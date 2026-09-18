@@ -1,0 +1,13 @@
+{
+  "databasePort": 13306,
+  "businessChecks": 74,
+  "java": "21",
+  "instance": "D:\\rgzn\\ai-trainer-platform\\build\\OneClick Smoke\\instance",
+  "python": "3.13.15",
+  "securityHttpChecks": 62,
+  "connector": "8.4.0",
+  "httpPort": 19001,
+  "mysql": "8.4.11",
+  "originalDatabaseUnaffected": true,
+  "testedAt": "2026-09-15T09:49:22.3803593+08:00"
+}

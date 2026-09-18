@@ -1,0 +1,30 @@
+{
+  "coverage": "Direct runtime components only; no claim of complete transitive CVE matching",
+  "components": [
+    {
+      "name": "MySQL Connector/J",
+      "version": "5.1.37",
+      "status": "Legacy 5.1 branch; upgrade pending",
+      "sha256": "D6E2B59A61CDAD4251CCF7AC55949A9E09607577DBB9D500E4256FCF789B04F3",
+      "reference": "https://dev.mysql.com/blog-archive/support-eol-for-mysql-connector-j-5-1/",
+      "path": "lib/mysql-connector-java-5.1.37-bin.jar"
+    },
+    {
+      "status": "Existing host service; supported-version migration pending",
+      "name": "MySQL Server",
+      "version": "5.7"
+    },
+    {
+      "status": "Deployment runtime patch and support policy to verify",
+      "name": "Java",
+      "version": "JDK 24 host, Java 8 compilation target"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js",
+      "status": "CDN loader; isolation, integrity and transitive WASM/package audit pending",
+      "name": "Pyodide",
+      "version": "0.24.1"
+    }
+  ],
+  "recordedAt": "2026-09-14T17:26:47.5763904+08:00"
+}

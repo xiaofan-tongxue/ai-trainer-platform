@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 - 人工智能训练师学习平台</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if (!requireAuth()) throw new Error();
+if (!isAdmin()) { location.href = '/index.html'; }
+const content = renderLayout('admin', '管理后台', '系统管理');
+const TABS = [
+  { k: 'stats', label: '数据总览' },
+  { k: 'users', label: '账号管理' },
+  { k: 'login', label: '登录日志' },
+  { k: 'op', label: '操作日志' },
+  { k: 'mistakes', label: '错题记录' },
+  { k: 'subs', label: '实操提交' },
+  { k: 'ai', label: 'AI 判题配置' }
+];
+content.innerHTML = `
+  <div class="row mb-16" style="flex-wrap:wrap">
+    ${TABS.map(t => `<button class="btn ${t.k==='stats'?'primary':'ghost'}" data-tab="${t.k}" onclick="switchTab('${t.k}')">${t.label}</button>`).join('')}
+  </div>
+  <div id="panel"></div>`;
+
+function switchTab(k) {
+  document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('primary', b.dataset.tab === k));
+  document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('ghost', b.dataset.tab !== k));
+  const fn = { stats: tabStats, users: tabUsers, login: tabLoginLogs, op: tabOpLogs, mistakes: tabMistakes, subs: tabSubs, ai: tabAi }[k];
+  fn();
+}
+
+function loading() { return '<div class="loading"><span class="spin"></span>加载中</div>'; }
+
+function tabStats() {
+  const p = document.getElementById('panel');
+  p.innerHTML = loading();
+  api('/admin/stats').then(s => {
+    const items = [
+      ['用户总数', s.users, '👥'], ['理论题目', s.questions, '📚'], ['实操题目', s.practical, '🛠️'],
+      ['考试记录', s.exams, '📝'], ['实操提交', s.submissions, '🤖'], ['登录日志', s.loginLogs, '🔐'],
+      ['操作日志', s.operationLogs, '📋']
+    ];
+    p.innerHTML = `<div class="grid cols-4">${items.map(([l, n, ic]) => `
+      <div class="card stat"><div style="font-size:24px;margin-bottom:6px">${ic}</div><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join('')}
+    </div>`;
+  }).catch(e => p.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function tabUsers() {
+  const p = document.getElementById('panel');
+  p.innerHTML = `<div class="card mb-16">
+    <div class="card-h">新建账号</div>
+    <div class="card-b">
+      <div class="grid cols-4">
+        <div class="field"><label>用户名</label><input id="nu" placeholder="至少3位"></div>
+        <div class="field"><label>密码</label><input id="np" type="password" placeholder="至少12位，含字母和数字"></div>
+        <div class="field"><label>昵称</label><input id="nn" placeholder="可选"></div>
+        <div class="field"><label>角色</label><select id="nr"><option value="USER">学员</option><option value="ADMIN">管理员</option></select></div>
+      </div>
+      <button class="btn primary" onclick="createUser()">创建账号</button>
+    </div>
+  </div>
+  <div class="card"><div class="card-h">账号列表</div><div class="card-b" id="ulist">${loading()}</div></div>`;
+  loadUsers();
+}
+
+function loadUsers() {
+  api('/admin/users').then(list => {
+    document.getElementById('ulist').innerHTML = `
+      <div class="table-wrap"><table class="tbl">
+        <tr><th>ID</th><th>用户名</th><th>昵称</th><th>角色</th><th>状态</th><th>最近登录</th><th>操作</th></tr>
+        ${list.map(u => `<tr>
+          <td>${u.id}</td><td>${esc(u.username)}</td><td>${esc(u.nickname || '-')}</td>
+          <td>${u.role === 'ADMIN' ? '<span class="badge purple">管理员</span>' : '<span class="badge blue">学员</span>'}</td>
+          <td>${u.status === 1 ? '<span class="badge green">启用</span>' : '<span class="badge red">禁用</span>'}</td>
+          <td>${fmtTime(u.last_login_at)}</td>
+          <td>
+            <button class="btn sm ghost" onclick="toggleStatus(${u.id},${u.status})">${u.status===1?'禁用':'启用'}</button>
+            <button class="btn sm ghost" onclick="toggleRole(${u.id},'${u.role}')">${u.role==='ADMIN'?'设为学员':'设为管理员'}</button>
+            <button class="btn sm ghost" onclick="resetPwd(${u.id})">重置密码</button>
+            <button class="btn sm danger" onclick="delUser(${u.id},'${esc(u.username)}')">删除</button>
+          </td>
+        </tr>`).join('')}
+      </table></div>`;
+  }).catch(e => document.getElementById('ulist').innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function createUser() {
+  const body = {
+    username: document.getElementById('nu').value.trim(),
+    password: document.getElementById('np').value,
+    nickname: document.getElementById('nn').value.trim(),
+    role: document.getElementById('nr').value
+  };
+  api('/admin/users', 'POST', body).then(() => { toast('创建成功'); loadUsers(); })
+    .catch(e => toast(e.message));
+}
+function toggleStatus(id, cur) {
+  api('/admin/user/' + id, 'PUT', { status: cur === 1 ? 0 : 1 }).then(() => { toast('已更新'); loadUsers(); });
+}
+function toggleRole(id, cur) {
+  api('/admin/user/' + id, 'PUT', { role: cur === 'ADMIN' ? 'USER' : 'ADMIN' }).then(() => { toast('已更新'); loadUsers(); });
+}
+function resetPwd(id) {
+  const pwd = prompt('请输入新密码（至少12位，含字母和数字）：');
+  if (!pwd) return;
+  api('/admin/user/' + id, 'PUT', { password: pwd }).then(() => toast('密码已重置')).catch(e => toast(e.message));
+}
+function delUser(id, name) {
+  if (!confirm(`确定删除用户「${name}」？`)) return;
+  api('/admin/user/' + id, 'DELETE').then(() => { toast('已删除'); loadUsers(); }).catch(e => toast(e.message));
+}
+
+function tabLoginLogs() {
+  const p = document.getElementById('panel');
+  p.innerHTML = loading();
+  api('/admin/login-logs').then(list => {
+    p.innerHTML = `<div class="card"><div class="card-h">登录日志（最近 200 条）</div><div class="card-b"><div class="table-wrap"><table class="tbl">
+      <tr><th>时间</th><th>用户</th><th>IP</th><th>结果</th><th>User-Agent</th></tr>
+      ${list.map(l => `<tr><td>${fmtTime(l.created_at)}</td><td>${esc(l.username || '-')}</td><td>${esc(l.ip)}</td>
+        <td>${l.success ? '<span class="badge green">成功</span>' : '<span class="badge red">失败</span>'}</td>
+        <td class="small muted" style="max-width:320px;word-break:break-all">${esc(l.user_agent || '')}</td></tr>`).join('')}
+    </table></div></div></div>`;
+  }).catch(e => p.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function tabOpLogs() {
+  const p = document.getElementById('panel');
+  p.innerHTML = loading();
+  api('/admin/operation-logs').then(list => {
+    p.innerHTML = `<div class="card"><div class="card-h">操作日志（最近 200 条）</div><div class="card-b"><div class="table-wrap"><table class="tbl">
+      <tr><th>时间</th><th>用户</th><th>操作</th><th>对象</th><th>详情</th><th>IP</th></tr>
+      ${list.map(l => `<tr><td>${fmtTime(l.created_at)}</td><td>${esc(l.username || '-')}</td><td><span class="badge blue">${esc(l.action)}</span></td>
+        <td>${esc(l.target)}</td><td class="small muted">${esc(l.detail || '')}</td><td>${esc(l.ip)}</td></tr>`).join('')}
+    </table></div></div></div>`;
+  }).catch(e => p.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function tabMistakes() {
+  const p = document.getElementById('panel');
+  p.innerHTML = loading();
+  api('/admin/mistakes').then(list => {
+    p.innerHTML = `<div class="card"><div class="card-h">全部学员错题记录</div><div class="card-b"><div class="table-wrap"><table class="tbl">
+      <tr><th>用户</th><th>题型</th><th>题目</th><th>正确答案</th><th>错次</th><th>最近错</th></tr>
+      ${list.map(m => `<tr><td>${esc(m.username)}</td><td>${typeBadge(m.type)}</td><td class="small" style="max-width:360px">${esc(m.question)}</td>
+        <td>${esc(m.answer)}</td><td>${m.wrong_count}</td><td>${fmtTime(m.last_wrong_at)}</td></tr>`).join('')}
+    </table></div></div></div>`;
+  }).catch(e => p.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function tabSubs() {
+  const p = document.getElementById('panel');
+  p.innerHTML = loading();
+  api('/admin/submissions').then(list => {
+    p.innerHTML = `<div class="card"><div class="card-h">全部实操提交（AI 评分）</div><div class="card-b"><div class="table-wrap"><table class="tbl">
+      <tr><th>用户</th><th>试题</th><th>题目</th><th>得分</th><th>时间</th></tr>
+      ${list.map(s => `<tr><td>${esc(s.username)}</td><td class="mono">${esc(s.code)}</td><td>${esc(s.title)}</td>
+        <td><strong style="color:${s.score>=60?'var(--green)':'var(--red)'}">${s.score}</strong></td><td>${fmtTime(s.created_at)}</td></tr>`).join('')}
+    </table></div></div></div>`;
+  }).catch(e => p.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function tabAi() {
+  const p = document.getElementById('panel');
+  p.innerHTML = loading();
+  api('/admin/ai').then(c => {
+    p.innerHTML = '<div class="card" style="max-width:760px">'
+      + '<div class="card-h">DeepSeek 配置 <span class="badge ' + (c.keyConfigured ? 'green' : 'amber') + '">' + (c.keyConfigured ? '已配置' : '未配置') + '</span></div>'
+      + '<div class="card-b">'
+      + '<p class="muted" style="margin-top:0">用于Python学习反馈、技能作答审阅和学情报告。仅连接DeepSeek官方服务。密钥保存在服务端，不向浏览器返回；环境变量配置优先于此处设置。</p>'
+      + '<div class="field"><label for="ak">API Key（留空保留现有密钥）</label><input id="ak" type="password" autocomplete="new-password" value="" placeholder="填写新密钥时才会替换"></div>'
+      + '<div class="field"><label>接口地址（chat/completions 完整 URL）</label><input id="au" value="' + esc(c.apiUrl) + '"></div>'
+      + '<div class="field"><label>模型名</label><input id="am" value="' + esc(c.apiModel) + '" placeholder="deepseek-flash"></div>'
+      + '<button class="btn primary" onclick="saveAi()">保存配置</button>'
+      + '<button class="btn ghost" onclick="testAi(this)">测试已保存配置</button><p id="aiStatus" role="status" class="small muted"></p>'
+      + '</div></div>';
+  }).catch(e => p.innerHTML = '<div class="empty">' + esc(e.message) + '</div>');
+}
+function saveAi() {
+  api('/admin/ai', 'POST', {
+    apiKey: document.getElementById('ak').value.trim(),
+    apiUrl: document.getElementById('au').value.trim(),
+    apiModel: document.getElementById('am').value.trim()
+  }).then(() => {document.getElementById('ak').value='';toast('配置已保存');tabAi();}).catch(e => toast(e.message));
+}
+async function testAi(button){button.disabled=true;const status=document.getElementById('aiStatus');status.textContent='正在验证连接…';try{const r=await api('/admin/ai/test','POST',{});status.textContent='连接成功，模型：'+r.model;}catch(e){status.textContent=e.message;}finally{button.disabled=false;}}
+
+switchTab('stats');
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 人工智能训练师学习平台</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-box">
+    <h1>人工智能训练师</h1>
+    <div class="sub">三级职业技能等级认定 · 学习平台</div>
+    <div class="login-tabs">
+      <div id="tabLogin" class="active" onclick="switchTab('login')">登录</div>
+      <div id="tabRegister" onclick="switchTab('register')">注册</div>
+    </div>
+    <div id="err" class="login-err"></div>
+
+    <form id="loginForm" onsubmit="return doLogin(event)">
+      <div class="field">
+        <label>账号</label>
+        <input type="text" id="loginUser" placeholder="请输入用户名" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="loginPass" placeholder="请输入密码" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn primary" style="width:100%;justify-content:center;padding:11px">登 录</button>
+      <div class="small muted mt-16" style="text-align:center">旧账号首次登录后须更新密码。连续认证失败将临时限制登录。</div>
+    </form>
+
+    <form id="registerForm" style="display:none" onsubmit="return doRegister(event)">
+      <div class="field">
+        <label>用户名 <span class="muted small">(至少3位)</span></label>
+        <input type="text" id="regUser" placeholder="设置用户名">
+      </div>
+      <div class="field">
+        <label>昵称</label>
+        <input type="text" id="regNick" placeholder="显示名称（可选）">
+      </div>
+      <div class="field">
+        <label>邮箱</label>
+        <input type="email" id="regEmail" placeholder="邮箱（可选）">
+      </div>
+      <div class="field">
+        <label>密码 <span class="muted small">(12–128位，包含字母和数字)</span></label>
+        <input type="password" id="regPass" placeholder="设置密码">
+      </div>
+      <button type="submit" class="btn primary" style="width:100%;justify-content:center;padding:11px">注册并登录</button>
+    </form>
+  </div>
+</div>
+<script>
+function switchTab(t) {
+  const login = t === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', login);
+  document.getElementById('tabRegister').classList.toggle('active', !login);
+  document.getElementById('loginForm').style.display = login ? '' : 'none';
+  document.getElementById('registerForm').style.display = login ? 'none' : '';
+  hideErr();
+}
+function showErr(msg) {
+  const e = document.getElementById('err');
+  e.textContent = msg; e.style.display = 'block';
+}
+function hideErr() { document.getElementById('err').style.display = 'none'; }
+
+async function post(path, body) {
+  const r = await fetch('/api' + path, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Mode':'cookie' },
+    body: JSON.stringify(body)
+  });
+  const j = await r.json();
+  if (j.code !== 0) throw new Error(j.message || '请求失败');
+  return j.data;
+}
+
+async function doLogin(e) {
+  e.preventDefault(); hideErr();
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { showErr('请输入账号和密码'); return false; }
+  try {
+    const d = await post('/auth/login', { username: u, password: p });
+    sessionStorage.setItem('auth-mode', 'cookie');sessionStorage.setItem('csrf',d.csrf);
+    sessionStorage.setItem('user', JSON.stringify(d.user));
+    localStorage.removeItem('token');localStorage.removeItem('user');
+    location.href = d.user.mustChangePassword?'/password.html':'/index.html';
+  } catch (err) { showErr(err.message); }
+  return false;
+}
+
+async function doRegister(e) {
+  e.preventDefault(); hideErr();
+  const username = document.getElementById('regUser').value.trim();
+  const nickname = document.getElementById('regNick').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
+  if (!username || !password) { showErr('请输入用户名和密码'); return false; }
+  try {
+    const d = await post('/auth/register', { username, nickname, email, password });
+    sessionStorage.setItem('auth-mode', 'cookie');sessionStorage.setItem('csrf',d.csrf);
+    sessionStorage.setItem('user', JSON.stringify(d.user));
+    location.href = '/index.html';
+  } catch (err) { showErr(err.message); }
+  return false;
+}
+</script>
+</body>
+</html>

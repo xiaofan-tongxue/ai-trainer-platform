@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>错题本 - 人工智能训练师学习平台</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if (!requireAuth()) throw new Error();
+const content = renderLayout('mistakes', '错题本', '我的错题记录');
+content.innerHTML = `
+  <div class="row mb-16">
+    <button class="btn primary" id="btnUn" onclick="setFilter(true)">待攻克错题</button>
+    <button class="btn ghost" id="btnAll" onclick="setFilter(false)">全部错题</button>
+    <span class="muted small" id="stats" style="flex:0 0 auto"></span>
+  </div>
+  <div id="list" class="card"><div class="loading"><span class="spin"></span>加载中</div></div>`;
+
+let onlyUnmastered = true;
+
+function setFilter(v) {
+  onlyUnmastered = v;
+  document.getElementById('btnUn').classList.toggle('primary', v);
+  document.getElementById('btnUn').classList.toggle('ghost', !v);
+  document.getElementById('btnAll').classList.toggle('primary', !v);
+  document.getElementById('btnAll').classList.toggle('ghost', v);
+  load();
+}
+
+function load() {
+  const box = document.getElementById('list');
+  box.innerHTML = '<div class="loading"><span class="spin"></span>加载中</div>';
+  api('/mistakes?onlyUnmastered=' + onlyUnmastered).then(list => {
+    if (!list.length) { box.innerHTML = '<div class="empty"><div class="big">🎉</div>暂无错题记录<br>去 <a href="/practice.html">题库练习</a> 或 <a href="/exam.html">模拟考试</a> 做题吧</div>'; return; }
+    box.innerHTML = list.map(m => {
+      const opts = (m.options || []).map(o => `<div class="option ${String(m.answer).includes(o.label) ? 'correct' : ''}" style="cursor:default"><span class="tag-opt">${o.label}</span><span>${esc(o.text)}</span></div>`).join('');
+      return `<div class="question-item">
+        <div class="row" style="align-items:flex-start">
+          ${typeBadge(m.type)}
+          <div class="q-title" style="flex:1">${esc(m.question)}</div>
+          <button class="btn sm ghost" onclick="remove(${m.question_id})">移除</button>
+        </div>
+        ${m.type === 'JUDGE' ? '' : opts}
+        <div class="feedback no mt-8">正确答案：<strong>${esc(m.answer)}</strong>　累计答错 ${m.wrong_count} 次${m.mastered ? ' · <span class="badge green">已掌握</span>' : ''}</div>
+        ${m.analysis ? `<div class="muted small mt-8">${esc(m.analysis)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }).catch(e => box.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+
+  api('/mistakes/stats').then(s => {
+    document.getElementById('stats').textContent = `待攻克 ${s.total} 题 · 已掌握 ${s.mastered} 题`;
+  }).catch(() => {});
+}
+
+function remove(qid) {
+  api('/mistakes/remove', 'POST', { questionId: qid }).then(() => { toast('已从错题本移除'); load(); });
+}
+
+load();
+</script>
+</body>
+</html>

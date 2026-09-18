@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代码实验室 - 人工智能训练师学习平台</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.lab-wrap{display:flex;gap:20px;align-items:flex-start;}
+.lab-side{width:250px;flex:0 0 250px;}
+.lab-main{flex:1;min-width:0;}
+.lab-item{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:13.5px;color:var(--text-2);cursor:pointer;border-radius:6px;}
+.lab-item:hover{background:var(--primary-050);}
+.lab-item.active{background:var(--primary);color:#fff;}
+.lab-item .n{color:var(--amber);font-family:Consolas,monospace;font-size:12px;width:42px;flex:0 0 42px;}
+.lab-item.active .n{color:#fff;}
+.theory{line-height:1.8;font-size:14px;}
+.theory b{color:var(--primary);}
+.steps{margin:8px 0 0;padding-left:20px;}
+.steps li{margin:4px 0;color:var(--text-2);}
+.st{color:var(--amber);font-weight:700;}
+.out{background:#0f172a;color:#e2e8f0;border:1px solid #1f2937;border-radius:8px;padding:14px 16px;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.6;min-height:260px;white-space:pre-wrap;overflow:auto;margin:0;}
+.run-note{font-size:12px;color:var(--text-3);}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.code-cols{display:flex;gap:12px;}
+.code-cols > div{flex:1;min-width:0;}
+@media(max-width:1000px){.lab-wrap,.code-cols{flex-direction:column;}.lab-side{width:100%;flex:auto;}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if(!requireAuth()) throw new Error();
+const content = renderLayout('labs', '代码实验室', '6 个实操 Lab · numpy/pandas/scikit-learn 在线运行');
+content.innerHTML = '<div class="lab-wrap"><div class="lab-side"><div class="card"><div class="card-h">实操目录</div><div style="padding:8px" id="labsNav"></div></div></div><div class="lab-main"><div class="card mb-16"><div class="card-h" id="labTitle"></div><div class="card-b theory" id="theory"></div></div><div class="card mb-16"><div class="card-h">在线运行 <span class="run-note">（首次运行需联网加载 numpy/pandas/scikit-learn，约 20~30 秒）</span></div><div class="card-b"><div class="toolbar"><button class="btn primary" onclick="runLab()">▶ 运行</button><button class="btn ghost" onclick="resetLab()">重置代码</button><span class="run-note" id="runNote"></span></div><div class="code-cols"><div><textarea id="editor" class="code-editor" spellcheck="false"></textarea></div><div><pre class="out" id="output">（点「运行」执行，首次加载约 20~30 秒）</pre></div></div></div></div><div class="card"><div class="card-h">考点小结</div><div class="card-b" id="summary" style="line-height:1.8;font-size:13.5px"></div></div></div></div>';
+var LABS = [{"n":"Lab 1","title":"数据清洗（Pandas）","theory":"<b>【考点】</b>三级实操必考：给定一份数据（CSV / Excel），制定并落地数据清洗规范。清洗就四件事——缺失值、数据类型、重复值、异常值。","steps":["缺失值：isnull() 查看 → dropna() 删除 / fillna() 填充（数值用均值或中位数，类别用众数）","数据类型：astype() 转成正确类型（字符串数字转 float 等）","重复值：drop_duplicates() 去重","异常值：业务阈值过滤（也可用 3σ / 箱线图 IQR）"],"code":"import pandas as pd\nimport numpy as np\n\n# 模拟考场上读到的原始数据（实际用 pd.read_csv(\"xxx.csv\")）\ndf = pd.DataFrame({\n    \"id\": [1, 2, 3, 4, 5, 6],\n    \"温度\": [36.5, 37.0, np.nan, 38.2, 36.5, 99.9],\n    \"转速\": [1200, 1250, 1300, 1200, 1250, 1300],\n    \"标签\": [\"正常\", \"正常\", \"异常\", \"正常\", \"正常\", \"异常\"],\n})\nprint(\"原始数据：\\n\", df)\n\n# 1. 缺失值\ndf[\"温度\"] = df[\"温度\"].astype(float)\ndf_clean = df.dropna()               # 或 df.fillna(df[\"温度\"].median())\n\n# 2. 重复值\ndf_clean = df_clean.drop_duplicates()\n\n# 3. 异常值：温度应在 35~42 之间\ndf_clean = df_clean[(df_clean[\"温度\"] >= 35) & (df_clean[\"温度\"] <= 42)]\nprint(\"清洗后：\\n\", df_clean)","summary":"<span class=\"st\">考点小结</span> ① 缺失值三处理：删除、填充、插值；② 填充规则：数值→均值/中位数，类别→众数；③ 异常值：业务阈值、3σ、箱线图 IQR；④ 去重防样本重复干扰训练。"},{"n":"Lab 2","title":"数据标注与特征处理","theory":"<b>【考点】</b>数据标注规范 = 标注目标 + 特征选择 + 标注质量。模型只吃数字，文字类别要先编码；量纲不同的特征要先标准化。","steps":["标签编码：map() 或 LabelEncoder 把文字类别转成 0/1/2…","特征/标签分离：X（特征）与 y（标签）拆开","标准化：StandardScaler 统一量纲（均值 0、方差 1）"],"code":"import pandas as pd\nimport numpy as np\nfrom sklearn.preprocessing import StandardScaler\n\n# 智慧交通：燃油效率模型（三级实操常见案例）\ndf = pd.DataFrame({\n    \"燃油效率\": [18, 22, 19, 30, 25],\n    \"排量\": [3.5, 2.0, 2.8, 1.6, 1.8],\n    \"车型\": [\"SUV\", \"轿车\", \"SUV\", \"轿车\", \"轿车\"],\n})\n\n# 1. 标签编码：文字类别 -> 数字\nlabel_map = {\"轿车\": 0, \"SUV\": 1}\ndf[\"车型编码\"] = df[\"车型\"].map(label_map)\nprint(df)\n\n# 2. 特征选择：选特征列 X、标签列 y\nX = df[[\"排量\", \"车型编码\"]].values\ny = df[\"燃油效率\"].values\n\n# 3. 标准化\nscaler = StandardScaler()\nX_std = scaler.fit_transform(X)\nprint(\"标准化后特征：\\n\", X_std)","summary":"<span class=\"st\">考点小结</span> ① 标签编码（有序）vs One-Hot（无序）的区别；② 特征选择目的：降维、去冗余、提泛化；③ 标准化(均值0方差1) vs 归一化(缩到0~1)。"},{"n":"Lab 3","title":"数据集划分（8:2）","theory":"<b>【考点】</b>本示例按 8:2 划分训练集与测试集；这不是国家标准统一规定的比例，实际按题目和数据特征选择。random_state 保证可复现，stratify 保证类别比例一致（防某类全掉进测试集）。","steps":["train_test_split(X, y, test_size=0.2, random_state=..., stratify=y)","训练集喂模型、测试集只用于最终评估","数据少的场景用交叉验证（KFold）"],"code":"import numpy as np\nfrom sklearn.model_selection import train_test_split\n\nX = np.arange(20).reshape(10, 2)      # 10 个样本，2 个特征\ny = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\n\nprint(\"训练集样本数：\", len(X_train))\nprint(\"测试集样本数：\", len(X_test))\nprint(\"训练集标签分布：\", np.bincount(y_train))\nprint(\"测试集标签分布：\", np.bincount(y_test))","summary":"<span class=\"st\">考点小结</span> ① 划分是为了用「没见过的数据」真实评估泛化能力，防自欺；② 留出法 vs 交叉验证；③ stratify 保证训练/测试类别分布一致。"},{"n":"Lab 4","title":"分类模型训练","theory":"<b>【考点】</b>三级要会选模型、fit 训练、看准确率。重点会对比逻辑回归 / 决策树 / 随机森林，并说得出各自特点。","steps":["监督学习三要素：模型、数据、标签","fit() 训练，predict() 预测，score() 评估","逻辑回归(线性/可解释)、决策树(易过拟合)、随机森林(集成/更稳)"],"code":"import numpy as np\nfrom sklearn.datasets import make_classification\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\n# 造一份二分类数据\nX, y = make_classification(n_samples=200, n_features=4, random_state=0)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)\n\nfor name, model in [(\"逻辑回归\", LogisticRegression(max_iter=1000)),\n                    (\"决策树\", DecisionTreeClassifier()),\n                    (\"随机森林\", RandomForestClassifier())]:\n    model.fit(X_train, y_train)\n    acc = model.score(X_test, y_test)\n    print(f\"{name} 测试准确率：{acc:.3f}\")","summary":"<span class=\"st\">考点小结</span> ① 监督学习=有标签，无监督=无标签(聚类)，强化=奖励反馈；② 分类 vs 回归：输出是类别还是数值；③ 三种模型区别（可解释性 / 稳定性）。"},{"n":"Lab 5","title":"模型评估指标","theory":"<b>【考点】</b>不能只看准确率。混淆矩阵、精确率、召回率、F1 是三级高频考点，尤其要会解释「不平衡数据下准确率会骗人」。","steps":["混淆矩阵：TP / FP / FN / TN","精确率 Precision = TP/(TP+FP)（查准：报出来的有多少是对的）","召回率 Recall = TP/(TP+FN)（查全：该找出来的找到多少）","F1 = 精确率与召回率的调和平均"],"code":"import numpy as np\nfrom sklearn.metrics import (confusion_matrix, accuracy_score, precision_score,\n                             recall_score, f1_score, classification_report)\n\ny_true = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 0])\ny_pred = np.array([0, 1, 0, 0, 0, 1, 0, 1, 0, 0])\n\nprint(\"混淆矩阵：\\n\", confusion_matrix(y_true, y_pred))\nprint(\"准确率 Accuracy：\", accuracy_score(y_true, y_pred))\nprint(\"精确率 Precision：\", precision_score(y_true, y_pred))\nprint(\"召回率 Recall：\", recall_score(y_true, y_pred))\nprint(\"F1：\", f1_score(y_true, y_pred))\nprint(\"\\n分类报告：\\n\", classification_report(y_true, y_pred, zero_division=0))","summary":"<span class=\"st\">考点小结</span> ① Accuracy 对不平衡数据失效；② 正类少时关注 Recall，误报代价高时关注 Precision；③ F1 兼顾二者；④ PR 曲线、ROC/AUC 概念要能口头解释。"},{"n":"Lab 6","title":"回归与过拟合","theory":"<b>【考点】</b>过拟合 = 训练误差小、测试误差大，是三级核心考点。用「训练误差 vs 测试误差」的差距判断，并说出应对办法。","steps":["欠拟合：模型太简单，训练测试都差 → 加复杂度/加特征","过拟合：训练好测试差 → 加正则、加数据、交叉验证、降复杂度","回归评估：MAE / MSE / RMSE / R²"],"code":"import numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.preprocessing import PolynomialFeatures\nfrom sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score\n\nnp.random.seed(0)\nX = np.linspace(0, 10, 50).reshape(-1, 1)\ny = 0.5 * X.ravel()**2 - 2 * X.ravel() + 5 + np.random.normal(0, 3, 50)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)\n\n# 1 次=欠拟合，2 次=合适，9 次=过拟合\nfor deg in [1, 2, 9]:\n    poly = PolynomialFeatures(degree=deg)\n    lr = LinearRegression().fit(poly.fit_transform(X_train), y_train)\n    tr = mean_squared_error(y_train, lr.predict(poly.fit_transform(X_train)))\n    te = mean_squared_error(y_test, lr.predict(poly.transform(X_test)))\n    print(f\"degree={deg}: 训练MSE={tr:.2f}, 测试MSE={te:.2f}\")\n\npoly = PolynomialFeatures(degree=2)\nlr = LinearRegression().fit(poly.fit_transform(X_train), y_train)\nyp = lr.predict(poly.transform(X_test))\nprint(\"MAE:\", mean_absolute_error(y_test, yp))\nprint(\"R2:\", r2_score(y_test, yp))","summary":"<span class=\"st\">考点小结</span> ① 过拟合原因：模型太复杂 / 数据太少 / 噪声大；② 解决：正则化(L1/L2)、交叉验证、加数据、降复杂度、早停；③ R² 越接近 1 拟合越好。"}];
+var cur=0, pyodide=null, pyLoading=null, editor=null, outputEl=null;
+function renderNav(){
+  var nav=document.getElementById('labsNav'), html='';
+  for(var i=0;i<LABS.length;i++){
+    html += '<div class="lab-item'+(i===cur?' active':'')+'" onclick="openLab('+i+')"><span class="n">'+LABS[i].n+'</span>'+LABS[i].title+'</div>';
+  }
+  nav.innerHTML=html;
+}
+function openLab(i){
+  cur=i;
+  var L=LABS[i];
+  document.getElementById('labTitle').textContent=L.n+' · '+L.title;
+  document.getElementById('theory').innerHTML=L.theory+'<ol class="steps">'+L.steps.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol>';
+  document.getElementById('summary').innerHTML=L.summary;
+  editor.value=L.code;
+  setOut('（点「运行」执行）');
+  renderNav();
+}
+function setOut(s){ outputEl.textContent=s; }
+function setNote(s){ document.getElementById('runNote').textContent=s; }
+function loadPy(){
+  if(pyodide) return Promise.resolve(pyodide);
+  if(pyLoading) return pyLoading;
+  setNote('正在加载 Python 运行时（约 8MB，需联网）…');
+  pyLoading=new Promise(function(resolve,reject){
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+    s.onload=function(){
+      if(typeof loadPyodide!=='function'){reject(new Error('Pyodide 加载异常'));return;}
+      loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'}).then(function(p){pyodide=p;resolve(p);}).catch(reject);
+    };
+    s.onerror=function(){reject(new Error('无法加载 Pyodide（需联网）'));};
+    document.head.appendChild(s);
+  });
+  return pyLoading;
+}
+function runLab(){
+  var code=editor.value;
+  if(!code.trim()){setOut('（代码为空）');return;}
+  setNote('加载 numpy/pandas/scikit-learn 中（首次约 20~30 秒）…');
+  loadPy().then(function(p){
+    return p.loadPackage(['numpy','pandas','scikit-learn']).then(function(){return p;});
+  }).then(function(p){
+    var out='';
+    p.setStdout({batched:function(s){out+=s+'\n';}});
+    p.setStderr({batched:function(s){out+=s+'\n';}});
+    return p.runPythonAsync(code).then(function(){return out;});
+  }).then(function(o){setNote('');setOut(o||'（程序运行结束，无输出）');})
+  .catch(function(e){setNote('');setOut('⚠️ '+((e&&e.message)?e.message:String(e)));});
+}
+function resetLab(){ editor.value=LABS[cur].code; }
+(function init(){
+  editor=document.getElementById('editor');
+  outputEl=document.getElementById('output');
+  editor.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){e.preventDefault();var st=editor.selectionStart,en=editor.selectionEnd;editor.value=editor.value.substring(0,st)+'    '+editor.value.substring(en);editor.selectionStart=editor.selectionEnd=st+4;}
+  });
+  openLab(Math.max(0,Math.min(LABS.length-1,Number(new URLSearchParams(location.search).get('lab'))||0)));
+})();
+</script>
+</body>
+</html>

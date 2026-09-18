@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>实操训练 - 人工智能训练师学习平台</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if (!requireAuth()) throw new Error();
+const content = renderLayout('practical', '实操训练', '40 道操作技能题 · AI 智能评分');
+const S = { tasks: [], current: null, submitting: false, openedLink: false };
+
+function listView() {
+  content.innerHTML = `
+    <div class="row mb-16">
+      <button class="btn primary" onclick="listView()">全部题目</button>
+      <button class="btn ghost" onclick="mySubmissions()">我的提交记录</button>
+    </div>
+    <div id="list" class="card"><div class="loading"><span class="spin"></span>加载中</div></div>`;
+  api('/practical').then(tasks => {
+    S.tasks = tasks;
+    if(!S.openedLink){S.openedLink=true;const code=new URLSearchParams(location.search).get('code');const target=tasks.find(t=>t.code===code||String(t.code).startsWith(code+'.'));if(target){detail(target.id);return;}}
+    const groups = {};
+    tasks.forEach(t => { (groups[t.category] = groups[t.category] || []).push(t); });
+    document.getElementById('list').innerHTML = Object.keys(groups).map(cat => `
+      <div class="card-h" style="background:#f9fafb">${esc(cat)} <span class="badge gray">${groups[cat].length} 题</span></div>
+      ${groups[cat].map(t => `
+        <div class="question-item row" style="cursor:pointer;align-items:center" onclick="detail(${t.id})">
+          <span class="badge blue">${esc(t.code)}</span>
+          <div style="flex:1"><strong>${esc(t.title)}</strong></div>
+          <span class="muted small">${esc(t.duration || '')}</span>
+          <button class="btn sm ghost">进入 →</button>
+        </div>`).join('')}
+    `).join('');
+  }).catch(e => document.getElementById('list').innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function detail(id) {
+  content.innerHTML = '<div class="loading" style="padding:60px"><span class="spin"></span>加载题目…</div>';
+  api('/practical/' + id).then(t => {
+    S.current = t;
+    const mats = t.materials || [];
+    content.innerHTML = `
+      <div class="row mb-16">
+        <button class="btn ghost" onclick="listView()">← 返回列表</button>
+        <span class="badge blue">${esc(t.code)}</span>
+        <h2 style="margin:0;flex:1">${esc(t.title)}</h2>
+        <span class="badge gray">${esc(t.category)}</span>
+      </div>
+      <div class="split" style="align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div class="card mb-16">
+            <div class="card-h">题目信息</div>
+            <div class="card-b">
+              <div class="grid cols-2 mb-16">
+                <div><label>考核时间</label><div>${esc(t.duration || '-')}</div></div>
+                <div><label>试题代码</label><div class="mono">${esc(t.code)}</div></div>
+              </div>
+              <label>工作任务</label>
+              <div class="md" style="white-space:pre-wrap">${esc(t.task_desc || '')}</div>
+              ${t.skills ? `<label class="mt-16">技能要求</label><div class="md" style="white-space:pre-wrap">${esc(t.skills)}</div>` : ''}
+              ${t.quality ? `<label class="mt-16">质量指标</label><div class="md" style="white-space:pre-wrap">${esc(t.quality)}</div>` : ''}
+              ${t.notes ? `<label class="mt-16">注意事项</label><div class="md" style="white-space:pre-wrap">${esc(t.notes)}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="card mb-16">
+            <div class="card-h">在线作答与 AI 评分</div>
+            <div class="card-b">
+              <label>在此编写/粘贴你的答案（代码或文字分析）</label>
+              <textarea id="answer" class="code-editor" maxlength="30000" placeholder="填写代码、分析步骤与运行结果。提交材料将发送给DeepSeek进行审阅，不会代替实际运行验证。"></textarea>
+              <div class="row mt-16">
+                <button class="btn primary" id="submitWork" onclick="submitWork()">提交审阅</button>
+                <button class="btn ghost" onclick="toggleRef()">查看参考答案</button>
+              </div>
+              <div id="aiResult" class="mt-16"></div>
+              <div id="refAnswer" class="mt-16" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card right">
+          <div class="card-h">实操素材 <span class="badge gray">${mats.length}</span></div>
+          <div class="card-b" style="padding:10px">
+            ${mats.length ? mats.map(m => `
+              <div class="row" style="padding:8px;border-bottom:1px solid var(--border)">
+                <div class="mono small" style="flex:1;word-break:break-all">${esc(m.name)}</div>
+                <button class="btn sm ghost" onclick="previewMaterial('${esc(m.name)}')">预览</button>
+                <button class="btn sm ghost" data-download="${esc(m.name)}">下载</button>
+              </div>`).join('') : '<div class="empty">本题无素材文件</div>'}
+            <div class="muted small mt-8">素材在线预览支持文本/CSV/JSON/图片，其余文件请下载查看。</div>
+          </div>
+        </div>
+      </div>`;
+    const draftKey='practical-draft:'+AUTH.user.id+':'+t.id;
+    document.getElementById('answer').value=sessionStorage.getItem(draftKey)||'';
+    document.getElementById('answer').oninput=e=>{try{sessionStorage.setItem(draftKey,e.target.value);}catch(err){}};
+    content.querySelectorAll('[data-download]').forEach(b=>b.onclick=()=>downloadWorkMaterial(t.id,b.dataset.download));
+  }).catch(e => content.innerHTML = `<div class="empty">${esc(e.message)}<br><button class="btn primary mt-16" onclick="listView()">返回</button></div>`);
+}
+
+function toggleRef() {
+  const box = document.getElementById('refAnswer');
+  if (box.style.display === 'none') {
+    box.style.display = '';
+    box.innerHTML = `<div class="card"><div class="card-h">参考答案与解析</div><div class="card-b md">${md(S.current.reference_answer || '（无）')}</div></div>`;
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function submitWork() {
+  if(S.submitting)return;
+  const answer = document.getElementById('answer').value;
+  if (!answer.trim()) { toast('请先填写答案内容'); return; }
+  S.submitting=true;const button=document.getElementById('submitWork');button.disabled=true;
+  const res = document.getElementById('aiResult');
+  res.innerHTML = '<div class="feedback" style="background:#f3f4f6;color:#374151"><span class="spin"></span>AI Agent 正在评分分析…</div>';
+  api('/practical/' + S.current.id + '/submit', 'POST', { content: answer }).then(r => {
+    res.innerHTML = `
+      <div class="card" style="border-left:4px solid var(--primary)">
+        <div class="card-b">
+          <div class="row" style="align-items:center">
+            <div style="flex:1">
+              <div class="muted small">${r.mode==='deepseek_review'?'DeepSeek 材料审阅分':'本地关键词参考分（不纳入通过率）'}</div>
+              <div class="score-ring ${r.score >= 60 ? 'pass' : 'fail'}">${r.score}</div>
+            </div>
+            <div style="flex:2" class="muted">${esc(r.comment)}</div>
+          </div>
+          <div class="md mt-16">${md(r.analysis)}</div>
+        </div>
+      </div>`;
+    toast('评分完成');
+  }).catch(e => res.innerHTML = `<div class="feedback no">${esc(e.message)}</div>`).finally(()=>{S.submitting=false;button.disabled=false;});
+}
+async function downloadWorkMaterial(id,name){try{const r=await fetch('/api/practical/'+id+'/material?file='+encodeURIComponent(name),{headers:{Authorization:'Bearer '+AUTH.token}});if(!r.ok)throw new Error('素材下载失败');const url=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message);}}
+
+function previewMaterial(name) {
+  const t = S.current;
+  const isImg = /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(name);
+  const isCsv = /\.csv$/i.test(name);
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `<div class="modal" style="width:880px">
+    <div class="modal-h"><span class="mono small">${esc(name)}</span><button class="btn ghost sm" onclick="this.closest('.modal-backdrop').remove()">关闭</button></div>
+    <div class="modal-b" style="min-height:200px"><div class="loading"><span class="spin"></span>加载中</div></div>
+  </div>`;
+  document.body.appendChild(modal);
+  fetch(`/api/practical/${t.id}/material?file=${encodeURIComponent(name)}`, { headers: { 'Authorization': 'Bearer ' + AUTH.token } })
+    .then(r => {
+      if(!r.ok)throw new Error('素材读取失败');
+      if(isImg)return r.blob().then(blob=>({url:URL.createObjectURL(blob)}));
+      const ct = r.headers.get('content-type') || '';
+      if (ct.includes('json') && !isCsv) return r.json().then(j => ({ text: JSON.stringify(j, null, 2), raw: false }));
+      return r.text().then(text => ({ text, raw: true }));
+    })
+    .then(d => {
+      const b = modal.querySelector('.modal-b');
+      if (isImg) {
+        const img=document.createElement('img');img.src=d.url;img.alt=name;img.style.maxWidth='100%';img.onload=()=>URL.revokeObjectURL(d.url);b.innerHTML='';b.appendChild(img);
+      } else if (isCsv) {
+        b.innerHTML = renderCsvPreview(d.text);
+      } else {
+        b.innerHTML = `<pre class="mono" style="white-space:pre-wrap;word-break:break-all;font-size:12.5px;line-height:1.6">${esc(d.text)}</pre>`;
+      }
+    })
+    .catch(e => modal.querySelector('.modal-b').innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+/* CSV 解析：支持引号包裹、转义引号，限制最大行数 */
+function parseCsv(text, limit) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  let truncated = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') {
+        row.push(field); field = '';
+        if (rows.length < limit) { rows.push(row); row = []; }
+        else { truncated = true; break; }
+      }
+      else if (c === '\r') { /* 忽略 */ }
+      else field += c;
+    }
+  }
+  if (!truncated && (field.length > 0 || row.length > 0)) {
+    row.push(field);
+    if (rows.length < limit) rows.push(row); else truncated = true;
+  }
+  return { rows, truncated };
+}
+
+function renderCsvPreview(text) {
+  const MAX = 101; // 表头 + 100 数据行
+  const { rows, truncated } = parseCsv(text, MAX);
+  const clean = rows.filter(r => r.some(c => c.trim() !== ''));
+  if (!clean.length) return '<div class="empty">空文件</div>';
+  const header = clean[0];
+  const data = clean.slice(1);
+  const th = header.map((h, i) => `<th>${esc(h)}</th>`).join('');
+  const trs = data.map(r => {
+    const cells = header.map((h, i) => esc(r[i] == null ? '' : r[i]));
+    return `<tr>${cells.map(c => `<td title="${c}">${c}</td>`).join('')}</tr>`;
+  }).join('');
+  const tip = `<div class="muted small mb-8">${data.length} 行数据${truncated ? '（文件更大，仅预览前 100 行）' : ''} · 列 ${header.length} 列 · 单元格悬浮可看完整内容</div>`;
+  return tip + `<div class="table-wrap" style="max-height:58vh;overflow:auto;border:1px solid var(--border);border-radius:8px">
+    <table class="tbl" style="font-size:12.5px;white-space:nowrap;margin:0">
+      <thead><tr>${th}</tr></thead><tbody>${trs}</tbody>
+    </table></div>`;
+}
+
+function mySubmissions() {
+  content.innerHTML = `
+    <div class="row mb-16">
+      <button class="btn ghost" onclick="listView()">← 返回题目</button>
+      <h2 style="margin:0">我的实操提交记录</h2>
+    </div>
+    <div id="subs" class="card"><div class="loading"><span class="spin"></span>加载中</div></div>`;
+  api('/practical/submissions').then(list => {
+    document.getElementById('subs').innerHTML = list.length ? `
+      <div class="table-wrap"><table class="tbl">
+        <tr><th>试题</th><th>题目</th><th>得分</th><th>时间</th><th>操作</th></tr>
+        ${list.map(s => `<tr>
+          <td class="mono">${esc(s.code)}</td><td>${esc(s.title)}</td>
+          <td><strong style="color:${s.score >= 60 ? 'var(--green)' : 'var(--red)'}">${s.score}</strong></td>
+          <td>${fmtTime(s.created_at)}</td>
+          <td><button class="btn sm ghost" onclick="viewSub(${s.id})">查看分析</button></td>
+        </tr>`).join('')}
+      </table></div>` : '<div class="empty">还没有提交记录</div>';
+  }).catch(e => document.getElementById('subs').innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function viewSub(id) {
+  api('/practical/submissions').then(list => {
+    const s = list.find(x => x.id === id);
+    if (!s) return;
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `<div class="modal" style="width:760px">
+      <div class="modal-h"><span>${esc(s.title)} · 得分 ${s.score}</span><button class="btn ghost sm" onclick="this.closest('.modal-backdrop').remove()">关闭</button></div>
+      <div class="modal-b md">${md(s.analysis || '无分析')}</div>
+    </div>`;
+    document.body.appendChild(modal);
+  });
+}
+
+listView();
+</script>
+</body>
+</html>

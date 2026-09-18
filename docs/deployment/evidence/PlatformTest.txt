@@ -1,0 +1,75 @@
+PASS no evidence gives no probability
+PASS diagnostic informs domain learning priorities
+PASS diagnostic never supplies pass probability evidence
+PASS theory alone never gives joint estimate
+PASS minimum dual-subject evidence enables estimate
+PASS weak practical cannot be compensated by high theory
+PASS speed submissions excluded
+PASS practice duplicates do not inflate sample size
+PASS unanswered questions stay in denominator
+PASS order independent exact multiple choice
+PASS extra multiple choice option scores zero
+PASS key cannot be routed to non-provider host
+PASS insecure endpoint rejected
+PASS out of range AI score rejected
+PASS AI score calculated from validated rubric
+PASS seven-day report accepted
+PASS AI plan exceeding daily budget rejected
+PASS 120 minute full skill paper cannot fit 60 minute plan
+PASS AI per-question timing hallucination rejected
+PASS zero foundation plan starts with computer basics rather than model training
+PASS foundation plan respects fifteen minute budget
+PASS passed prerequisites unlock evidence based planning
+PASS short budget schedules diagnosis in separate time slot
+PASS all 24 lessons loaded
+PASS course answers hidden before checking
+PASS provider JSON adapter roundtrip
+PASS provider auth failure is surfaced
+PASS empty provider reply rejected
+PASS truncated provider reply rejected
+PASS public settings never return API key
+PASS new learner snapshot has no invalid numbers
+PASS new learner sees insufficient evidence
+PASS learning profile persisted
+PASS course self-check persisted
+PASS course progress isolated by user
+PASS diagnostic paper generated
+PASS diagnostic question count
+PASS diagnostic resumes active paper
+PASS exam session ownership enforced
+PASS out-of-paper answer rejected
+PASS answer survives reload
+PASS submission includes every assigned question
+PASS duplicate submit is idempotent
+PASS legacy record ownership enforced
+PASS theory paper generated
+PASS theory question count
+PASS theory resumes active paper
+PASS exam session ownership enforced
+PASS out-of-paper answer rejected
+PASS answer survives reload
+PASS submission includes every assigned question
+PASS duplicate submit is idempotent
+PASS legacy record ownership enforced
+PASS shanghai paper generated
+PASS shanghai question count
+PASS shanghai resumes active paper
+PASS exam session ownership enforced
+PASS out-of-paper answer rejected
+PASS answer survives reload
+PASS submission includes every assigned question
+PASS duplicate submit is idempotent
+PASS legacy record ownership enforced
+PASS practical paper generated
+PASS practical question count
+PASS practical resumes active paper
+PASS exam session ownership enforced
+PASS out-of-paper answer rejected
+PASS expired skill paper persists pending review
+PASS late answers are not accepted
+PASS unanswered practical gets zero without paid AI call
+PASS practice answers only returned after submission
+PASS repeated practice counts once in actual database
+PASS wrong-question drill filters owned mistakes
+PASS authenticated material download succeeds
+ALL 74 CHECKS PASSED

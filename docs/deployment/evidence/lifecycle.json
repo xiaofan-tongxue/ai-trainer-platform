@@ -1,0 +1,43 @@
+{
+  "httpPort": 19002,
+  "checks": [
+    {
+      "name": "unique initial administrator requires password change",
+      "passed": true
+    },
+    {
+      "name": "new administrator password activates full access",
+      "passed": true
+    },
+    {
+      "name": "fresh seed has 900 questions, 40 tasks, only one random-password administrator",
+      "passed": true
+    },
+    {
+      "name": "repeat installation succeeds",
+      "passed": true
+    },
+    {
+      "name": "repeat installation preserves the data key",
+      "passed": true
+    },
+    {
+      "name": "repeat installation preserves changed credentials",
+      "passed": true
+    },
+    {
+      "name": "graceful stop succeeds",
+      "passed": true
+    },
+    {
+      "name": "restart and HTTP readiness succeed",
+      "passed": true
+    },
+    {
+      "name": "database credentials survive restart",
+      "passed": true
+    }
+  ],
+  "databasePort": 13307,
+  "testedAt": "2026-09-15T09:52:51.2176307+08:00"
+}

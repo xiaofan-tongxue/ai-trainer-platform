@@ -1,0 +1,250 @@
+[
+  {
+    "path": "src/main/java/com/aitrainer/Main.java",
+    "sha256": "7629DC1E64ECE749A92DE832B86441D242C247EED5645276C8225DC9A181A3AF"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/config/Config.java",
+    "sha256": "A025E6665CB7936D91913E442E0ED2E5B550ACAACC992DA4747171F603FD0C47"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/ChapterDao.java",
+    "sha256": "58D5BE9F3079D1D5959F975206D7559534BC63117DA1FEEBDD1EED34D4EA7A77"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/ExamDao.java",
+    "sha256": "01C12971EDD592DD4153B78DB0BE00103A31DC0BF8DFCED74F1BF7F586324AFC"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/LogDao.java",
+    "sha256": "63AA43904B4E421909F414ED581BF9869DD38BD9960976CAC1E403A92501B511"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/MistakeDao.java",
+    "sha256": "DB0E8AE9E59CD299F2C2530A80B7CBF890A25F9B9D4C1A4B3CBA74D2FD32EB06"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/PracticalDao.java",
+    "sha256": "5D89439A31892CD76F4F35B7435050B50EC5C152EE8EDE0A55A334E76AE28D45"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/QuestionDao.java",
+    "sha256": "7D00F3AF800ECCF4E54A7DFA02F30681A6547DC4785A2A651AEBE6CED338543F"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/SettingsDao.java",
+    "sha256": "CAB39A1F0D4C7E40D27562F3505A52C37271B65C1BDF47050E4D103AD30E3B9D"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/dao/UserDao.java",
+    "sha256": "C0394E50ED4F75A3E0830F11F53E85E45F29FAC6B97BDA0FC476706FF86359FD"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/db/DB.java",
+    "sha256": "E28B73A7CE6367C134603EA0D203D021A73185C679C1588A16B86ABF0EE717BB"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/db/Migrations.java",
+    "sha256": "D67BA76363406303B4EFF8EFC5F099C3F39DAE16B269875150C1B90A7DFEC627"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/entity/User.java",
+    "sha256": "45B28697393A0CB5BA6D514270EE3B0646C9A0BFBFA5CED61633FDD16766B27B"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/Crypto.java",
+    "sha256": "BF0946203944022DC0E4C598895F2C85B3637BA4896231372E67F252CA18F654"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/Passwords.java",
+    "sha256": "AD158B422FD846414D89E2695B8F6FFAD8CA004F4DE849F77453447F23730C41"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/ProtectedFields.java",
+    "sha256": "861EEB140B3A0555C099B86402A5803E17998FF0328D4A8AD3ECE3661AEF9FEC"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/ProvisionDatabase.java",
+    "sha256": "4078FBF145D7C30AE62234988F09289C1320A63654DED720FCC1C2A7849DA8CC"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/RateLimiter.java",
+    "sha256": "D9E848543AD8FB1C2A2AD1C50479E065F5C04344C1D11D6CD16858EC6C8497BA"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/Secrets.java",
+    "sha256": "37B8B7923B98D7B332D5EF17D38D1255747006AAC3B5A1DC3377D7D0BCD4E144"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/SecurityAudit.java",
+    "sha256": "04A5F35B81082FBF1B06BCC0C5C7854B2DC386C5E62D56AF7C83ACA0EB10C729"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/SecurityGate.java",
+    "sha256": "9239FA9549B97C232898AAF0BB6765009C5D6D590596604276CF998696B79F14"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/security/SecurityMigration.java",
+    "sha256": "2871373148D52015BC399A6EDC661AAF535C9584B1E2F3F66892BE416849B560"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/AdminService.java",
+    "sha256": "AC0D61FADB79EF56C24E296CDD5E8687E4FD981C9F6898EB99D3168E0F77B968"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/AiAgentService.java",
+    "sha256": "0DB20335B97F13B58A3E1F5F0CB394E4804D6E19D4E1EA352C7B83F7A1292C58"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/AiTutorService.java",
+    "sha256": "2EE776D201A224D7F5E1FD426F6259869004E3333CB5FF77750F0C95CF811AB3"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/AuthService.java",
+    "sha256": "24DDD0DE7C2495B06A4AF0E2A68B3736B509E4E364761AACF15CDB99AEEFC177"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/Curriculum.java",
+    "sha256": "491A83ADE25CE8C5139125F4BC8E85CC59911EDF689B087F2785A090C69CE8D0"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/DeepSeekClient.java",
+    "sha256": "FF27BBA089D2CF3D4E49E96FDCD4A37A8C07B916EBFA4A56EA1FAFDD3D84FFF4"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/ExamService.java",
+    "sha256": "187D095738AC71A162FFEE344E49AD1A428B477D1D2719DC78CE29EB93F45AC6"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/Knowledge.java",
+    "sha256": "273ECCB6AD5A1CEB2A9808D87631C60390F4C78A9449E1380A3B203991687BE9"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/LearningService.java",
+    "sha256": "66FC3B67B24FBCDC2C75874D91E70291CE52360F3C0F20D48BF39CA3DE645C59"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/LogService.java",
+    "sha256": "75FF0239DED11B66EDD71D6DC9942535E6F8322183DF8BDAED7B5C91863680F4"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/MistakeService.java",
+    "sha256": "82619E34F23A508FC04935E8FD1B2D620771A9475A3C33FE0C5C11DF0FC1E350"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/PracticalService.java",
+    "sha256": "26AB08D58861612D2C040CEAB020001B02D70F3C9B97CA9685F686BDEC15164E"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/QuestionService.java",
+    "sha256": "4BE7B42888BB7A3176F7EF90F1BE9A47BDCD3F6783F8725571827A124FCCFD39"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/service/ReadinessEngine.java",
+    "sha256": "1195728BFE9D7C211995B1C3B49273D1E6FC5595D2D2958B1376A60E78271136"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/util/Json.java",
+    "sha256": "A4219D06B817B6EFFD5A56BEC7D5F2D67AEAA5CEAE2D8790AB468C576263ED87"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/util/SessionManager.java",
+    "sha256": "A5688503ADD19BDD3DA1A5747FDE89D42C3CB7AC97431DAD81EF85205CAE7D96"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/util/Str.java",
+    "sha256": "4ED939C714952E3117B920DFD249F79E846ED86D8F1EC48C01F65018A361EE07"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/web/ApiHandler.java",
+    "sha256": "5C39596E5DEA53B9A08045C2DB8E39AA051848A604C6244BE08B2EE6B45EFFD5"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/web/MaterialHandler.java",
+    "sha256": "8D08C0D63E5EDC2FD5FC99796E9B616E3F13A62A43378AB298A917FAF8035DC9"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/web/Request.java",
+    "sha256": "A188B7CCCFAC81709996423DCC706F631F6FF4B0F56E198127015AE7A2148699"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/web/Response.java",
+    "sha256": "3E21F2475FE2297C31DF6962CCA12689B423EF1AA8CCD5F2734DAA31D71F3FDD"
+  },
+  {
+    "path": "src/main/java/com/aitrainer/web/StaticHandler.java",
+    "sha256": "5C103C28A3385B63543C0AAA6ABAFC01E65D4204EED53B64753892B4FA771258"
+  },
+  {
+    "path": "webapp/admin.html",
+    "sha256": "83D8332267E919E124740D7971E07F3C93FE7BF2C5BB5AC71D4B95FD04CF4441"
+  },
+  {
+    "path": "webapp/exam.html",
+    "sha256": "2495B4C2B1BB1FD42B2273C543E10F8F851F27666DC4BAD0771AEFB9C840638D"
+  },
+  {
+    "path": "webapp/index.html",
+    "sha256": "0341A4A575431EDAADC5F8D783FAE350F0C12445C00052A83D67A494B9CDA026"
+  },
+  {
+    "path": "webapp/insights.html",
+    "sha256": "FCEB4CDE63ECBCBFA7FA31287F16D8570255AC99FF66DAD0DC1239657A51F032"
+  },
+  {
+    "path": "webapp/journey.html",
+    "sha256": "2501341785AE5289D90769CBD3B8916ABED25D03805584DAB9A2B6BC363ED49D"
+  },
+  {
+    "path": "webapp/labs.html",
+    "sha256": "47B845783DA2DE7CB1B3FE4CB2C2D1AB11E4BE4F4FDE8E8BAEC1525B6DB2DAF3"
+  },
+  {
+    "path": "webapp/login.html",
+    "sha256": "40299367E825798FD265E07CCAC56B3A57CEA8F1FCF53082B5B0A9126096ED6F"
+  },
+  {
+    "path": "webapp/mistakes.html",
+    "sha256": "F04FD02D05130C674CD30ED237FB823E9A5C9AC69112F40942A2AF920EB02BF2"
+  },
+  {
+    "path": "webapp/password.html",
+    "sha256": "CD93067F9A99F01D1FC2F840B06B7BEBF0B22B740D625274BC5FD9FECB885AF8"
+  },
+  {
+    "path": "webapp/practical.html",
+    "sha256": "5D55EF7CDB843E2FB1BFC16B040219E794FACE6EE3F399B979EF5ADCE2F779DB"
+  },
+  {
+    "path": "webapp/practice.html",
+    "sha256": "5C263409CBFD1CE01E3B715E162519D0AD6B473119278F6ED50A4126953F93C1"
+  },
+  {
+    "path": "webapp/python.html",
+    "sha256": "6CFF7C6497B347E3D7192BF08F4EAC51CE2C9F35B6898ABD59678AF86BF76772"
+  },
+  {
+    "path": "webapp/sources.html",
+    "sha256": "09D1124D9C36DA46E22358FB45011BDBD5F45BD0480E7F76CEAFE88A8DA4C094"
+  },
+  {
+    "path": "webapp/theory.html",
+    "sha256": "801B163BA7F753BA7332FC40DBDBF7F67F27F322F07875C2A7A9844D54E365B6"
+  },
+  {
+    "path": "webapp/css/style.css",
+    "sha256": "B10AB130E29F46155F7A2E366BF63BA330EFB639078680BC2CF7B993157F79F0"
+  },
+  {
+    "path": "webapp/js/common.js",
+    "sha256": "D10B29CB18C7B35934765DE25D665D9D0F50BF86328C4876DA5BA2DBAF976F6D"
+  },
+  {
+    "path": "webapp/js/exam.js",
+    "sha256": "347506D894854503BD67027F4E8DE312F11BB65B574E61AF0310A0DEB5163D1E"
+  },
+  {
+    "path": "webapp/js/learning.js",
+    "sha256": "CFE9117F30CC21A12157B9BF9C930181D246CE72CF6A5ED124B288587D1C0865"
+  }
+]

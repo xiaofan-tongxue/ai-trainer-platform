@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>理论知识 - 人工智能训练师学习平台</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if (!requireAuth()) throw new Error();
+const content = renderLayout('theory', '理论知识', '理论学习');
+content.innerHTML = `
+  <div class="split">
+    <div class="card" style="flex:0 0 260px">
+      <div class="card-h">章节目录</div>
+      <div class="card-b" id="toc" style="padding:8px"><div class="loading"><span class="spin"></span>加载中</div></div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="card-h" id="chTitle">请选择章节</div>
+      <div class="card-b" id="chContent"><div class="empty">从左侧选择一个章节开始学习</div></div>
+    </div>
+  </div>`;
+
+let chapters = [];
+api('/chapters').then(list => {
+  chapters = list;
+  document.getElementById('toc').innerHTML = list.map((c, i) =>
+    `<a href="javascript:;" onclick="loadChapter(${i})" id="ch${c.id}" style="display:block;padding:10px 12px;border-radius:8px;color:inherit;margin-bottom:2px">${c.sort_order}. ${esc(c.title)}</a>`
+  ).join('');
+  if (list.length) {const code=new URLSearchParams(location.search).get('code');const index=list.findIndex(c=>String(c.code)===code||String(c.code).startsWith(code+'.'));loadChapter(Math.max(0,index));}
+}).catch(e => document.getElementById('toc').innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+
+function loadChapter(i) {
+  const c = chapters[i];
+  document.querySelectorAll('#toc a').forEach(a => a.style.background = '');
+  document.getElementById('ch' + c.id).style.background = 'var(--primary-050)';
+  document.getElementById('chTitle').textContent = c.title;
+  const box = document.getElementById('chContent');
+  box.innerHTML = '<div class="loading"><span class="spin"></span>加载中</div>';
+  api('/chapters/' + c.id).then(ch => {
+    box.innerHTML = `<div class="md">${md(ch.content)}</div>`;
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }).catch(e => box.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+PASS security response headers
+PASS backup and traversal blocked: /admin.html.bak
+PASS backup and traversal blocked: /js/common.js.bak
+PASS backup and traversal blocked: /.env
+PASS backup and traversal blocked: /%2e%2e/db/schema.sql
+PASS static method allowlist
+PASS anonymous admin API denied
+PASS anonymous report denied
+PASS HTTP parameter pollution rejected
+PASS duplicate auth JSON rejected
+PASS content type confusion rejected
+PASS cross origin rejected
+PASS HttpOnly browser cookie with no bearer exposure
+PASS cookie CSRF without token rejected
+PASS same origin CSRF protected write succeeds
+PASS ordinary user function level authorization
+PASS cross account exam object access denied
+PASS state changing GET removed
+PASS unconsumed route segments rejected
+PASS read only endpoint method enforced
+PASS question API avoids answer exposure
+PASS pagination bound enforced
+PASS legacy or reset credentials restricted to password update
+PASS old credentials can update password
+PASS password change revokes bearer session
+PASS administrator authorized access
+PASS admin config response never returns API key
+PASS admin account disable succeeds
+PASS disabled account cookie revoked
+PASS role enum validation
+PASS active database encrypted: users.username
+PASS active database encrypted: users.nickname
+PASS active database encrypted: users.email
+PASS active database encrypted: settings.v
+PASS active database encrypted: login_logs.username
+PASS active database encrypted: login_logs.ip
+PASS active database encrypted: login_logs.user_agent
+PASS active database encrypted: operation_logs.username
+PASS active database encrypted: operation_logs.target
+PASS active database encrypted: operation_logs.detail
+PASS active database encrypted: operation_logs.ip
+PASS active database encrypted: practice_records.user_answer
+PASS active database encrypted: practice_records.is_correct
+PASS active database encrypted: exam_records.detail
+PASS active database encrypted: exam_records.score
+PASS active database encrypted: exam_records.total
+PASS active database encrypted: exam_records.correct
+PASS active database encrypted: exam_records.passed
+PASS active database encrypted: exam_records.duration_sec
+PASS active database encrypted: practical_submissions.content
+PASS active database encrypted: practical_submissions.score
+PASS active database encrypted: practical_submissions.analysis
+PASS active database encrypted: exam_sessions.paper
+PASS active database encrypted: exam_sessions.answers
+PASS active database encrypted: exam_sessions.result
+PASS active database encrypted: learning_reports.report
+PASS active database encrypted: learning_profiles.exam_date
+PASS active database encrypted: learning_profiles.daily_minutes
+PASS active database encrypted: learning_profiles.foundation
+PASS active database encrypted: learning_profiles.institution
+PASS active database encrypted: lesson_progress.score
+PASS persistent five failure account lockout
+ALL 62 HTTP SECURITY CHECKS PASSED; fixtures removed

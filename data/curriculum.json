@@ -1,0 +1,1562 @@
+{
+  "version": "2026.09.11",
+  "institution": "四川省科教兴川促进会",
+  "title": "人工智能训练师三级 · 从零基础到双科备考",
+  "hours": 100,
+  "stages": [
+    {
+      "id": "start",
+      "title": "01 · 零基础起步",
+      "description": "弄清考试要求，掌握电脑、Python 与数据表。",
+      "target": "能看懂输入、处理、输出，完成入门测验。",
+      "hours": 12
+    },
+    {
+      "id": "data",
+      "title": "02 · 数据与业务",
+      "description": "从业务问题出发，设计采集、清洗、标注和审核流程。",
+      "target": "独立完成一份数据处理规范和可复现的数据清洗作业。",
+      "hours": 18
+    },
+    {
+      "id": "model",
+      "title": "03 · 模型训练与测试",
+      "description": "掌握数据划分、模型选择、训练和错误分析。",
+      "target": "能解释指标、避免数据泄漏，交付训练代码与测试报告。",
+      "hours": 22
+    },
+    {
+      "id": "system",
+      "title": "04 · 智能系统与指导",
+      "description": "把指标转成产品优化，设计人机协作并指导初学者。",
+      "target": "交付产品分析、交互流程和培训讲义。",
+      "hours": 18
+    },
+    {
+      "id": "practice",
+      "title": "05 · 专项攻克",
+      "description": "结合原题库与素材，完成四个实操领域的独立作业。",
+      "target": "每个领域至少完成两道不同任务，复测反复错题。",
+      "hours": 16
+    },
+    {
+      "id": "sprint",
+      "title": "06 · 双科冲刺与考务",
+      "description": "完成限时整卷、复盘薄弱点、准备考试与考后核查。",
+      "target": "至少三次理论、两次完整实操模拟，再检查双科稳定性。",
+      "hours": 14
+    }
+  ],
+  "lessons": [
+    {
+      "id": "start-1",
+      "stage": "start",
+      "title": "先认识考试，再安排学习",
+      "domain": "foundation",
+      "minutes": 25,
+      "content": "## 你要学会什么\n人工智能训练师三级对应高级工。学习目标是把业务问题转成数据流程、训练与测试任务、智能产品改进方案，并能指导初级人员。会聊天工具不等于具备这些能力。\n\n## 两科要分别合格\n国家标准规定理论和技能均按百分制计分，均须达到 60 分。理论时间不少于 90 分钟，技能不少于 120 分钟。本平台默认用 90 / 120 分钟训练，具体题型、软件版本、提交文件要求以科教兴川该批次通知为准。\n\n## 第一天怎么做\n先在学习首页填每天可用时间；做一次入门诊断。不会的题允许留空，诊断用于确定起点。每日按“读一节 → 做自测 → 实际操作 → 复盘一个错误”完成一轮。这里规划的是 100 小时自学路线，包含基础补课和反复练习，不是报名机构的法定培训学时。\n\n## 哪些资料可以信\n考务依据页列出已核实的科教兴川年度公告。现有 900 题及 40 道实操来自公开备考资料，答案是个人整理，不能视作四川历年真题。遇到表述绝对化或有争议的答案，先理解条件再记忆。",
+      "deliverable": "填写学习档案，完成一次入门诊断；记录两个最陌生的领域。",
+      "links": [
+        {
+          "label": "开始入门诊断",
+          "href": "/exam.html?mode=diagnostic"
+        },
+        {
+          "label": "科教兴川考务依据",
+          "href": "/sources.html"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "start-1-1",
+          "question": "理论 85、技能 55，是否双科合格？",
+          "options": [
+            {
+              "label": "A",
+              "text": "是，平均分超过 60"
+            },
+            {
+              "label": "B",
+              "text": "否，技能尚未达到 60"
+            },
+            {
+              "label": "C",
+              "text": "由理论分决定"
+            }
+          ],
+          "answer": "B",
+          "explanation": "两科各自达到 60，不能用平均分弥补一科不足。"
+        },
+        {
+          "id": "start-1-2",
+          "question": "本平台的 900 道题应如何使用？",
+          "options": [
+            {
+              "label": "A",
+              "text": "当作科教兴川历年原题"
+            },
+            {
+              "label": "B",
+              "text": "公开练习资料，答案需理解和核验"
+            },
+            {
+              "label": "C",
+              "text": "背完即可保证通过"
+            }
+          ],
+          "answer": "B",
+          "explanation": "资料地域和答案来源必须分清，练习结果不能保证正式考试结果。"
+        }
+      ]
+    },
+    {
+      "id": "start-2",
+      "stage": "start",
+      "title": "电脑、文件和表格基本功",
+      "domain": "foundation",
+      "minutes": 35,
+      "content": "## 文件是实操交付物\n文件名、扩展名、路径决定软件如何找到数据。`data/patients.csv` 是相对路径；CSV 是文本表格，XLSX 是工作簿，IPYNB 是 Notebook。不要通过改扩展名来转换文件。\n\n## 一张表怎么读\n行通常是一条记录，列是一个字段。先找样本标识、时间、特征与标签。标签是模型需要预测的结果，例如“是否违约”；ID 通常用来识别记录，不应无条件作为预测特征。\n\n## 第一次读数据\n```python\nimport pandas as pd\ndf = pd.DataFrame({\"编号\": [1, 2], \"年龄\": [20, 30]})\nprint(df.head())\nprint(df.shape)\nprint(df.dtypes)\nprint(df.isna().sum())\ndf.to_csv(\"clean.csv\", index=False, encoding=\"utf-8-sig\")\n```\nshape 给出行数与列数。导出时 index=False 可以避免额外序号列。遇到中文乱码先确认编码；遇到 FileNotFoundError 先确认工作目录和文件名。保留原始文件，处理结果另存。",
+      "deliverable": "创建一个两行数据表，解释每列含义并导出 clean.csv。",
+      "links": [
+        {
+          "label": "代码实验室",
+          "href": "/labs.html?lab=0"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "start-2-1",
+          "question": "CSV 与 XLSX 的关系是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "改后缀即可互转"
+            },
+            {
+              "label": "B",
+              "text": "格式不同，需用软件读取和另存"
+            },
+            {
+              "label": "C",
+              "text": "两者都是图片"
+            }
+          ],
+          "answer": "B",
+          "explanation": "文本表格与工作簿格式不同，改名不改变内容格式。"
+        },
+        {
+          "id": "start-2-2",
+          "question": "df.shape 返回什么？",
+          "options": [
+            {
+              "label": "A",
+              "text": "缺失值总数"
+            },
+            {
+              "label": "B",
+              "text": "行数和列数"
+            },
+            {
+              "label": "C",
+              "text": "模型分数"
+            }
+          ],
+          "answer": "B",
+          "explanation": "它返回 (行数, 列数)。"
+        }
+      ]
+    },
+    {
+      "id": "start-3",
+      "stage": "start",
+      "title": "Python：变量、判断与循环",
+      "domain": "foundation",
+      "minutes": 50,
+      "content": "## 用变量保存值\n`score = 68` 把数值保存到变量 score；`score == 68` 是比较。字符串用引号，数字做计算时不加引号。缩进属于 Python 语法，建议统一四个空格。\n\n## 把考试规则写成程序\n```python\ntheory, skill = 68, 72\nif theory >= 60 and skill >= 60:\n    print(\"双科合格\")\nelse:\n    print(\"仍需复习\")\n\nscores = [50, 70, 90]\nfor score in scores:\n    print(score >= 60)\n```\nand 表示同时满足。循环会逐一处理列表元素。不要把 `>= 60` 写成 `> 60`，否则正好 60 会被判错。\n\n## 排错顺序\n先看错误最后一行，再找行号。SyntaxError 常来自括号或引号；NameError 常来自变量未定义或拼写不一致；TypeError 常来自类型不匹配。每次只改一处，再运行验证。",
+      "deliverable": "把程序改为读取三位学员的双科分数，打印每人的结果。",
+      "links": [
+        {
+          "label": "Python 入门练习",
+          "href": "/python.html"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "start-3-1",
+          "question": "判断两科都达线应该用？",
+          "options": [
+            {
+              "label": "A",
+              "text": "and"
+            },
+            {
+              "label": "B",
+              "text": "or"
+            },
+            {
+              "label": "C",
+              "text": "赋值 ="
+            }
+          ],
+          "answer": "A",
+          "explanation": "and 要求两个条件同时为真。"
+        },
+        {
+          "id": "start-3-2",
+          "question": "score = '60' 中的 score 是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "整数"
+            },
+            {
+              "label": "B",
+              "text": "字符串"
+            },
+            {
+              "label": "C",
+              "text": "列表"
+            }
+          ],
+          "answer": "B",
+          "explanation": "引号包裹的是字符串，需要转换后再作数值比较。"
+        }
+      ]
+    },
+    {
+      "id": "start-4",
+      "stage": "start",
+      "title": "函数、列表与可复现操作",
+      "domain": "foundation",
+      "minutes": 45,
+      "content": "## 拆成能重复使用的步骤\n函数接收输入、执行处理、返回结果。参数名字不重要，输入输出约定很重要。\n```python\ndef pass_both(theory, skill):\n    return theory >= 60 and skill >= 60\n\nstudents = [{\"理论\": 60, \"技能\": 70}, {\"理论\": 80, \"技能\": 40}]\nfor row in students:\n    print(pass_both(row[\"理论\"], row[\"技能\"]))\n```\n列表装多个元素，字典用键表达字段。上例输出 True、False。\n\n## Notebook 的常见坑\n单元格可以乱序执行，导致依赖旧变量。交作业前重启内核，从头运行所有单元格。记录 Python 版本、主要库版本、随机种子、输入文件名和输出路径，其他人才有机会复现你的结果。\n\n## 从抄代码到独立做\n先运行例子；再改输入；最后关闭例子，自己写同样功能。把失败输入也作为测试，例如空列表、缺少字段、非数值。",
+      "deliverable": "不看例子实现双科判定函数，使用 60 分边界和不合格样本验证。",
+      "links": [
+        {
+          "label": "Python 函数练习",
+          "href": "/python.html"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "start-4-1",
+          "question": "交 Notebook 前最可靠的检查是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "只运行最后一格"
+            },
+            {
+              "label": "B",
+              "text": "重启内核并从头执行"
+            },
+            {
+              "label": "C",
+              "text": "截图后删除代码"
+            }
+          ],
+          "answer": "B",
+          "explanation": "从头运行可以发现隐藏的执行顺序依赖。"
+        },
+        {
+          "id": "start-4-2",
+          "question": "函数 return 的作用是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "向调用方返回结果"
+            },
+            {
+              "label": "B",
+              "text": "只向屏幕打印"
+            },
+            {
+              "label": "C",
+              "text": "安装依赖"
+            }
+          ],
+          "answer": "A",
+          "explanation": "return 返回数据，print 只是显示。"
+        }
+      ]
+    },
+    {
+      "id": "data-1",
+      "stage": "data",
+      "title": "职业道德与数据使用边界",
+      "domain": "ethics",
+      "minutes": 35,
+      "content": "## 训练师对什么负责\n对数据来源、处理过程、标注一致性和报告真实性负责。不因为模型分数不好就删除困难样本，也不能把猜测写成已验证的结论。\n\n## 一条实际处理流程\n收集前确认业务目的和许可范围；只收必要字段；限制访问；对展示数据进行脱敏；按规定保存和删除。脱敏不等于任意公开，也不意味着所有再识别风险都消失。\n\n## 标注争议怎么处理\n例如同一条评论既表扬配送又批评产品。不要让标注员各凭感觉：先写标签边界，提供正反例与边界例；无法判断的样本进入复核队列；记录规则版本及变更原因。\n\n## 写报告的方式\n“在本测试集 100 条样本上，发现 12 条漏识别”是可追溯的描述。“已经完全没有错误”缺少条件。AI 自动给出的批改建议也需结合实际输出核对。",
+      "deliverable": "写一份五项数据处理检查单，并为混合情绪评论制定复核规则。",
+      "links": [
+        {
+          "label": "职业道德专项",
+          "href": "/practice.html?domain=ethics"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "data-1-1",
+          "question": "指标不好时正确做法是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "删除困难样本提高分数"
+            },
+            {
+              "label": "B",
+              "text": "保留测试条件并分析错误"
+            },
+            {
+              "label": "C",
+              "text": "修改真实标签迎合模型"
+            }
+          ],
+          "answer": "B",
+          "explanation": "测试数据应代表业务，不能为提高成绩而篡改证据。"
+        },
+        {
+          "id": "data-1-2",
+          "question": "标注存在歧义时应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "随机选一个标签"
+            },
+            {
+              "label": "B",
+              "text": "补充边界例并安排复核"
+            },
+            {
+              "label": "C",
+              "text": "忽略所有歧义数据"
+            }
+          ],
+          "answer": "B",
+          "explanation": "通过明确规范、仲裁与版本记录保持一致性。"
+        }
+      ]
+    },
+    {
+      "id": "data-2",
+      "stage": "data",
+      "title": "业务分析：目标到流程图",
+      "domain": "business",
+      "minutes": 50,
+      "content": "## 从问题开始\n例：客服重复咨询太多。先定义目标“在不降低满意度的条件下减少重复咨询”，再定义指标、数据来源与验收窗口。不要一开始就决定使用某个模型。\n\n## 三张流程\n采集：来源 → 权限 → 字段 → 频率 → 入库；处理：类型检查 → 缺失/重复处理 → 标签规范 → 版本管理；审核：抽样 → 双人复核 → 争议仲裁 → 发布。每一步写清输入、输出、负责人和异常分支。\n\n## 找出单一模块的问题\n先按渠道、时间、用户类型拆解数据。例如识别率在夜间下降，可能是噪声或样本分布变化。提出假设，设计小范围验证；不能仅由相关性推出因果。\n\n## 作答模板\n背景与目标；现状和证据；问题定位；优化方案；验证方法；风险和回退。方案中至少包含一个可计算指标及其分母。",
+      "deliverable": "为客服咨询场景画采集—处理—审核流程，标出异常返回节点。",
+      "links": [
+        {
+          "label": "业务流程实操",
+          "href": "/practical.html?code=1.1.1"
+        },
+        {
+          "label": "业务分析专项",
+          "href": "/practice.html?domain=business"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "data-2-1",
+          "question": "开始设计业务流程时首先明确？",
+          "options": [
+            {
+              "label": "A",
+              "text": "最昂贵模型"
+            },
+            {
+              "label": "B",
+              "text": "目标与验收指标"
+            },
+            {
+              "label": "C",
+              "text": "图表配色"
+            }
+          ],
+          "answer": "B",
+          "explanation": "先定义可验证目标，再选择技术方案。"
+        },
+        {
+          "id": "data-2-2",
+          "question": "两个指标同时变化能否直接证明因果？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能，需要进一步验证"
+            },
+            {
+              "label": "C",
+              "text": "只要样本多就一定能"
+            }
+          ],
+          "answer": "B",
+          "explanation": "共同变化可能由第三个因素引起。"
+        }
+      ]
+    },
+    {
+      "id": "data-3",
+      "stage": "data",
+      "title": "清洗规范：缺失、异常与重复",
+      "domain": "training",
+      "minutes": 60,
+      "content": "## 先审计，再处理\n对每列检查类型、范围、缺失率、重复情况。缺失可能有业务含义，例如未发生购买时订单金额为空；不要默认全部填零。异常值可能是错误，也可能是关键少数事件。\n\n```python\nimport pandas as pd\ndf = pd.DataFrame({\"id\":[1,2,2,3], \"age\":[\"20\",None,None,\"-8\"]})\ndf[\"age\"] = pd.to_numeric(df[\"age\"], errors=\"coerce\")\ndf = df.drop_duplicates(subset=[\"id\"])\ndf.loc[~df[\"age\"].between(0, 120), \"age\"] = float(\"nan\")\nprint(df.isna().sum())\n```\n\n## 每个规则要写理由\n数据字典至少含字段名、类型、允许范围、缺失处理、单位。记录处理前后行数、删改原因和异常记录，避免静默丢失数据。建模中的中位数填充与标准化必须在训练集拟合，再应用到验证/测试集。\n\n## 检查输出\n确认主键唯一、字段齐全、数值范围合理，检查被删除记录；保存清洗报告与处理脚本。",
+      "deliverable": "对实操 CSV 写数据字典，提交清洗前后统计及处理代码。",
+      "links": [
+        {
+          "label": "Pandas 清洗实验",
+          "href": "/labs.html?lab=0"
+        },
+        {
+          "label": "清洗实操",
+          "href": "/practical.html?code=2.1.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "data-3-1",
+          "question": "年龄 -8 应该如何处理？",
+          "options": [
+            {
+              "label": "A",
+              "text": "保留并当正常值"
+            },
+            {
+              "label": "B",
+              "text": "先按业务规则标记异常并记录处理原因"
+            },
+            {
+              "label": "C",
+              "text": "全部改为 18"
+            }
+          ],
+          "answer": "B",
+          "explanation": "需要可解释、可追溯的处理规则。"
+        },
+        {
+          "id": "data-3-2",
+          "question": "模型评估中的中位数填充参数应来自？",
+          "options": [
+            {
+              "label": "A",
+              "text": "全部数据"
+            },
+            {
+              "label": "B",
+              "text": "训练集"
+            },
+            {
+              "label": "C",
+              "text": "最终测试标签"
+            }
+          ],
+          "answer": "B",
+          "explanation": "从测试集学习处理参数会造成信息泄漏。"
+        }
+      ]
+    },
+    {
+      "id": "data-4",
+      "stage": "data",
+      "title": "标注规范与质量审核",
+      "domain": "training",
+      "minutes": 55,
+      "content": "## 规范要让不同的人得出一致结果\n写清标注对象、标签定义、边界条件、正反例、工具操作、文件格式和复核流程。文本可做分类、实体边界、关系标注；图像可以做分类、框、多边形或分割，不同任务输出结构不同。\n\n## 质量不仅是完成数量\n抽查标签正确性、边界完整性、漏标率和人员间一致性。双人一致并不一定正确，两个人也可能同时误解规则，因此需要基准样本和仲裁。\n\n## 少数类问题\n如果 95% 样本为“正常”，全部标“正常”也会有 95% 表面正确率，却丢失重要异常。按类别报告错误，给少数类足够的审核样本。重采样只能在训练部分进行，保持最终测试集代表业务分布。\n\n## 交付格式\n数据版本、标注规范版本、标签分布、抽检规则、质量统计、疑难案例与返工记录。",
+      "deliverable": "为正面/负面/混合情绪设计标签规范，包含三个边界例。",
+      "links": [
+        {
+          "label": "标注质量理论",
+          "href": "/theory.html?code=09"
+        },
+        {
+          "label": "文本标注",
+          "href": "/theory.html?code=08"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "data-4-1",
+          "question": "两位标注员一致说明什么？",
+          "options": [
+            {
+              "label": "A",
+              "text": "一定正确"
+            },
+            {
+              "label": "B",
+              "text": "一致性较好，但仍需基准和复核"
+            },
+            {
+              "label": "C",
+              "text": "无需质量审核"
+            }
+          ],
+          "answer": "B",
+          "explanation": "一致性与真实性是不同维度。"
+        },
+        {
+          "id": "data-4-2",
+          "question": "过采样应在什么时候进行？",
+          "options": [
+            {
+              "label": "A",
+              "text": "划分之前处理全部数据"
+            },
+            {
+              "label": "B",
+              "text": "只处理训练部分"
+            },
+            {
+              "label": "C",
+              "text": "复制测试样本"
+            }
+          ],
+          "answer": "B",
+          "explanation": "先划分、再对训练集重采样，避免重复样本泄漏。"
+        }
+      ]
+    },
+    {
+      "id": "model-1",
+      "stage": "model",
+      "title": "划分数据，防止数据泄漏",
+      "domain": "training",
+      "minutes": 55,
+      "content": "## 三类数据各司其职\n训练集用来拟合参数；验证集或交叉验证用于选模型与调参；测试集在方案确定后做最终评估。8:2 只是常用示例，并非国家标准统一比例。\n\n## 划分要贴合业务\n同一患者多条记录须按患者分组，不能随机散落训练与测试两边。预测未来时按时间先后划分，不能把未来混进过去。普通独立分类样本可使用 stratify 保持类别比例。\n\n## 正确顺序\n划分 → 训练部分拟合填充/缩放/特征选择 → 训练模型 → 验证调参 → 一次最终测试。推荐 Pipeline 把转换器和模型一起管理。\n\n## 检查例子\n如果“是否购买”的特征包含“付款完成时间”，预测时这个字段还不存在，即使测试分数很高也可能无法上线。逐列追问：真实预测时能拿到它吗？",
+      "deliverable": "写出一种按时间划分与一种按用户分组划分场景，指出泄漏来源。",
+      "links": [
+        {
+          "label": "数据划分实验",
+          "href": "/labs.html?lab=2"
+        },
+        {
+          "label": "划分方法理论",
+          "href": "/theory.html?code=11"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "model-1-1",
+          "question": "8:2 是否适用于所有考试和业务？",
+          "options": [
+            {
+              "label": "A",
+              "text": "是，国家标准固定"
+            },
+            {
+              "label": "B",
+              "text": "否，要按题目与数据特性选择"
+            },
+            {
+              "label": "C",
+              "text": "只能 1:1"
+            }
+          ],
+          "answer": "B",
+          "explanation": "比例、分组和时间条件都应以具体任务为准。"
+        },
+        {
+          "id": "model-1-2",
+          "question": "同一个人的多条记录更适合怎样划分？",
+          "options": [
+            {
+              "label": "A",
+              "text": "按人分组划分"
+            },
+            {
+              "label": "B",
+              "text": "逐行随意划分"
+            },
+            {
+              "label": "C",
+              "text": "复制到各集合"
+            }
+          ],
+          "answer": "A",
+          "explanation": "分组能降低同主体信息泄漏。"
+        }
+      ]
+    },
+    {
+      "id": "model-2",
+      "stage": "model",
+      "title": "模型选择与训练闭环",
+      "domain": "training",
+      "minutes": 65,
+      "content": "## 分清任务类型\n类别输出是分类，例如是否异常；连续数值输出是回归，例如预测需求量；没有标签时可以研究聚类。逻辑回归常用于分类，线性回归用于数值预测，别被名称迷惑。\n\n```python\nfrom sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\nX, y = load_iris(return_X_y=True)\nXtr, Xte, ytr, yte = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nmodel = make_pipeline(StandardScaler(), LogisticRegression(max_iter=500))\nmodel.fit(Xtr, ytr)\nprint(model.score(Xte, yte))\n```\n\n先跑简单基线，再增加复杂度。决策树便于解释但容易过拟合，随机森林通过多个树集成提高稳定性。模型选择还要考虑数据量、解释要求、时延和维护成本，不能只看训练分数。",
+      "deliverable": "从原始输入到最终测试跑通一遍，保存随机种子与分数。",
+      "links": [
+        {
+          "label": "分类训练实验",
+          "href": "/labs.html?lab=3"
+        },
+        {
+          "label": "模型开发实操",
+          "href": "/practical.html?code=2.2.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "model-2-1",
+          "question": "预测明天销售额属于？",
+          "options": [
+            {
+              "label": "A",
+              "text": "回归"
+            },
+            {
+              "label": "B",
+              "text": "分类"
+            },
+            {
+              "label": "C",
+              "text": "文本分词"
+            }
+          ],
+          "answer": "A",
+          "explanation": "销售额是连续数值。"
+        },
+        {
+          "id": "model-2-2",
+          "question": "StandardScaler 放入 Pipeline 的价值是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "让测试集决定参数"
+            },
+            {
+              "label": "B",
+              "text": "让预处理随训练流程正确拟合和复用"
+            },
+            {
+              "label": "C",
+              "text": "取消数据划分"
+            }
+          ],
+          "answer": "B",
+          "explanation": "Pipeline 有助于避免预处理与交叉验证发生泄漏。"
+        }
+      ]
+    },
+    {
+      "id": "model-3",
+      "stage": "model",
+      "title": "指标计算：准确率以外看什么",
+      "domain": "training",
+      "minutes": 60,
+      "content": "## 用一个例子算清楚\n实际 10 个异常，检出 8 个，漏掉 2 个；同时把 4 个正常误报为异常。TP=8、FN=2、FP=4。\n精确率 = 8/(8+4) = 66.7%；召回率 = 8/(8+2) = 80%；F1 = 2×8/(2×8+4+2) ≈ 72.7%。\n\n## 选指标看代价\n漏报代价大时关注召回，误报代价大时关注精确率，但要结合总体目标。调整阈值通常会改变这两者的取舍。多分类任务说明 macro、micro、weighted 平均方式，别把不同口径直接比较。\n\n## 回归\nMAE 是绝对误差平均，RMSE 对大误差更敏感；R² 可能小于零，表示比用均值预测还差，并非永远在 0 到 1 之间。\n\n## 报告应包含\n测试集规模和分布、指标定义、基线对比、按类/场景拆分、错误样本原因，以及尚未验证的限制。",
+      "deliverable": "手算混淆矩阵指标，再用实验室代码核对。",
+      "links": [
+        {
+          "label": "评估指标实验",
+          "href": "/labs.html?lab=4"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "model-3-1",
+          "question": "TP=8、FP=4 时精确率是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "80%"
+            },
+            {
+              "label": "B",
+              "text": "66.7%"
+            },
+            {
+              "label": "C",
+              "text": "50%"
+            }
+          ],
+          "answer": "B",
+          "explanation": "精确率的分母为预测成正类的总数 8+4。"
+        },
+        {
+          "id": "model-3-2",
+          "question": "R² 能否为负？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能"
+            },
+            {
+              "label": "C",
+              "text": "只能为负"
+            }
+          ],
+          "answer": "A",
+          "explanation": "模型可能劣于均值基线，因此 R² 可以为负。"
+        }
+      ]
+    },
+    {
+      "id": "model-4",
+      "stage": "model",
+      "title": "过拟合、错误分析与测试报告",
+      "domain": "training",
+      "minutes": 55,
+      "content": "## 看两组表现\n训练好、验证差提示过拟合；两者都差可能是欠拟合，也要排查标签与数据问题。训练好但线上差也可能是分布变化，不能只把模型变简单。\n\n## 一次只验证一个假设\n按错误类别分组：标注错误、样本不足、数据偏移、特征不足、阈值不合适。先选代价低的修正，在固定验证条件下比较；调参时不用最终测试集。\n\n## 常用改进\n正则化、限制树深度、收集代表性样本、交叉验证、早停。增大模型或堆叠训练轮次不是通用解决方案。\n\n## 可复现报告模板\n任务和版本；数据来源与划分；预处理与模型；指标与基线；典型错误；改进前后对比；结论、限制及下一轮实验。报告内引用真实运行结果，缺结果时写“待验证”。",
+      "deliverable": "按模板撰写一页测试报告，至少列出三个错例类型和验证步骤。",
+      "links": [
+        {
+          "label": "过拟合实验",
+          "href": "/labs.html?lab=5"
+        },
+        {
+          "label": "过拟合理论",
+          "href": "/theory.html?code=12"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "model-4-1",
+          "question": "用最终测试集反复选最佳参数会？",
+          "options": [
+            {
+              "label": "A",
+              "text": "提高评估独立性"
+            },
+            {
+              "label": "B",
+              "text": "造成对测试集的过度适配"
+            },
+            {
+              "label": "C",
+              "text": "消除过拟合"
+            }
+          ],
+          "answer": "B",
+          "explanation": "最终测试集应保持独立。"
+        },
+        {
+          "id": "model-4-2",
+          "question": "训练和验证都很差时应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "直接宣布过拟合"
+            },
+            {
+              "label": "B",
+              "text": "检查数据、标签、模型能力与特征"
+            },
+            {
+              "label": "C",
+              "text": "只增加测试数据"
+            }
+          ],
+          "answer": "B",
+          "explanation": "多种原因可能造成双低，需要先定位。"
+        }
+      ]
+    },
+    {
+      "id": "system-1",
+      "stage": "system",
+      "title": "产品监控与优化需求",
+      "domain": "design",
+      "minutes": 55,
+      "content": "## 把模型指标接到业务指标\n客服系统可以同时监控识别质量、响应时延、人工接管率、问题解决率与用户满意度。只提高准确率不代表业务改善，例如拒答过多可能造成低解决率。\n\n## 切片分析\n按渠道、时间、新老用户或产品版本拆分。分别报告样本量和分母，小样本剧烈波动时不要仓促下结论。用同一口径比较前后变化。\n\n## 形成可执行需求\n问题：晚间语音失败率升高；证据：按时段统计及噪声分布；假设：环境噪声变化；改进：降噪或补充样本；验收：独立数据上的识别质量及延迟；上线策略：灰度、监控、回退条件。\n\n## 日常监控\n关注输入分布变化、缺失字段、失败请求和模型版本。报警需要阈值、负责人、处置流程和复盘记录。",
+      "deliverable": "给智能音箱设计指标表，并写一条可验收的优化需求。",
+      "links": [
+        {
+          "label": "智能产品实操",
+          "href": "/practical.html?code=3.1.1"
+        },
+        {
+          "label": "系统设计专项",
+          "href": "/practice.html?domain=design"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "system-1-1",
+          "question": "监控报告只写百分比是否足够？",
+          "options": [
+            {
+              "label": "A",
+              "text": "足够"
+            },
+            {
+              "label": "B",
+              "text": "不足，还需样本量、分母和统计窗口"
+            },
+            {
+              "label": "C",
+              "text": "无需统计窗口"
+            }
+          ],
+          "answer": "B",
+          "explanation": "口径和样本量决定比较是否有意义。"
+        },
+        {
+          "id": "system-1-2",
+          "question": "优化需求应该包含？",
+          "options": [
+            {
+              "label": "A",
+              "text": "问题、证据、方案、验收与回退"
+            },
+            {
+              "label": "B",
+              "text": "只写使用大模型"
+            },
+            {
+              "label": "C",
+              "text": "只有截图"
+            }
+          ],
+          "answer": "A",
+          "explanation": "完整的需求必须可实施、可验证。"
+        }
+      ]
+    },
+    {
+      "id": "system-2",
+      "stage": "system",
+      "title": "人机交互与异常分支",
+      "domain": "design",
+      "minutes": 55,
+      "content": "## 一次交互的闭环\n用户输入 → 输入检查 → 模型推理 → 结果解释 → 用户确认或纠正 → 记录反馈。低置信度、高风险和系统异常应有人工介入或重试分支。\n\n## 例：图像识别\n输入格式、尺寸和预处理必须与训练时一致。推理后不直接把最大分值当作可靠概率；需要结合校准、阈值与场景验证。图像损坏、无目标、网络超时都应有明确提示。\n\n## 设计一张流程图\n正常：上传 → 校验 → 识别 → 展示；不确定：补充输入/人工复核；异常：说明原因 → 保留数据 → 重试或退出。避免用户不知道当前状态，也避免同一个请求被多次提交。\n\n## 交付验证\n列出用户路径、输入输出、失败状态、可用性指标、无障碍需求与隐私处理。分别测试正常输入、空输入、异常文件和服务失败。",
+      "deliverable": "为图像识别系统画正常、低置信度、文件错误三条流程。",
+      "links": [
+        {
+          "label": "交互设计实操",
+          "href": "/practical.html?code=3.2.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "system-2-1",
+          "question": "模型低置信度时合理操作是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "装作确定"
+            },
+            {
+              "label": "B",
+              "text": "补充信息或转人工复核"
+            },
+            {
+              "label": "C",
+              "text": "一律删除请求"
+            }
+          ],
+          "answer": "B",
+          "explanation": "不确定性应体现在交互和复核流程里。"
+        },
+        {
+          "id": "system-2-2",
+          "question": "推理预处理应与什么一致？",
+          "options": [
+            {
+              "label": "A",
+              "text": "训练时的约定"
+            },
+            {
+              "label": "B",
+              "text": "任意图像软件默认值"
+            },
+            {
+              "label": "C",
+              "text": "用户显示器尺寸"
+            }
+          ],
+          "answer": "A",
+          "explanation": "输入分布和格式差异会影响推理结果。"
+        }
+      ]
+    },
+    {
+      "id": "system-3",
+      "stage": "system",
+      "title": "培训讲义与技术指导",
+      "domain": "coaching",
+      "minutes": 45,
+      "content": "## 面向初学者而不是堆术语\n先说明学习对象已有能力，再定义可观察目标。例如“能完成 20 条文本标注并说明两条边界规则”，比“了解人工智能”更容易验收。\n\n## 一份讲义的结构\n目标与前置知识；工具准备；演示步骤；独立练习；常见错误；评价标准；课后任务。每个演示都配一份可重复操作的样例，训练数据不要混入实际敏感数据。\n\n## 指导顺序\n让学员复述问题 → 复现 → 缩小范围 → 找到原因 → 学员自己修改 → 用新样本复测。直接把答案复制过去，不能证明学员掌握。\n\n## 验收\n检查操作结果和解释能力。把错误类型记下来，下一轮安排针对性任务，避免只用出勤或观看时长衡量学习效果。",
+      "deliverable": "写 30 分钟 Pandas 清洗微课大纲，含示范、独立练习和评分标准。",
+      "links": [
+        {
+          "label": "培训大纲实操",
+          "href": "/practical.html?code=4.1.4"
+        },
+        {
+          "label": "培训指导专项",
+          "href": "/practice.html?domain=coaching"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "system-3-1",
+          "question": "哪个培训目标可验收？",
+          "options": [
+            {
+              "label": "A",
+              "text": "深入掌握所有知识"
+            },
+            {
+              "label": "B",
+              "text": "独立完成缺失值审计并解释规则"
+            },
+            {
+              "label": "C",
+              "text": "多听几节课"
+            }
+          ],
+          "answer": "B",
+          "explanation": "需要可观察的行为和交付标准。"
+        },
+        {
+          "id": "system-3-2",
+          "question": "指导学员后如何确认掌握？",
+          "options": [
+            {
+              "label": "A",
+              "text": "让他复制答案"
+            },
+            {
+              "label": "B",
+              "text": "用新的样例独立复测"
+            },
+            {
+              "label": "C",
+              "text": "只问听懂没有"
+            }
+          ],
+          "answer": "B",
+          "explanation": "迁移到新样例才能更好判断掌握情况。"
+        }
+      ]
+    },
+    {
+      "id": "system-4",
+      "stage": "system",
+      "title": "综合案例：智能客服改进",
+      "domain": "business",
+      "minutes": 60,
+      "content": "## 案例背景\n某客服系统近一周处理 1000 条咨询，其中 200 条转人工，80 条被重复咨询。你需要提出改进，而不是直接建议换更大的模型。\n\n## 数据设计\n字段包括咨询类型、时间、渠道、处理结果、转人工原因、复询标记。明确统计窗口和用户/会话去重方式；检查是否只采到成功请求，避免幸存者偏差。\n\n## 工作链\n先抽样检查标签；按渠道和问题类型拆分；确定问题集中位置；写数据补充与清洗规范；制定测试集；比较改进前后效果；设计低置信度转人工流程；给初级标注员写指导说明。\n\n## 交付\n一份分析报告、一份数据字典、一个交互流程和一页培训讲义。数字必须由案例或实际运行得到；不把假设补成“已经提升 30%”。这个练习把三级四个实操领域连起来。",
+      "deliverable": "用四个小标题完成综合方案：业务、训练、系统、指导。",
+      "links": [
+        {
+          "label": "业务优化实操",
+          "href": "/practical.html?code=1.2.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "system-4-1",
+          "question": "只采集成功请求会造成？",
+          "options": [
+            {
+              "label": "A",
+              "text": "更客观的评估"
+            },
+            {
+              "label": "B",
+              "text": "样本选择偏差"
+            },
+            {
+              "label": "C",
+              "text": "自动均衡"
+            }
+          ],
+          "answer": "B",
+          "explanation": "失败请求缺失会掩盖系统问题。"
+        },
+        {
+          "id": "system-4-2",
+          "question": "尚未实施的优化幅度应写？",
+          "options": [
+            {
+              "label": "A",
+              "text": "已提升 30%"
+            },
+            {
+              "label": "B",
+              "text": "目标或待验证假设"
+            },
+            {
+              "label": "C",
+              "text": "保证提升"
+            }
+          ],
+          "answer": "B",
+          "explanation": "目标与已验证结果必须区分。"
+        }
+      ]
+    },
+    {
+      "id": "practice-1",
+      "stage": "practice",
+      "title": "业务实操：从模仿到独立交付",
+      "domain": "business",
+      "minutes": 60,
+      "content": "## 三轮训练\n第一轮看题目与素材，跟着参考思路复现；第二轮关闭参考答案，用另一个场景重写；第三轮限制时间，检查完整交付。AI 审阅会给出建议，但不能代替你运行代码或验证文件。\n\n## 本轮交付清单\n业务目标、数据字典、采集流程、清洗规范、审核流程、异常处理、优化指标、验证方法。与题目无关的长篇术语不会增加有效覆盖。\n\n## 检查点\n如果题目给定 30 分钟，先用 5 分钟拆要求、20 分钟操作、5 分钟检查。这是训练建议，不是机构统一时间分配。缺素材或无法运行的环节明确写出，别虚构输出。",
+      "deliverable": "独立完成 1.1.1 和 1.2.1；提交后逐项修订再重做。",
+      "links": [
+        {
+          "label": "数据流程任务",
+          "href": "/practical.html?code=1.1.1"
+        },
+        {
+          "label": "业务优化任务",
+          "href": "/practical.html?code=1.2.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "practice-1-1",
+          "question": "实操答案很长意味着？",
+          "options": [
+            {
+              "label": "A",
+              "text": "一定高分"
+            },
+            {
+              "label": "B",
+              "text": "仍需检查是否满足任务要求"
+            },
+            {
+              "label": "C",
+              "text": "无需测试"
+            }
+          ],
+          "answer": "B",
+          "explanation": "有效证据和任务覆盖比长度更重要。"
+        },
+        {
+          "id": "practice-1-2",
+          "question": "查看参考后完成的作业属于？",
+          "options": [
+            {
+              "label": "A",
+              "text": "独立模考证据"
+            },
+            {
+              "label": "B",
+              "text": "有辅导练习"
+            },
+            {
+              "label": "C",
+              "text": "正式考试成绩"
+            }
+          ],
+          "answer": "B",
+          "explanation": "练习与独立限时模拟应分开记录。"
+        }
+      ]
+    },
+    {
+      "id": "practice-2",
+      "stage": "practice",
+      "title": "训练实操：代码、结果和分析",
+      "domain": "training",
+      "minutes": 65,
+      "content": "## 必备材料\n输入数据、清洗代码、数据集划分、模型训练、评估结果、错误分析、输出文件。先跑简单基线，确保能从头运行，再考虑优化。\n\n## 常见失分\n把标签混入特征；全数据缩放后再切分；只报告训练分；分类任务用了回归指标；未保存文件；Notebook 依赖上一次内核状态。每次提交前按清单自查。\n\n## 本轮要求\n选择两份不同数据：一份做分类，一份做回归。写清指标选择理由，并记录随机种子。AI 给出的分数属于作答审阅，不证明实际代码已在指定环境运行成功。",
+      "deliverable": "完成分类任务 2.2.1 与回归任务 2.2.4，保存输出和报告。",
+      "links": [
+        {
+          "label": "分类实操",
+          "href": "/practical.html?code=2.2.1"
+        },
+        {
+          "label": "回归实操",
+          "href": "/practical.html?code=2.2.4"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "practice-2-1",
+          "question": "仅训练集分数能代表泛化吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能"
+            },
+            {
+              "label": "C",
+              "text": "大于 90 即可"
+            }
+          ],
+          "answer": "B",
+          "explanation": "必须使用独立评估数据。"
+        },
+        {
+          "id": "practice-2-2",
+          "question": "标签列应不应该直接保留在 X 中？",
+          "options": [
+            {
+              "label": "A",
+              "text": "应该"
+            },
+            {
+              "label": "B",
+              "text": "不应该"
+            },
+            {
+              "label": "C",
+              "text": "只要得分高就可以"
+            }
+          ],
+          "answer": "B",
+          "explanation": "把目标放入输入是典型泄漏。"
+        }
+      ]
+    },
+    {
+      "id": "practice-3",
+      "stage": "practice",
+      "title": "系统实操：分析与交互验证",
+      "domain": "design",
+      "minutes": 60,
+      "content": "## 按任务组织证据\n从素材读取信息，汇总数据分布与异常；提出与证据对应的产品优化；画人机交互流程，包含错误、低置信度和人工接管。\n\n## 不只看正常演示\n至少检查空输入、格式错误、模型无结果、重复提交、响应超时。记录预期行为与实际行为，并说明哪个环节负责兜底。\n\n## 完成标准\n分析报告中的每个关键数字有出处；交互流程每个分支有去向；优化方案有指标、验证窗口与回退条件；最后写出仍未解决的问题。",
+      "deliverable": "独立完成 3.1.1 和 3.2.1，补齐异常分支说明。",
+      "links": [
+        {
+          "label": "系统分析任务",
+          "href": "/practical.html?code=3.1.1"
+        },
+        {
+          "label": "人机交互任务",
+          "href": "/practical.html?code=3.2.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "practice-3-1",
+          "question": "流程图错误分支应？",
+          "options": [
+            {
+              "label": "A",
+              "text": "省略"
+            },
+            {
+              "label": "B",
+              "text": "有明确提示、处理或退出路径"
+            },
+            {
+              "label": "C",
+              "text": "全部回到首页不解释"
+            }
+          ],
+          "answer": "B",
+          "explanation": "异常分支是可用性的重要组成部分。"
+        },
+        {
+          "id": "practice-3-2",
+          "question": "优化结论依据应来自？",
+          "options": [
+            {
+              "label": "A",
+              "text": "可追溯数据和验证"
+            },
+            {
+              "label": "B",
+              "text": "最流行的术语"
+            },
+            {
+              "label": "C",
+              "text": "猜测的提升百分比"
+            }
+          ],
+          "answer": "A",
+          "explanation": "真实证据支撑可验证结论。"
+        }
+      ]
+    },
+    {
+      "id": "practice-4",
+      "stage": "practice",
+      "title": "错题复习与培训实操",
+      "domain": "coaching",
+      "minutes": 45,
+      "content": "## 错题分三类\n概念不清：回对应课程，自己解释；计算出错：重算并核对分母；审题失误：圈出条件与否定词。不要只记选项字母。\n\n## 间隔复习\n今天订正，隔一天、三天、一周再做。一次答对是进展，不是永久掌握；重点观察新题与间隔复测。学习报告优先使用近期每道题最后一次答案，防止同一道题重复刷高正确率。\n\n## 培训实操\n给初学者写出操作演示、独立任务、常见错误与评分表。尝试用自己的错题做教学样例，但不要把有争议的参考答案当成权威。",
+      "deliverable": "订正五道错题并安排复习，完成 4.1.4 或 4.2.1。",
+      "links": [
+        {
+          "label": "错题专项重练",
+          "href": "/practice.html?mode=wrong"
+        },
+        {
+          "label": "指导任务",
+          "href": "/practical.html?code=4.2.1"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "practice-4-1",
+          "question": "重复刷同一题 100 次能否代表全领域掌握？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能，需要覆盖新题和不同能力"
+            },
+            {
+              "label": "C",
+              "text": "与整卷等价"
+            }
+          ],
+          "answer": "B",
+          "explanation": "重复次数会放大熟悉度，覆盖和迁移更重要。"
+        },
+        {
+          "id": "practice-4-2",
+          "question": "讲义评价标准最好包含？",
+          "options": [
+            {
+              "label": "A",
+              "text": "只统计出勤"
+            },
+            {
+              "label": "B",
+              "text": "结果质量和独立操作要求"
+            },
+            {
+              "label": "C",
+              "text": "只看字数"
+            }
+          ],
+          "answer": "B",
+          "explanation": "评价应对应学习目标。"
+        }
+      ]
+    },
+    {
+      "id": "sprint-1",
+      "stage": "sprint",
+      "title": "理论限时模拟与整卷复盘",
+      "domain": "foundation",
+      "minutes": 40,
+      "content": "## 两种训练用途\n入门诊断快速找起点；完整理论模拟检查广度和时间管理。平台按国标领域权重生成 100 分训练卷，题量和题型是平台方案，不代表科教兴川实际试卷结构。原上海资料卷保留为补充训练。\n\n## 作答顺序\n先完成把握高的题，把不确定题标记后回看；多选注意题目要求，平台多选按完全正确计分。留出检查时间，未作答计零分。\n\n## 交卷后\n按领域看失分；把错误分为知识、计算和审题三类；复习后换一套卷再测。单次通过不能代表稳定，冲刺训练建议最近三套理论均达到 75 分以上作为余量目标，这不是正式合格线。",
+      "deliverable": "完成三套不同理论模拟，逐套记录三个改进点。",
+      "links": [
+        {
+          "label": "完整理论模拟",
+          "href": "/exam.html?mode=theory"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "sprint-1-1",
+          "question": "平台国标覆盖卷等于科教兴川原卷吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "等于"
+            },
+            {
+              "label": "B",
+              "text": "不等于，是训练设计"
+            },
+            {
+              "label": "C",
+              "text": "只要题量一样就等于"
+            }
+          ],
+          "answer": "B",
+          "explanation": "能力覆盖依据和真实试卷来源是两个问题。"
+        },
+        {
+          "id": "sprint-1-2",
+          "question": "交卷漏题如何计分？",
+          "options": [
+            {
+              "label": "A",
+              "text": "自动排除分母"
+            },
+            {
+              "label": "B",
+              "text": "按未答计零"
+            },
+            {
+              "label": "C",
+              "text": "自动补正确答案"
+            }
+          ],
+          "answer": "B",
+          "explanation": "整卷必须包含所有已分配试题。"
+        }
+      ]
+    },
+    {
+      "id": "sprint-2",
+      "stage": "sprint",
+      "title": "技能限时模拟与成果检查",
+      "domain": "training",
+      "minutes": 40,
+      "content": "## 实操整卷\n本平台用四个领域的任务组成 120 分钟训练卷，按业务 25%、训练 35%、系统 35%、指导 5% 汇总。任务数量和具体时间分配为平台训练方案，实际认定以科教兴川通知为准。\n\n## 独立完成\n先读全卷与素材要求；按分值和熟悉程度安排时间；分段保存答案；最后检查文件、说明与输出。整卷提交后统一审阅，作答时不展示参考答案。\n\n## 评分证据\nDeepSeek 按任务要求与评分维度审阅代码及文字，没有执行代码的能力证明。接口失败时保存作答，保留重试审阅入口；关键词匹配成绩不进入通过率估计。两套不同实操模拟可作为初步证据，仍需对照考试软件自行验证产物。",
+      "deliverable": "完成两套实操模拟；检查每套四个领域均有有效交付。",
+      "links": [
+        {
+          "label": "技能整卷模拟",
+          "href": "/exam.html?mode=practical"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "sprint-2-1",
+          "question": "AI 审阅分能否证明代码在考场环境成功执行？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能，还需实际验证"
+            },
+            {
+              "label": "C",
+              "text": "高于 90 就能"
+            }
+          ],
+          "answer": "B",
+          "explanation": "文字审阅和运行验证不同。"
+        },
+        {
+          "id": "sprint-2-2",
+          "question": "模型接口失败时应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "丢弃答案"
+            },
+            {
+              "label": "B",
+              "text": "保存作答，稍后重新审阅"
+            },
+            {
+              "label": "C",
+              "text": "伪造分数"
+            }
+          ],
+          "answer": "B",
+          "explanation": "保留证据并明确待评分状态。"
+        }
+      ]
+    },
+    {
+      "id": "sprint-3",
+      "stage": "sprint",
+      "title": "读懂通过率和七日重点计划",
+      "domain": "foundation",
+      "minutes": 35,
+      "content": "## 数字从哪里来\n学习报告先读取个人近 30 天限时模考、独立题目覆盖和各领域错误，再生成估计。数据不足时显示“暂不估计”，不把没有记录解释成 0% 通过率。\n\n## 估计的边界\n至少三次完整理论与两次四领域实操模拟后，平台才显示启发式通过可能性区间。该区间是对成绩波动和评分误差做敏感性计算，不是经过四川考生真实结果校准的概率或统计置信区间。不同模拟试卷与正式考试的难度差异仍未知。\n\n## DeepSeek 的职责\n解释证据、指出薄弱领域、给出具体练习与验收目标，不能凭空覆盖数值或保证通过。若某科持续不足，下一周优先补那一科；两科都达线后继续练新题与独立实操。",
+      "deliverable": "生成学情报告，选择最弱领域，完成计划后用新卷复测。",
+      "links": [
+        {
+          "label": "查看我的学情",
+          "href": "/insights.html"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "sprint-3-1",
+          "question": "暂无成绩应显示？",
+          "options": [
+            {
+              "label": "A",
+              "text": "0%"
+            },
+            {
+              "label": "B",
+              "text": "暂不估计，需要数据"
+            },
+            {
+              "label": "C",
+              "text": "50%"
+            }
+          ],
+          "answer": "B",
+          "explanation": "缺少数据不是失败，也不支持随意给概率。"
+        },
+        {
+          "id": "sprint-3-2",
+          "question": "估计区间的性质是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "官方通过率"
+            },
+            {
+              "label": "B",
+              "text": "未经真实结果校准的训练参考"
+            },
+            {
+              "label": "C",
+              "text": "拿证承诺"
+            }
+          ],
+          "answer": "B",
+          "explanation": "模型和训练分数都不能保证正式考试结果。"
+        }
+      ]
+    },
+    {
+      "id": "sprint-4",
+      "stage": "sprint",
+      "title": "科教兴川考前与考后流程",
+      "domain": "foundation",
+      "minutes": 30,
+      "content": "## 报名与资格\n默认评价机构为四川省科教兴川促进会。学习起点可以是零基础，但三级报考仍需满足该批次申报条件并通过资格审核。不要把“完成课程”当成“自动具备报名资格”。\n\n## 考前一周\n核对准考证姓名、职业、等级、日期、地址；确认理论与技能时长、软件/库版本、能否联网、素材与成果提交要求；预演目录结构、文件保存和从头运行。具体补考、成绩复核、证书发放安排以当批次通知为准。\n\n## 考试当天\n携带通知要求的证件与准考证；提前到场；阅读作答与交付说明；保存后重新打开产物验证；确认最终提交状态。遇到设备问题立即按考务流程处理，不自行猜测补救规则。\n\n## 考后\n查看两科成绩；若未合格，按失分领域继续训练并核对补考安排；合格后按机构通知领取证书，通过官方技能人才评价证书查询渠道核验。本平台可以继续保存学习计划与复盘。",
+      "deliverable": "完成自己的考前清单，核对日期、考点、软件和提交要求。",
+      "links": [
+        {
+          "label": "科教兴川考务资料",
+          "href": "/sources.html"
+        },
+        {
+          "label": "学情与复习计划",
+          "href": "/insights.html"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "sprint-4-1",
+          "question": "学完课程就自动符合三级报考条件吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "是"
+            },
+            {
+              "label": "B",
+              "text": "否，仍需按机构条件审核"
+            },
+            {
+              "label": "C",
+              "text": "交卷一次即可"
+            }
+          ],
+          "answer": "B",
+          "explanation": "学习能力与申报资格是不同事项。"
+        },
+        {
+          "id": "sprint-4-2",
+          "question": "考前软件版本和提交规则以什么为准？",
+          "options": [
+            {
+              "label": "A",
+              "text": "网上其他地区经验"
+            },
+            {
+              "label": "B",
+              "text": "科教兴川本批次通知"
+            },
+            {
+              "label": "C",
+              "text": "平台默认值"
+            }
+          ],
+          "answer": "B",
+          "explanation": "年度或地区间可能存在差异。"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "national",
+      "title": "《人工智能训练师国家职业技能标准（2021年版）》",
+      "url": "https://www.cdp.edu.cn/__local/F/32/90/C6CFE95FFD7768B1D16877F8668_28B50D3E_339D0.pdf",
+      "type": "国家标准",
+      "date": "2021",
+      "scope": "已核读项目内正式版全文相关页：PDF 第6、11–12、17–18页。双科60分，理论≥90分钟、技能≥120分钟，三级能力与权重。",
+      "verification": "本地正式版全文核对；网络同名文件仅作入口"
+    },
+    {
+      "id": "kjxc-2023",
+      "title": "科教兴川 2023 年上半年职业技能等级认定考试安排",
+      "url": "https://www.kjxc.org/news/442.html",
+      "type": "评价机构年度公告",
+      "date": "2023",
+      "scope": "列出人工智能训练师三、四、五级，依据2021年国家标准。没有公开完整历次真题。",
+      "verification": "官网搜索索引可核验；网页直连失败"
+    },
+    {
+      "id": "kjxc-2024",
+      "title": "科教兴川 2024 年职业技能等级认定考试安排",
+      "url": "https://kjxc.org/news/447.html",
+      "type": "评价机构年度公告",
+      "date": "2024",
+      "scope": "列出人工智能训练师5–1级，依据2021年国家标准。不能据此推出本批次题量与真题。",
+      "verification": "官网搜索索引可核验；网页直连失败"
+    },
+    {
+      "id": "kjxc-2025",
+      "title": "科教兴川 2025 年职业技能等级认定考试安排",
+      "url": "https://www.kjxc.org/news/2240.html",
+      "type": "评价机构年度公告",
+      "date": "2025",
+      "scope": "确认该职业继续按2021年国家标准组织认定。具体批次时间需以通知和准考证为准。",
+      "verification": "官网搜索索引可核验；网页直连失败"
+    },
+    {
+      "id": "kjxc-2026",
+      "title": "科教兴川关于成都人工智能训练师社会化认定的报道",
+      "url": "https://www.kjxc.org/news/2284.html",
+      "type": "认定动态",
+      "date": "2026-03",
+      "scope": "确认认定活动和分级申报背景；没有三级逐题成绩或完整真题，不能用于个人通过率校准。",
+      "verification": "官网搜索索引可核验；网页存在证书问题"
+    },
+    {
+      "id": "bank",
+      "title": "现有公开题库来源声明",
+      "url": "https://gjzs.sjtu.edu.cn/skill",
+      "type": "补充练习资料",
+      "date": "2025版资料包",
+      "scope": "本地开源资料README注明来源为上海交通大学终身教育学院；答案为个人整理。900题/40实操不标为四川或科教兴川历年真题。",
+      "verification": "已读本地README与结构化题库"
+    },
+    {
+      "id": "deepseek",
+      "title": "DeepSeek JSON Output 官方文档",
+      "url": "https://api-docs.deepseek.com/zh-cn/guides/json_mode/",
+      "type": "接口文档",
+      "date": "核验于2026-09-11",
+      "scope": "服务端结构化输出、必填字段校验，空响应及截断处理。",
+      "verification": "官方页面全文核验"
+    }
+  ],
+  "exam": {
+    "title": "科教兴川备考 · 国家标准覆盖训练",
+    "notice": "这是依照国家标准设计的训练卷，不是科教兴川历年真题；该机构历次完整真题与本批次详细题型尚未取得。",
+    "theoryMinutes": 90,
+    "practicalMinutes": 120,
+    "passScore": 60,
+    "theoryWeights": {
+      "ethics": 5,
+      "foundation": 10,
+      "business": 20,
+      "training": 30,
+      "design": 30,
+      "coaching": 5
+    },
+    "practicalWeights": {
+      "business": 25,
+      "training": 35,
+      "design": 35,
+      "coaching": 5
+    }
+  }
+}

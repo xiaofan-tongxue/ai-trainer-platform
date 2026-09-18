@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 基础 - 人工智能训练师学习平台</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.course-wrap{display:flex;gap:20px;align-items:flex-start;}
+.course-side{width:300px;flex:0 0 300px;}
+.course-main{flex:1;min-width:0;}
+.toc{max-height:72vh;overflow-y:auto;padding:8px;}
+.ch-title{padding:8px 10px;font-weight:700;cursor:pointer;border-radius:6px;font-size:13.5px;display:flex;align-items:center;gap:6px;color:var(--text);}
+.ch-title .cnt{margin-left:auto;font-size:11px;color:var(--text-3);font-weight:400;}
+.ex-item{padding:6px 10px 6px 30px;font-size:13px;color:var(--text-2);cursor:pointer;border-radius:6px;}
+.ex-item:hover{background:var(--primary-050);}
+.ex-item.active{background:var(--primary);color:#fff;}
+.ex-item .tick{color:var(--green);font-weight:700;}
+.out{background:#0f172a;color:#e2e8f0;border:1px solid #1f2937;border-radius:8px;padding:14px 16px;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.6;min-height:320px;white-space:pre-wrap;overflow:auto;margin:0;}
+.run-note{font-size:12px;color:var(--text-3);}
+.prog{font-size:12.5px;color:var(--amber);font-weight:600;}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.code-cols{display:flex;gap:12px;}
+.code-cols > div{flex:1;min-width:0;}
+.lesson-box{background:var(--primary-050);border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:14px;color:#1e3a8a;line-height:1.7;font-size:13.5px;}
+.lesson-h{font-weight:700;color:var(--primary);display:block;margin-bottom:2px;}
+.ai-sec{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:13.5px;line-height:1.7;}
+.ai-h{font-weight:700;color:var(--text);margin-bottom:2px;}
+.ref-code{background:#0f172a;color:#e2e8f0;padding:12px 14px;border-radius:8px;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.6;white-space:pre-wrap;margin:0;overflow:auto;}
+.judge-ok{background:#dcfce7;color:#14532d;padding:10px 14px;border-radius:8px;font-size:13.5px;font-weight:600;}
+.judge-no{background:#fee2e2;color:#7f1d1d;padding:10px 14px;border-radius:8px;font-size:13.5px;font-weight:600;}
+.judge-warn{background:#fef3c7;color:#92400e;padding:10px 14px;border-radius:8px;font-size:13.5px;}
+.judge-loading{background:#f3f4f6;color:var(--text-2);padding:10px 14px;border-radius:8px;font-size:13.5px;}
+@media(max-width:1000px){.course-wrap,.code-cols{flex-direction:column;}.course-side{width:100%;flex:auto;}.toc{max-height:280px;}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if(!requireAuth()) throw new Error();
+const content = renderLayout('python', 'Python 基础', '8 章 41 题 · 教程 + 练习 + AI 判题');
+content.innerHTML = '<div class="course-wrap"><div class="course-side"><div class="card"><div class="card-h">课程目录 <span class="prog" id="prog"></span></div><div class="toc" id="toc"></div></div></div><div class="course-main"><div class="card mb-16"><div class="card-h" id="chHead"></div><div class="card-b" id="chIntro" style="line-height:1.8;font-size:14px"></div></div><div class="card mb-16"><div class="card-h" id="exHead"></div><div class="card-b"><div class="lesson-box" id="lesson"></div><div id="prompt" style="white-space:pre-wrap;line-height:1.8;font-size:14px"></div></div></div><div class="card"><div class="card-h">在线运行与 AI 判题 <span class="run-note">（首次运行需联网加载 Python 运行时）</span></div><div class="card-b"><div class="toolbar"><button class="btn primary" onclick="runCode()">▶ 运行并判题</button><button class="btn ghost" onclick="showAnswer()">看答案</button><button class="btn ghost" onclick="clearEditor()">清空</button><span class="run-note" id="runNote"></span></div><div class="code-cols"><div><textarea id="editor" class="code-editor" spellcheck="false" placeholder="# 在这里写代码…"></textarea></div><div><pre class="out" id="output">（点「运行并判题」执行代码）</pre></div></div><div id="judge" style="margin-top:12px"></div></div></div></div></div>';
+var CHAPTERS = [{"id":"hello","icon":"🌱","title":"你好，世界","intro":"本章学「程序怎么把结果输出到屏幕」。核心是 print() 函数——程序一行行从上往下执行，print 把内容打印出来给你看。理解「代码顺序执行 + print 输出」是后面所有题的地基，也是考证里「能看懂并运行基础 Python」的基本功。","exercises":[{"id":"02","title":"Hello World","prompt":"用 print 函数在屏幕上输出：\n\nHello World!","solution":"print(\"Hello World!\")","lesson":"考点：print() 基础输出。思路：print(\"文本\") 把字符串显示到屏幕。常见错误：中英文引号混用、漏写括号。"},{"id":"03","title":"星星图案","prompt":"用多个 print 语句，打印一个由 * 组成的三角形图案，类似：\n\n   *\n  ***\n *****\n*******","solution":"print(\"   *\")\nprint(\"  ***\")\nprint(\" *****\")\nprint(\"*******\")","lesson":"考点：print 排版。思路：一行一个 print，星号数量逐行增加。技巧：print(\"*\" * n) 用乘法生成 n 个星号。"},{"id":"04","title":"名字缩写","prompt":"用 print 把你名字的首字母用「点阵字」打出来。比如字母 M 可以这样拼：\n\nM     M\nMM   MM\nM M M M\nM  M  M\nM     M","solution":"print(\"M     M\")\nprint(\"MM   MM\")\nprint(\"M M M M\")\nprint(\"M  M  M\")\nprint(\"M     M\")\nprint(\"M     M\")","lesson":"考点：多行输出 + 字符画。思路：把一个字母拆成几行，每行 print 一段（空格对齐）。打印 M 或 F 都算对，关键是理解「逐行拼出图案」。"},{"id":"05","title":"写封信","prompt":"用多个 print 语句，在屏幕上输出一封简短的信（问候语 + 正文 + 落款）。","solution":"print(\"亲爱的朋友：\")\nprint()\nprint(\"好久不见，最近好吗？\")\nprint(\"祝你一切都好！\")\nprint()\nprint(\"你的朋友\")","lesson":"考点：print 多行文本。思路：每句一个 print；print() 空括号输出空行。技巧：三引号 \"\"\"...\"\"\" 一次存整段多行文本。"}]},{"id":"vars","icon":"🔢","title":"变量","intro":"本章学「变量」——给数据起个名字存起来，方便复用和计算。核心：变量命名（PEP8 用下划线）、赋值（=）、算术运算（+ - * / ** %）、f-string 格式化输出。变量是最核心的概念，后面做数据处理、模型训练，全是在操作变量。","exercises":[{"id":"07","title":"温度转换","prompt":"把华氏温度转换成摄氏温度。公式：\n\n摄氏 = (华氏 - 32) × 5 / 9\n\n设华氏 = 100，计算并输出结果（保留两位小数）。","solution":"fahrenheit = 100\ncelsius = (fahrenheit - 32) * 5 / 9\nprint(f\"{fahrenheit} 华氏度 = {celsius:.2f} 摄氏度\")","lesson":"考点：变量 + 算术运算 + f-string。公式：摄氏=(华氏-32)×5/9，括号不能省（先减后乘）。f-string 里 :.2f 保留两位小数。"},{"id":"08","title":"BMI 计算","prompt":"计算身体质量指数 BMI。公式：\n\nBMI = 体重(kg) ÷ 身高(m)²\n\n设体重 = 70，身高 = 1.75，计算并输出 BMI（保留两位小数）。","solution":"weight = 70   # 千克\nheight = 1.75 # 米\nbmi = weight / (height ** 2)\nprint(f\"BMI = {bmi:.2f}\")","lesson":"考点：变量 + 幂运算。公式：BMI=体重÷身高²，** 表示平方。变量命名用下划线（weight, height）符合 PEP8。"},{"id":"09","title":"二次方程","prompt":"解一元二次方程 ax² + bx + c = 0。求根公式：\n\nx = (-b ± √(b² - 4ac)) / (2a)\n\n设 a=1, b=-3, c=2，用 math.sqrt 求平方根，输出两个根。","solution":"import math\na, b, c = 1, -3, 2\ndisc = b ** 2 - 4 * a * c\nx1 = (-b + math.sqrt(disc)) / (2 * a)\nx2 = (-b - math.sqrt(disc)) / (2 * a)\nprint(f\"根为 {x1} 和 {x2}\")","lesson":"考点：import math + 开平方。求根公式 x=(-b±√(b²-4ac))/2a，用 math.sqrt 求 √。注意判别式 b²-4ac<0 时无实根会报错。"},{"id":"10","title":"汇率换算","prompt":"把美元换算成人民币和欧元。设 1 美元 ≈ 7.2 人民币、≈ 0.92 欧元。设 usd = 100，输出两种换算结果。","solution":"usd = 100\ncny = usd * 7.2\neur = usd * 0.92\nprint(f\"{usd} 美元 ≈ {cny} 人民币\")\nprint(f\"{usd} 美元 ≈ {eur} 欧元\")","lesson":"考点：变量 + 常量 + f-string。汇率是固定不变的量，习惯大写命名（如 CNY_RATE=7.2）。f-string 让输出可读。"}]},{"id":"flow","icon":"🔀","title":"条件分支","intro":"本章学 if/elif/else 条件判断——让程序根据条件走不同分支。核心：比较运算符（> < == >= <= !=）、逻辑运算符（and/or/not）、多分支结构。这是「程序会做判断」的关键，也是模型预测里「按条件分类」的底层思想。","exercises":[{"id":"11","title":"抛硬币","prompt":"用 random 模块模拟抛硬币，随机输出「正面」或「反面」。","solution":"import random\ncoin = random.choice([\"正面\", \"反面\"])\nprint(f\"结果是：{coin}\")","lesson":"考点：import random + 随机选择。random.choice(列表) 从序列里随机挑一个。理解「导入模块 → 调用模块里的函数」。"},{"id":"12","title":"成绩等级","prompt":"根据分数输出等级：90+ 为 A，80+ 为 B，70+ 为 C，60+ 为 D，其余为 F。设 score = 85，输出对应等级。","solution":"score = 85\nif score >= 90:\n    grade = \"A\"\nelif score >= 80:\n    grade = \"B\"\nelif score >= 70:\n    grade = \"C\"\nelif score >= 60:\n    grade = \"D\"\nelse:\n    grade = \"F\"\nprint(f\"分数 {score} 的等级是 {grade}\")","lesson":"考点：if/elif/else 多分支。思路：从高到低判断（先 >=90 再 >=80…），顺序反了结果就错。"},{"id":"13","title":"pH 酸碱度","prompt":"根据 pH 值判断溶液性质：pH < 7 为酸性，pH > 7 为碱性，等于 7 为中性。设 ph = 8.5，输出判断结果。","solution":"ph = 8.5\nif ph < 7:\n    kind = \"酸性\"\nelif ph > 7:\n    kind = \"碱性\"\nelse:\n    kind = \"中性\"\nprint(f\"pH = {ph} 是{kind}\")","lesson":"考点：if/elif/else 三分支 + 边界。注意「等于 7 是中性」这个边界条件别漏。比较用 > < ==。"},{"id":"14","title":"魔法八球","prompt":"做一个魔法八球：准备几个回答，随机输出其中一个。","solution":"import random\nanswers = [\"是的\", \"不是\", \"再问一次\", \"很有可能\", \"别抱希望\"]\nprint(random.choice(answers))","lesson":"考点：random.choice + 列表。思路：把可能的回答放进列表，随机选一个输出。数据驱动的思路。"},{"id":"15","title":"过山车","prompt":"游乐园规定：身高 ≥ 120cm 且年龄 ≥ 10 岁才能坐过山车。设 height=130, age=12，用 if 判断并输出能否乘坐（区分身高/年龄不达标两种情况）。","solution":"height = 130   # 厘米\nage = 12\nif height >= 120 and age >= 10:\n    print(\"可以乘坐过山车！\")\nelif height >= 120:\n    print(\"年龄未达标，不能乘坐。\")\nelse:\n    print(\"身高未达标，不能乘坐。\")","lesson":"考点：and 逻辑与。身高和年龄两个条件都满足才能坐，用 and 连接，比嵌套 if 更简洁。"},{"id":"16","title":"分院帽","prompt":"做一顶魔法分院帽：从四个学院中随机分一个，并输出结果。","solution":"import random\nhouses = [\"格兰芬多\", \"斯莱特林\", \"拉文克劳\", \"赫奇帕奇\"]\nprint(\"你被分到了：\" + random.choice(houses))","lesson":"考点：random.choice 随机分类。这就是「分类」概念的最简单雏形——把输入分到几个类别之一。"}]},{"id":"loops","icon":"🔁","title":"循环","intro":"本章学 for/while 循环——让程序重复做事，不用手写 100 遍。核心：for...in、range()、while、break/continue。循环是批量处理数据的必备工具，后面遍历列表、遍历数据集全靠它。","exercises":[{"id":"17","title":"输入密码","prompt":"用循环模拟输入密码：预设正确密码为 \"1234\"，遍历一组尝试，找到正确的就提示欢迎并 break。","solution":"password = \"1234\"\nattempts = [\"0000\", \"1234\"]  # 模拟输入尝试\nfor guess in attempts:\n    print(f\"尝试密码：{guess}\")\n    if guess == password:\n        print(\"密码正确，欢迎！\")\n        break\nelse:\n    print(\"全部尝试失败，拒绝访问。\")","lesson":"考点：循环 + break。思路：遍历一组尝试，找到正确的就 break 退出。「重试直到成功」的经典模式。"},{"id":"18","title":"猜数字","prompt":"写一个猜数字游戏：随机一个 1~10 的目标数，遍历一组猜测，提示「太大/太小/猜对了」。","solution":"import random\ntarget = random.randint(1, 10)\nguesses = [3, 7, target]  # 模拟猜测\nfor guess in guesses:\n    print(f\"猜 {guess}：\", end=\"\")\n    if guess > target:\n        print(\"太大了\")\n    elif guess < target:\n        print(\"太小了\")\n    else:\n        print(\"猜对了！\")\n        break","lesson":"考点：循环 + 比较 + break。思路：每次猜完比较大小，给「太大/太小」提示，猜对就 break。"},{"id":"19","title":"罚抄","prompt":"用 for 循环把「我上课不再讲话」打印 10 遍，每行带序号。","solution":"for i in range(1, 11):\n    print(f\"{i}. 我上课不再讲话\")","lesson":"考点：for + range。range(1,11) 生成 1~10，f-string 里 {i} 让每行带序号。"},{"id":"20","title":"99 瓶啤酒","prompt":"用倒序循环打印《99 瓶啤酒》歌词的几句：从 99 数到 97，每段两行。","solution":"for n in range(99, 96, -1):\n    print(f\"{n} 瓶啤酒挂在墙上，{n} 瓶啤酒\")\n    print(f\"拿下一瓶，传一传，{n-1} 瓶啤酒挂在墙上\")\n    print()","lesson":"考点：range 倒序。range(99,96,-1) 第三个参数 -1 是步长（倒着数）。注意 stop 是开区间，只到 97。"},{"id":"21","title":"FizzBuzz","prompt":"经典 FizzBuzz：从 1 数到 30。能被 3 整除输出 Fizz，能被 5 整除输出 Buzz，能同时被 3 和 5 整除输出 FizzBuzz，否则输出数字本身。","solution":"for i in range(1, 31):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)","lesson":"考点：取余 % + 多条件顺序。先判「能同时被 3 和 5 整除」(i%15==0)，再判 3 和 5，顺序反了会漏。"}]},{"id":"lists","icon":"📚","title":"列表","intro":"本章学列表 list——把多个数据装进一个容器批量处理。核心：创建、索引/切片、append/remove、for 遍历、enumerate。列表是 Python 最常用的数据结构，也是理解 pandas 表格数据的前提。","exercises":[{"id":"22","title":"购物清单","prompt":"创建一个购物清单列表，用 for 循环逐项打印（每项前面加 - ）。","solution":"grocery = [\"牛奶\", \"鸡蛋\", \"面包\", \"苹果\"]\nprint(\"购物清单：\")\nfor item in grocery:\n    print(\"- \" + item)","lesson":"考点：列表 + for 遍历。思路：把商品装进列表，for 循环逐项打印。这是最基础的数据处理模式。"},{"id":"23","title":"待办事项","prompt":"创建一个空列表，用 append 加入几件待办，再逐项打印（每项前面加 ☐）。","solution":"todo = []\ntodo.append(\"写作业\")\ntodo.append(\"锻炼\")\ntodo.append(\"读书\")\nprint(\"今日待办：\")\nfor task in todo:\n    print(\"☐ \" + task)","lesson":"考点：list.append()。思路：先建空列表，再用 append 往里加元素。列表是可变对象，append 就地修改。"},{"id":"24","title":"库存管理","prompt":"用列表套列表表示库存（每种商品名称 + 数量），循环打印每项并统计总数。","solution":"inventory = [[\"苹果\", 30], [\"香蕉\", 20], [\"橙子\", 15]]\ntotal = 0\nfor item in inventory:\n    print(f\"{item[0]}：{item[1]} 个\")\n    total += item[1]\nprint(f\"库存总数：{total}\")","lesson":"考点：列表套列表 + 累加。思路：每个子列表存「名称+数量」，循环里取 item[0]/item[1] 并累加总数。"},{"id":"25","title":"阅读清单","prompt":"创建一个阅读清单列表，练习 append 加书、remove 删书，再逐本打印。","solution":"reading_list = [\"三体\", \"活着\", \"百年孤独\"]\nreading_list.append(\"1984\")\nreading_list.remove(\"活着\")\nprint(\"我的阅读清单：\")\nfor book in reading_list:\n    print(book)","lesson":"考点：append 加、remove 删。注意 remove 只删第一个匹配项。"},{"id":"26","title":"混音带","prompt":"创建一个歌单列表，用 enumerate 给每首歌加序号后逐项打印。","solution":"mixtape = [\"晴天\", \"夜曲\", \"海阔天空\", \"平凡之路\"]\nprint(\"我的混音带：\")\nfor i, song in enumerate(mixtape, 1):\n    print(f\"{i}. {song}\")","lesson":"考点：enumerate。enumerate(列表, 1) 同时给序号和元素，比手动计数更 Pythonic。"},{"id":"27","title":"遗愿清单","prompt":"创建一个「人生愿望清单」列表，逐项打印（每项前面加 ★）。","solution":"bucket_list = [\"看极光\", \"跳伞\", \"环游世界\", \"学会潜水\"]\nprint(\"人生愿望清单：\")\nfor dream in bucket_list:\n    print(\"★ \" + dream)","lesson":"考点：遍历打印。思路：for 循环逐项打印，前面加个符号装饰。"}]},{"id":"funcs","icon":"⚙️","title":"函数","intro":"本章学函数——把一段代码封装成可复用的「积木」。核心：def 定义、参数、return 返回值、DRY 原则（不重复造轮子）。函数是工程化的起点，也是理解「数据清洗、模型训练」这类封装逻辑的基础。","exercises":[{"id":"28","title":"不要重复","prompt":"写一个 greet(name) 函数用于打招呼，然后调用它三次（传入不同名字），避免重复代码。","solution":"def greet(name):\n    print(f\"你好，{name}！\")\n\ngreet(\"小明\")\ngreet(\"小红\")\ngreet(\"小刚\")","lesson":"考点：def 定义函数 + 复用。思路：把打招呼的逻辑抽成 greet() 函数，调用三次传不同名字，避免重复代码。"},{"id":"29","title":"幸运饼干","prompt":"写一个 fortune() 函数，随机返回一句运势，然后打印「今日运势：xxx」。","solution":"import random\ndef fortune():\n    tips = [\"好运将至\", \"坚持不懈\", \"新的机会正在路上\", \"保持微笑\"]\n    return random.choice(tips)\n\nprint(\"今日运势：\" + fortune())","lesson":"考点：函数 + return + random。思路：fortune() 内部随机挑一句并 return，调用处打印「今日运势：xxx」。"},{"id":"30","title":"火箭倒计时","prompt":"写一个 countdown(n) 函数，从 n 倒数到 1，最后打印「点火！🚀」。调用 countdown(5)。","solution":"def countdown(n):\n    for i in range(n, 0, -1):\n        print(i)\n    print(\"点火！🚀\")\n\ncountdown(5)","lesson":"考点：函数 + range 倒序。思路：countdown(n) 从 n 倒数到 1，最后打印「点火」。参数让函数可复用。"},{"id":"31","title":"计算器","prompt":"写 add / sub / mul / div 四个函数，分别演示 6 和 3 的加减乘除。","solution":"def add(a, b):\n    return a + b\ndef sub(a, b):\n    return a - b\ndef mul(a, b):\n    return a * b\ndef div(a, b):\n    return a / b if b != 0 else \"错误：除数为零\"\n\nprint(\"6 + 3 =\", add(6, 3))\nprint(\"6 - 3 =\", sub(6, 3))\nprint(\"6 × 3 =\", mul(6, 3))\nprint(\"6 ÷ 3 =\", div(6, 3))","lesson":"考点：函数封装四则运算。思路：四个函数各做一种运算；div 里 if b!=0 防御除零错误是良好习惯。"},{"id":"32","title":"股票收益","prompt":"写一个 stock_return(buy, sell) 函数，返回利润和收益率（百分比）。用买入价 100、卖出价 130 演示。","solution":"def stock_return(buy, sell):\n    profit = sell - buy\n    pct = profit / buy * 100\n    return profit, pct\n\np, r = stock_return(100, 130)\nprint(f\"利润 {p}，收益率 {r:.1f}%\")","lesson":"考点：函数返回多个值。思路：stock_return 返回 (利润, 收益率)，用 p,r=... 元组解包接收。"},{"id":"33","title":"得来速点餐","prompt":"做一个得来速点餐：用字典存菜单（编号 → 名称和价格），写 order(code) 函数返回「一份XX，XX 元」。","solution":"menu = {\"1\": (\"汉堡\", 15), \"2\": (\"薯条\", 8), \"3\": (\"可乐\", 5)}\n\ndef order(code):\n    name, price = menu[code]\n    return f\"一份{name}，{price} 元\"\n\nprint(order(\"1\"))\nprint(order(\"3\"))","lesson":"考点：字典 + 函数。思路：菜单用字典存「编号→(名称,价格)」，order() 按编号查。比一堆 if 更清晰。"}]},{"id":"classes","icon":"🏗️","title":"类与对象","intro":"本章学面向对象 OOP——用「类」把数据和操作数据的函数绑在一起。核心：class、__init__ 构造函数、self、实例方法、属性。OOP 是理解大型项目和主流 AI 框架的关键（sklearn 里一个模型就是一个对象）。","exercises":[{"id":"34","title":"餐厅","prompt":"定义一个 Restaurant 类，属性有 name、cuisine，方法有 describe() 和 open()，然后实例化并调用。","solution":"class Restaurant:\n    def __init__(self, name, cuisine):\n        self.name = name\n        self.cuisine = cuisine\n    def describe(self):\n        print(f\"{self.name} 是一家{self.cuisine}餐厅\")\n    def open(self):\n        print(f\"{self.name} 正在营业！\")\n\nr = Restaurant(\"老王面馆\", \"川菜\")\nr.describe()\nr.open()","lesson":"考点：class + __init__ + self。思路：Restaurant 类存名字和菜系，describe()/open() 打印信息。self 代表实例本身。"},{"id":"35","title":"汉堡店","prompt":"定义一个 Burger 类，属性有 name、price，方法 info() 打印「XX 汉堡：XX 元」，然后实例化演示。","solution":"class Burger:\n    def __init__(self, name, price):\n        self.name = name\n        self.price = price\n    def info(self):\n        print(f\"{self.name} 汉堡：{self.price} 元\")\n\nb = Burger(\"经典牛肉\", 28)\nb.info()","lesson":"考点：class + 实例方法。思路：Burger 类存名字和价格，info() 打印。类把「数据+方法」封装在一起。"},{"id":"36","title":"最喜欢的城市","prompt":"定义一个 City 类，属性有 name、country、population，方法 info() 打印城市信息。","solution":"class City:\n    def __init__(self, name, country, population):\n        self.name = name\n        self.country = country\n        self.population = population\n    def info(self):\n        print(f\"{self.name}（{self.country}）人口 {self.population} 万\")\n\nc = City(\"上海\", \"中国\", 2487)\nc.info()","lesson":"考点：class + 属性。思路：City 类存名字、国家、人口三个属性，info() 打印。把现实事物建模成对象。"},{"id":"37","title":"银行账户","prompt":"定义 BankAccount 类，有 owner、balance，方法 deposit() 存钱、withdraw() 取钱（余额不足要提示）。演示存 50、取 30。","solution":"class BankAccount:\n    def __init__(self, owner, balance=0):\n        self.owner = owner\n        self.balance = balance\n    def deposit(self, amount):\n        self.balance += amount\n        print(f\"存入 {amount}，余额 {self.balance}\")\n    def withdraw(self, amount):\n        if amount > self.balance:\n            print(\"余额不足\")\n        else:\n            self.balance -= amount\n            print(f\"取出 {amount}，余额 {self.balance}\")\n\nacc = BankAccount(\"小李\", 100)\nacc.deposit(50)\nacc.withdraw(30)","lesson":"考点：class 方法改属性。思路：deposit 加余额、withdraw 减余额，withdraw 里 if 判余额不足——封装业务规则。"},{"id":"38","title":"宝可梦图鉴","prompt":"定义 Pokemon 类，有 name、kind、level，方法 cry() 和 level_up()，实例化一只宝可梦并演示。","solution":"class Pokemon:\n    def __init__(self, name, kind, level=1):\n        self.name = name\n        self.kind = kind\n        self.level = level\n    def cry(self):\n        print(f\"{self.name} 发出叫声！\")\n    def level_up(self):\n        self.level += 1\n        print(f\"{self.name} 升级到 {self.level} 级\")\n\np = Pokemon(\"皮卡丘\", \"电系\")\np.cry()\np.level_up()","lesson":"考点：class + 状态。思路：level_up() 修改 self.level，对象能「记住」自己的状态，这是 OOP 最核心的价值。"}]},{"id":"modules","icon":"📦","title":"模块","intro":"本章学模块——把代码拆成多个 .py 文件，用 import 复用别人写好的功能。核心：import、random 模块、标准库。真实项目都是多文件结构，import 正是你调用 numpy、sklearn 这些库的方式。","exercises":[{"id":"39","title":"老虎机","prompt":"用 random 做一个老虎机：随机抽三个符号，若三个全相同则打印「恭喜！全中！」，否则「再试一次吧」。","solution":"import random\nsymbols = [\"🍒\", \"🍋\", \"⭐\", \"7️⃣\"]\ndef spin():\n    return [random.choice(symbols) for _ in range(3)]\n\nresult = spin()\nprint(\" | \".join(result))\nif result[0] == result[1] == result[2]:\n    print(\"恭喜！全中！\")\nelse:\n    print(\"再试一次吧\")","lesson":"考点：random + 列表推导式 + join。思路：[random.choice(s) for _ in range(3)] 一行生成三个随机符号，\" | \".join 拼成一行。"},{"id":"40","title":"太阳系","prompt":"创建一个包含八大行星的列表，用 enumerate 给它们编号并逐项打印。","solution":"planets = [\"水星\", \"金星\", \"地球\", \"火星\", \"木星\", \"土星\", \"天王星\", \"海王星\"]\nprint(\"太阳系八大行星：\")\nfor i, p in enumerate(planets, 1):\n    print(f\"{i}. {p}\")","lesson":"考点：列表 + enumerate。思路：行星列表用 enumerate 编号逐项打印。"},{"id":"41","title":"生日祝福模块","prompt":"把几条生日祝福语放进一个「模块」里（用一个列表表示），主程序 import 它并随机打印一条。","solution":"# bday_messages.py（模块内容）\nbday_messages = [\n    \"生日快乐！🎂\",\n    \"愿你心想事成！\",\n    \"祝你岁岁平安！\",\n]\n\n# main.py（主程序）\nimport random\nmsgs = [\"生日快乐！🎂\", \"愿你心想事成！\", \"祝你岁岁平安！\"]\nprint(random.choice(msgs))","lesson":"考点：模块概念。思路：把祝福语放进一个「模块」（.py 文件），主程序 import 它再随机选一条。理解「模块=可复用的代码文件」。"},{"id":"42","title":"答案是 42","prompt":"生命、宇宙以及一切的答案是 42。用 random.randint 随机一个 40~42 的数，若恰好是 42 就提示「没错，就是 42！」。","solution":"import random\nanswer = random.randint(40, 42)\nprint(f\"生命、宇宙以及一切的答案是：{answer}\")\nif answer == 42:\n    print(\"没错，就是 42！\")","lesson":"考点：random.randint 闭区间。randint(40,42) 含 40 和 42 两端；== 判断相等，= 是赋值，别混。"},{"id":"43","title":"禅意 Python","prompt":"在 Python 里运行一行神秘的代码，感受 Python 之禅：\n\nimport this","solution":"import this","lesson":"考点：标准库。思路：import this 打印《Python 之禅》。体会 Python「优美胜于丑陋」的设计哲学。"}]}];
+var TIPS = {"10":"汇率这类常量习惯用大写命名（如 CNY_RATE=7.2）；f-string 让输出更清晰。","11":"random.choice(列表) 从序列随机选一个；random.randint(0,1) 也能实现。","12":"多分支用 if/elif/else；区间判断必须从高到低（先判 >=90），顺序反了结果就错。","13":"if/elif/else 三分支；比较时注意边界——「等于 7 是中性」这个条件别漏。","14":"核心是 random.choice；答案列表想多长都行，这正是数据驱动的思路。","15":"and 表示「与」，两个条件都满足才通过；比嵌套 if 更简洁。","16":"random.choice 随机分配；这其实就是「分类」概念的最简单雏形。","17":"循环 + break 是经典的「重试直到成功」模式；for...else 也能实现同样的效果。","18":"大小比较 + 循环 + break；进阶用 while True + input() 就能做成真正可交互的猜数字游戏。","19":"range(1,11) 生成 1~10；f-string 里 {i} 插值让每行自动带序号。","20":"range(99, 96, -1) 倒序；注意 stop 是开区间，只到 97。负数步长是倒序的关键。","21":"先判 i%15（同时被 3 和 5 整除），再判 3 和 5；顺序反了会出错。% 是取余运算符。","22":"列表 + for 遍历是最基础的数据处理模式，后面 pandas 也是同样的「遍历/迭代」思想。","23":"list.append() 加元素；列表是可变对象，append 就地修改原列表。","24":"列表套列表是二维数据结构，item[0]/item[1] 取各列；数据一多建议改用字典或 pandas。","25":"append 加、remove 删；注意 remove 只删除第一个匹配项。","26":"enumerate(seq, 1) 同时给序号和元素，比手动计数 i+=1 更 Pythonic。","27":"遍历打印是基本功；字符串拼接用 + 或 f-string 都行，f-string 更推荐。","28":"DRY = Don't Repeat Yourself：把重复逻辑抽成函数，一处修改处处生效，这是工程化的起点。","29":"函数用 return 返回值；random 在函数内部调用，所以每次返回结果不同。","30":"range(n,0,-1) 倒计时；把倒计时包成函数后，想数 10 秒就 countdown(10)，可复用。","31":"函数封装四则运算；div 里用 if b!=0 防御除零，是良好的防御性编程习惯。","32":"函数可返回多个值（元组解包 p,r=...）；收益率公式 = (卖-买)/买×100%。","33":"字典是「键→值」映射；order(code) 按编号查菜单，比写一堆 if 更清晰、更好扩展。","34":"class 定义类，__init__ 是构造函数；self 代表实例本身，别漏写。","35":"类把「数据 + 方法」封装在一起；info() 是实例方法，调用时自动传入 self。","36":"类属性存数据；把现实事物建模成对象，就是面向对象编程的核心思路。","37":"方法里操作 self.balance 改变状态；withdraw 里 if 判断余额，是封装业务规则。","38":"level_up() 修改 self.level，对象能「记住」自己的状态——这就是 OOP 最核心的价值。","39":"列表推导式 [random.choice(s) for _ in range(3)] 一行生成列表；join 把符号拼成一行。","40":"enumerate 编号最方便；列表切片 list[2:5]、排序 sorted(list) 也是高频操作。","41":"模块就是一个 .py 文件；import 后用「模块名.变量名」访问，真实项目都会拆多文件。","42":"random.randint(a,b) 是闭区间（含 a 和 b）；== 判断相等，= 是赋值，别混。","43":"import this 打印《Python 之禅》；「优美胜于丑陋」正是 Python 的设计哲学。","02":"print() 是最核心的输出函数，可接收多个参数（逗号分隔，自动加空格）。","03":"图案题练的是 print 排版；用 print('*' * n) 乘法生成重复字符，比手打星号简洁得多。","04":"点阵字本质是多行文本；进阶可用三引号 '''...''' 一次存整段多行字符串再 print。","05":"print() 空括号输出空行；多行文本用三引号 \"\"\"...\"\"\" 包裹，比一行行 print 更省事。","07":"注意运算优先级，括号 (f - 32) 不能省；f-string 里 :.2f 控制保留两位小数。","08":"** 是幂运算；变量命名用下划线（weight, height）符合 PEP8 规范。","09":"math.sqrt 开平方；当判别式 b²-4ac<0 时会报错，进阶可加 if 判断并提示「无实根」。"};
+var cur={ch:0,ex:0};
+var progress=load('pf_py_prog',{}), drafts=load('pf_py_draft',{});
+var pyodide=null, pyLoading=null, editor=null, outputEl=null;
+function load(k,d){try{var v=sessionStorage.getItem(k+':'+AUTH.user.id);return v?JSON.parse(v):d;}catch(e){return d;}}
+function save(k,v){try{sessionStorage.setItem(k+':'+AUTH.user.id,JSON.stringify(v));}catch(e){}}
+function key(c,e){return c+'-'+e;}
+function renderToc(){
+  var toc=document.getElementById('toc'), html='', i, j;
+  for(i=0;i<CHAPTERS.length;i++){
+    var ch=CHAPTERS[i], done=0;
+    for(j=0;j<ch.exercises.length;j++) if(progress[key(i,j)]) done++;
+    html += '<div class="ch-title">'+ch.icon+' '+ch.title+'<span class="cnt">'+done+'/'+ch.exercises.length+'</span></div>';
+    for(j=0;j<ch.exercises.length;j++){
+      var ex=ch.exercises[j];
+      html += '<div class="ex-item'+(i===cur.ch&&j===cur.ex?' active':'')+'" onclick="openEx('+i+','+j+')"><span class="tick">'+(progress[key(i,j)]?'✓':'')+'</span> '+ex.id+' '+ex.title+'</div>';
+    }
+  }
+  toc.innerHTML=html;
+  var total=0,dn=0;
+  for(i=0;i<CHAPTERS.length;i++){total+=CHAPTERS[i].exercises.length;for(j=0;j<CHAPTERS[i].exercises.length;j++)if(progress[key(i,j)])dn++;}
+  document.getElementById('prog').textContent='已通过 '+dn+'/'+total;
+}
+function openEx(ch,ex){
+  if(editor) drafts[key(cur.ch,cur.ex)]=editor.value;
+  save('pf_py_draft',drafts);
+  cur={ch:ch,ex:ex};
+  var C=CHAPTERS[ch], d=C.exercises[ex];
+  document.getElementById('chHead').textContent = C.icon+' '+C.title+' · 本章学什么';
+  document.getElementById('chIntro').textContent = C.intro || '';
+  document.getElementById('exHead').textContent = C.title+' / '+d.id+' · '+d.title;
+  document.getElementById('lesson').innerHTML = '<span class="lesson-h">📚 本节知识点</span><div>'+esc(d.lesson)+'</div>';
+  document.getElementById('prompt').textContent = '【题目要求】\n'+d.prompt;
+  editor.value = drafts[key(ch,ex)] || '';
+  setOut('（点「运行并判题」执行代码）');
+  document.getElementById('judge').innerHTML='';
+  renderToc();
+}
+function setOut(s){ outputEl.textContent=s; }
+function setNote(s){ document.getElementById('runNote').textContent=s; }
+function loadPy(){
+  if(pyodide) return Promise.resolve(pyodide);
+  if(pyLoading) return pyLoading;
+  setNote('正在加载 Python 运行时（首次约 8MB，需联网）…');
+  pyLoading=new Promise(function(resolve,reject){
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+    s.onload=function(){
+      if(typeof loadPyodide!=='function'){reject(new Error('Pyodide 加载异常'));return;}
+      loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'}).then(function(p){pyodide=p;setNote('');resolve(p);}).catch(reject);
+    };
+    s.onerror=function(){reject(new Error('无法加载 Pyodide（需联网）'));};
+    document.head.appendChild(s);
+  });
+  return pyLoading;
+}
+function runCode(){
+  var code=editor.value;
+  var context={ch:cur.ch,ex:cur.ex,code:code};
+  drafts[key(cur.ch,cur.ex)]=code; save('pf_py_draft',drafts);
+  if(!code.trim()){setOut('（代码为空）');return;}
+  setOut('');
+  loadPy().then(function(p){
+    p.setStdin({ stdin: function(){
+      var v = window.prompt('程序调用了 input()，请输入内容（取消则结束输入）：');
+      return v === null ? null : v;
+    }, autoEOF: true });
+    var out='';
+    var soBuf=[], seBuf=[];
+    var soDec=new TextDecoder('utf-8'), seDec=new TextDecoder('utf-8');
+    function flushBuf(arr, dec){
+      if(arr.length){
+        var s = dec.decode(new Uint8Array(arr));
+        arr.length = 0;
+        out += s;
+        outputEl.textContent = out;
+        outputEl.scrollTop = outputEl.scrollHeight;
+      }
+    }
+    p.setStdout({raw:function(byte){ soBuf.push(byte); if(byte===0x0A) flushBuf(soBuf,soDec); }, isatty:true});
+    p.setStderr({raw:function(byte){ seBuf.push(byte); if(byte===0x0A) flushBuf(seBuf,seDec); }, isatty:true});
+    return p.runPythonAsync(code).then(function(){ flushBuf(soBuf,soDec); flushBuf(seBuf,seDec); return out; });
+  }).then(function(o){ if(!o) setOut('（程序运行结束，无输出）'); askAi(o,context); })
+  .catch(function(e){setNote('');setOut('⚠️ '+((e&&e.message)?e.message:String(e)));askAi('⚠️ 运行出错：'+((e&&e.message)?e.message:String(e)),context);});
+}
+function askAi(output,context){
+  var ex=CHAPTERS[context.ch].exercises[context.ex];
+  var box=document.getElementById('judge');
+  box.innerHTML='<div class="judge-loading"><span class="spin"></span>AI 判题中…</div>';
+  api('/python/feedback','POST',{
+    title: ex.id+' '+ex.title,
+    lesson: ex.lesson,
+    prompt: ex.prompt,
+    code: context.code,
+    output: output
+  }).then(function(r){
+    if(r && r.mode==='llm'){
+      if(r.correct===true){ progress[key(context.ch,context.ex)]=true; save('pf_py_prog',progress); renderToc(); }
+      if(context.ch!==cur.ch||context.ex!==cur.ex)return;
+      box.innerHTML = renderLlm(r);
+    } else {
+      box.innerHTML = (r&&r.reason?'<div class="judge-warn">'+esc(r.reason)+'</div>':'')+renderLocal(ex);
+    }
+  }).catch(function(e){
+    box.innerHTML = renderLocal(ex) + '<div class="judge-warn">AI 判题请求失败：'+esc(e.message)+'</div>';
+  });
+}
+function renderLlm(r){
+  var ok = r.correct===true;
+  var html = '<div class="judge-'+(ok?'ok':'no')+'">'+(ok?'✅ AI 判定：正确，已计入完成':'❌ AI 判定：未通过')+'</div>';
+  if(r.why) html += '<div class="ai-sec"><div class="ai-h">📌 分析</div><div>'+esc(r.why)+'</div></div>';
+  if(!ok && r.fix) html += '<div class="ai-sec"><div class="ai-h">🛠️ 怎么改</div><div>'+esc(r.fix)+'</div></div>';
+  if(r.tip) html += '<div class="ai-sec"><div class="ai-h">💡 优化建议</div><div>'+esc(r.tip)+'</div></div>';
+  if(r.correct===null && r.raw) html += '<div class="ai-sec"><div class="ai-h">AI 回复</div><div>'+esc(r.raw)+'</div></div>';
+  return html;
+}
+function renderLocal(ex){
+  var tip = TIPS[ex.id]||'';
+  var html = '<div class="judge-warn">本次未获得有效AI反馈。可先对照参考答案自查：</div>';
+  html += '<div class="ai-sec"><div class="ai-h">📖 参考答案</div><pre class="ref-code">'+esc(ex.solution)+'</pre></div>';
+  if(tip) html += '<div class="ai-sec"><div class="ai-h">💡 进阶建议</div><div>'+esc(tip)+'</div></div>';
+  return html;
+}
+function showAnswer(){ editor.value=CHAPTERS[cur.ch].exercises[cur.ex].solution; drafts[key(cur.ch,cur.ex)]=editor.value; save('pf_py_draft',drafts); }
+function clearEditor(){ editor.value=''; drafts[key(cur.ch,cur.ex)]=''; save('pf_py_draft',drafts); }
+(function init(){
+  editor=document.getElementById('editor');
+  outputEl=document.getElementById('output');
+  editor.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){e.preventDefault();var st=editor.selectionStart,en=editor.selectionEnd;editor.value=editor.value.substring(0,st)+'    '+editor.value.substring(en);editor.selectionStart=editor.selectionEnd=st+4;}
+  });
+  openEx(0,0);
+})();
+</script>
+</body>
+</html>

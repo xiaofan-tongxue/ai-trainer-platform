@@ -1,0 +1,44 @@
+{
+  "collectedAt": "2026-09-14T17:26:47.5497466+08:00",
+  "scope": "Local single-instance application; production controls not assessed",
+  "auditChain": [
+    "2026-09-14.jsonl VERIFIED finalHmac=26e683255ce620bee93cde72f7e2f1beb090c9e2665c51157df30dfa92ce2dfe"
+  ],
+  "http": {
+    "target": "http://127.0.0.1:19001",
+    "testedAt": "2026-09-14T09:25:51.296047800Z",
+    "passed": 62
+  },
+  "auditExternalAnchorEstablished": false,
+  "legacyBackupCopies": [
+    {
+      "source": "D:\\rgzn\\ai-trainer-platform\\backups\\learning-upgrade-20260911-093832",
+      "encrypted": "D:\\rgzn\\ai-trainer-platform\\runtime\\security\\learning-upgrade-20260911-093832.protected.dpapi",
+      "sha256Base64": "mFlPLAPik7IL5h/8KRnsoG6htxtSUD1HfMIbONhW9RU=",
+      "verified": true,
+      "originalRetained": true
+    },
+    {
+      "source": "D:\\rgzn\\ai-trainer-platform.zip",
+      "encrypted": "D:\\rgzn\\ai-trainer-platform\\runtime\\security\\ai-trainer-platform.zip.protected.dpapi",
+      "sha256Base64": "Aflc955xhmyKbfL88AYDuKE5nLAqu3qknidXBOexFm8=",
+      "verified": true,
+      "originalRetained": true
+    }
+  ],
+  "listeners": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 19001
+    }
+  ],
+  "pending": [
+    "Historical plaintext cleanup approval",
+    "Production deployment and MLPS level",
+    "Database/driver upgrade",
+    "MFA and role separation",
+    "Strict CSP and isolated code execution",
+    "Independent archive and disaster recovery",
+    "Applicable commercial cryptography assessment"
+  ]
+}

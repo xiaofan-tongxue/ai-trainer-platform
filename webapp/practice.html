@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>题库练习 - 人工智能训练师学习平台</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="/js/common.js"></script>
+<script>
+if (!requireAuth()) throw new Error();
+const content = renderLayout('practice', '题库练习', '判断题 · 单选题 · 多选题');
+content.innerHTML = `
+  <div class="notice small">公开资料专项练习，领域标签为自动分类。<a href="/sources.html">查看来源</a> · <a href="/insights.html">查看薄弱点</a></div>
+  <div class="row mb-16"><label>知识领域<select id="domainFilter"><option value="">全部领域</option><option value="ethics">职业道德</option><option value="foundation">基础知识</option><option value="business">业务分析</option><option value="training">智能训练</option><option value="design">智能系统设计</option><option value="coaching">培训与指导</option></select></label><label>练习范围<select id="modeFilter"><option value="">全部题目</option><option value="wrong">待复习错题</option></select></label></div>
+  <div class="row mb-16" style="flex-wrap:wrap">
+    <button class="btn" data-type="ALL" onclick="setType('ALL')">全部题型</button>
+    <button class="btn" data-type="JUDGE" onclick="setType('JUDGE')">判断题</button>
+    <button class="btn" data-type="SINGLE" onclick="setType('SINGLE')">单选题</button>
+    <button class="btn" data-type="MULTIPLE" onclick="setType('MULTIPLE')">多选题</button>
+    <span class="muted small" id="countInfo" style="flex:0 0 auto"></span>
+  </div>
+  <div id="qlist" class="card"><div class="loading"><span class="spin"></span>加载中</div></div>
+  <div class="pager" id="pager"></div>`;
+
+const state = { type: 'JUDGE', page: 1, size: 10, total: 0 };
+
+function setType(t) {
+  state.type = t; state.page = 1;
+  document.querySelectorAll('[data-type]').forEach(b => b.classList.toggle('primary', b.dataset.type === t));
+  load();
+}
+
+function load() {
+  const box = document.getElementById('qlist');
+  box.innerHTML = '<div class="loading"><span class="spin"></span>加载中</div>';
+  api(`/questions?type=${state.type}&page=${state.page}&size=${state.size}&domain=${encodeURIComponent(document.getElementById('domainFilter').value)}&mode=${document.getElementById('modeFilter').value}`).then(d => {
+    state.total = d.total;
+    document.getElementById('countInfo').textContent = `共 ${d.total} 题`;
+    if (!d.list.length) { box.innerHTML = '<div class="empty">当前筛选下没有题目，可切换题型或领域。</div>';document.getElementById('pager').innerHTML=''; return; }
+    box.innerHTML = d.list.map((q, i) => renderQuestion(q, i)).join('');
+    renderPager();
+  }).catch(e => box.innerHTML = `<div class="empty">${esc(e.message)}</div>`);
+}
+
+function renderQuestion(q, i) {
+  const qid = q.id;
+  let opts = '';
+  if (q.type === 'JUDGE') {
+    opts = `<button class="option" style="width:100%;background:inherit;text-align:left" onclick="choose(${qid},'√',this)"><span class="tag-opt">√</span><span>正确</span></button>
+            <button class="option" style="width:100%;background:inherit;text-align:left" onclick="choose(${qid},'×',this)"><span class="tag-opt">×</span><span>错误</span></button>`;
+  } else {
+    opts = (q.options || []).map(o =>
+      `<button class="option" style="width:100%;background:inherit;text-align:left" onclick="choose(${qid},'${o.label}',this)"><span class="tag-opt">${esc(o.label)}</span><span>${esc(o.text)}</span></button>`
+    ).join('');
+  }
+  const multi = q.type === 'MULTIPLE' ? '<div class="muted small mb-8">多选题（可多选，点击选项后提交）</div>' : '';
+  return `<div class="question-item" id="q-${qid}">
+    <div class="row" style="align-items:flex-start">
+      ${typeBadge(q.type)}
+      <div class="q-title" style="flex:1">${(state.page-1)*state.size + i + 1}. ${esc(q.question)}</div>
+    </div>
+    ${multi}<div id="opts-${qid}" data-type="${q.type}">${opts}</div>
+    <div id="fb-${qid}"></div>
+  </div>`;
+}
+
+function choose(qid, answer, element) {
+  const wrap = document.getElementById('opts-' + qid);
+  const fb = document.getElementById('fb-' + qid);
+  if (wrap.dataset.done) return;
+  // 单选/判断：切换选中；多选：提交时再确认
+  const type = wrap.dataset.type;
+  if (type !== 'MULTIPLE') {
+    wrap.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  }
+  element.classList.toggle('selected');
+
+  let selected = [...wrap.querySelectorAll('.option.selected')].map(o => o.querySelector('.tag-opt').textContent.trim());
+  if (type === 'MULTIPLE') {
+    // 多选需要一个"确认"按钮；简单处理：点击后显示提交按钮
+    let btn = fb.querySelector('.submit-multi');
+    if (!btn) {
+      fb.innerHTML = '<button class="btn primary sm mt-8 submit-multi">提交答案</button>';
+      btn = fb.querySelector('.submit-multi');
+    }
+    btn.onclick = () => submitAnswer(qid, selected.sort().join(''), wrap, fb);
+    return;
+  }
+  submitAnswer(qid, selected[0], wrap, fb);
+}
+
+function submitAnswer(qid, answer, wrap, fb) {
+  wrap.dataset.done = '1';
+  fb.innerHTML = '<div class="feedback" style="background:#f3f4f6;color:#374151">判分中…</div>';
+  api('/practice/answer', 'POST', { questionId: qid, answer }).then(r => {
+    // 标记正确/错误选项
+    wrap.querySelectorAll('.option').forEach(o => {
+      const label = o.querySelector('.tag-opt').textContent.trim();
+      const ca = r.correctAnswer || '';
+      if (r.correct) {
+        if (ca.includes(label)) o.classList.add('correct');
+      } else {
+        if (ca.includes(label)) o.classList.add('correct');
+      }
+    });
+    const cur = [...wrap.querySelectorAll('.option.selected')];
+    if (!r.correct) cur.forEach(o => { if (!o.classList.contains('correct')) o.classList.add('wrong'); });
+    fb.innerHTML = `
+      <div class="feedback ${r.correct ? 'ok' : 'no'}">
+        <strong>${r.correct ? '✓ 回答正确' : '✗ 回答错误'}</strong>
+        <span class="muted">正确答案：${esc(r.correctAnswer)}</span>
+        ${r.analysis ? `<div class="mt-8" style="color:inherit">${esc(r.analysis)}</div>` : ''}
+      </div>`;
+  }).catch(e => { wrap.dataset.done = ''; fb.innerHTML = `<div class="feedback no">${esc(e.message)}</div>`; });
+}
+
+function renderPager() {
+  const pages = Math.ceil(state.total / state.size);
+  const p = document.getElementById('pager');
+  if (pages <= 1) { p.innerHTML = ''; return; }
+  let html = `<button class="btn ghost sm" ${state.page<=1?'disabled':''} onclick="goto(${state.page-1})">上一页</button>
+    <span class="small muted">${state.page} / ${pages}</span>
+    <button class="btn ghost sm" ${state.page>=pages?'disabled':''} onclick="goto(${state.page+1})">下一页</button>`;
+  p.innerHTML = html;
+}
+function goto(p) { state.page = p; load(); }
+
+const params=new URLSearchParams(location.search);
+document.getElementById('domainFilter').value=params.get('domain')||'';
+document.getElementById('modeFilter').value=params.get('mode')||'';
+document.getElementById('domainFilter').onchange=document.getElementById('modeFilter').onchange=()=>{state.page=1;load();};
+setType('ALL');
+</script>
+</body>
+</html>

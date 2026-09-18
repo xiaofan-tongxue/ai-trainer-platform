@@ -1,0 +1,70 @@
+[build] 使用 javac: C:\Program Files\Java\jdk-24\bin\javac.exe
+[build] 编译 44 个源文件 (target=Java 8)...
+����: [options] Դֵ 8 �ѹ�ʱ������δ�����а���ɾ��
+����: [options] Ŀ��ֵ 8 �ѹ�ʱ������δ�����а���ɾ��
+����: [options] Ҫ�����й��ѹ�ʱѡ��ľ���, ��ʹ�� -Xlint:-options��
+3 ������
+[build] 编译完成 -> build\classes
+����: [options] Դֵ 8 �ѹ�ʱ������δ�����а���ɾ��
+����: [options] Ŀ��ֵ 8 �ѹ�ʱ������δ�����а���ɾ��
+����: [options] Ҫ�����й��ѹ�ʱѡ��ľ���, ��ʹ�� -Xlint:-options��
+3 ������
+PASS GCM nonce is unique
+PASS GCM roundtrip
+PASS column substitution rejected
+PASS ciphertext tampering rejected
+PASS PBKDF2 verifies correct password only
+PASS password salts differ
+PASS weak password rejected
+PASS duplicate JSON keys rejected
+PASS invalid JSON numbers rejected
+PASS non-finite numbers rejected
+PASS deep JSON rejected
+PASS opaque session valid
+PASS user session revocation
+PASS rate allowance 0
+PASS rate allowance 1
+PASS rate allowance 2
+PASS rate limit enforced
+[OK] �����ֶ�Ǩ����ɣ����ܱ���У��ͨ��
+PASS encrypted account lookup and PII roundtrip
+PASS legacy password wrapped and change required
+PASS existing API key preserved after encryption
+PASS joined encrypted numeric field restored
+PASS encrypted profile retains numeric type
+PASS users.username at rest encrypted
+PASS users.nickname at rest encrypted
+PASS users.email at rest encrypted
+PASS settings.v at rest encrypted
+PASS login_logs.username at rest encrypted
+PASS login_logs.ip at rest encrypted
+PASS login_logs.user_agent at rest encrypted
+PASS operation_logs.username at rest encrypted
+PASS operation_logs.target at rest encrypted
+PASS operation_logs.detail at rest encrypted
+PASS operation_logs.ip at rest encrypted
+PASS practice_records.user_answer at rest encrypted
+PASS practice_records.is_correct at rest encrypted
+PASS exam_records.detail at rest encrypted
+PASS exam_records.score at rest encrypted
+PASS exam_records.total at rest encrypted
+PASS exam_records.correct at rest encrypted
+PASS exam_records.passed at rest encrypted
+PASS exam_records.duration_sec at rest encrypted
+PASS practical_submissions.content at rest encrypted
+PASS practical_submissions.score at rest encrypted
+PASS practical_submissions.analysis at rest encrypted
+PASS exam_sessions.paper at rest encrypted
+PASS exam_sessions.answers at rest encrypted
+PASS exam_sessions.result at rest encrypted
+PASS learning_reports.report at rest encrypted
+PASS learning_profiles.exam_date at rest encrypted
+PASS learning_profiles.daily_minutes at rest encrypted
+PASS learning_profiles.foundation at rest encrypted
+PASS learning_profiles.institution at rest encrypted
+PASS lesson_progress.score at rest encrypted
+PASS new settings encrypted write/read
+PASS password change removes restricted state
+PASS migration restart idempotent
+PASS encrypted backup restored into isolated recovery database
+ALL 57 SECURITY CHECKS PASSED; isolated databases removed
