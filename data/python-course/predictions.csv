@@ -1,0 +1,5 @@
+id,truth,prediction
+P01,cat,cat
+P02,dog,cat
+P03,cat,cat
+P04,dog,dog

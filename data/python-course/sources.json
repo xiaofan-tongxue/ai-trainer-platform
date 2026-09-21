@@ -1,0 +1,49 @@
+[
+  {
+    "file": "iris.csv",
+    "rows": 150,
+    "columns": [
+      "sepal_length",
+      "sepal_width",
+      "petal_length",
+      "petal_width",
+      "species"
+    ],
+    "source": "https://archive.ics.uci.edu/dataset/53/iris",
+    "download": "https://archive.ics.uci.edu/static/public/53/iris.zip",
+    "citation": "Fisher, R. (1936). Iris. https://doi.org/10.24432/C56C76",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "添加英文字段名，统一 UTF-8 与 LF 换行；原始数据值与行顺序不变。Iris 使用归档中的 iris.data，未套用其他版本修正。",
+    "checkedAt": "2026-09-21",
+    "sha256": "20f7ef9ad6e85c0752a0cda4c9d1edfcad39c04114a822496a15c20eb1df2cda"
+  },
+  {
+    "file": "wine.csv",
+    "rows": 178,
+    "columns": [
+      "class",
+      "alcohol",
+      "malic_acid",
+      "ash",
+      "alcalinity_of_ash",
+      "magnesium",
+      "total_phenols",
+      "flavanoids",
+      "nonflavanoid_phenols",
+      "proanthocyanins",
+      "color_intensity",
+      "hue",
+      "od280_od315",
+      "proline"
+    ],
+    "source": "https://archive.ics.uci.edu/dataset/109/wine",
+    "download": "https://archive.ics.uci.edu/static/public/109/wine.zip",
+    "citation": "Aeberhard, S. & Forina, M. (1992). Wine. https://doi.org/10.24432/C5PC7J",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "添加英文字段名，统一 UTF-8 与 LF 换行；原始数据值与行顺序不变。",
+    "checkedAt": "2026-09-21",
+    "sha256": "cea9a880b6c07ebcbe92aa34f723c13e55935ee225e7ce80cbd973c2ecd89031"
+  }
+]
