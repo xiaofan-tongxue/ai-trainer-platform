@@ -45,6 +45,7 @@ git lfs pull
 
 - [完整项目说明与考务依据](docs/PROJECT_GUIDE.md)
 - [Python 基础学习指南与资料来源](docs/PYTHON_FOUNDATIONS.md)
+- [零基础到三级的全局覆盖审查](docs/READINESS_AUDIT.md)
 - [部署验收记录](docs/deployment/README.md)
 - [安全整改与等保支撑材料](docs/security/README.md)
 

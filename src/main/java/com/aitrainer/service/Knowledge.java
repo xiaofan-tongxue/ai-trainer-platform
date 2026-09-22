@@ -18,6 +18,8 @@ public final class Knowledge {
         {"training", "训练|模型|算法|标注|清洗|特征|回归|分类|聚类|检验|统计|神经|卷积|数据集|抽样|指标|精确率|召回|过拟合|学习|决策|预测"}
     };
     public static String of(Map<String,Object> q) {
+        String stored = String.valueOf(q.get("knowledge"));
+        if (valid(stored)) return stored;
         String text = String.valueOf(q.get("question"));
         for (String[] rule : RULES) if (Pattern.compile(rule[1], Pattern.CASE_INSENSITIVE).matcher(text).find()) return rule[0];
         return "foundation";

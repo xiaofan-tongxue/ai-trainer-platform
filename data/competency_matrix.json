@@ -1,0 +1,139 @@
+{
+  "version": "2026-09-22",
+  "basis": "国家职业技能标准（2021年版）对应项目内六领域训练映射；不是评价机构逐题蓝图",
+  "weights": {
+    "theory": 100,
+    "practical": 100
+  },
+  "passRule": "理论与技能分别达到60分；具体批次以科教兴川通知为准",
+  "domains": [
+    {
+      "id": "ethics",
+      "name": "职业道德与基础法律",
+      "theoryWeight": 5,
+      "practicalWeight": 0,
+      "overview": [
+        "start"
+      ],
+      "knowledge": [
+        "职业道德、数据安全、隐私保护、知识产权、劳动与职业规范"
+      ],
+      "evidence": [
+        "理论模拟相关题正确率≥80%",
+        "能解释授权、脱敏、最小必要原则"
+      ],
+      "practiceDomains": [],
+      "questionCount": 35,
+      "practicalTaskCount": 0,
+      "status": "coverage-mapped"
+    },
+    {
+      "id": "foundation",
+      "name": "基础知识",
+      "theoryWeight": 10,
+      "practicalWeight": 0,
+      "overview": [
+        "start"
+      ],
+      "knowledge": [
+        "计算机与办公软件、文件与数据库、Python基础、统计基础、网络与安全常识"
+      ],
+      "evidence": [
+        "理论模拟相关题正确率≥80%",
+        "能独立完成文件、CSV、JSON读写并说明字段"
+      ],
+      "practiceDomains": [],
+      "questionCount": 387,
+      "practicalTaskCount": 0,
+      "status": "coverage-mapped"
+    },
+    {
+      "id": "business",
+      "name": "业务分析与数据处理",
+      "theoryWeight": 20,
+      "practicalWeight": 25,
+      "overview": [
+        "data"
+      ],
+      "knowledge": [
+        "需求分析、数据采集、清洗、数据字典、流程与质量审核"
+      ],
+      "evidence": [
+        "至少2次业务数据任务",
+        "提交数据字典、清洗前后统计、异常处理和验收条件"
+      ],
+      "practiceDomains": [
+        "1"
+      ],
+      "questionCount": 97,
+      "practicalTaskCount": 10,
+      "status": "coverage-mapped"
+    },
+    {
+      "id": "training",
+      "name": "智能训练与模型评估",
+      "theoryWeight": 30,
+      "practicalWeight": 35,
+      "overview": [
+        "model"
+      ],
+      "knowledge": [
+        "标注规范、训练验证测试、分类回归、指标、数据泄漏、过拟合与偏差"
+      ],
+      "evidence": [
+        "至少2次训练任务",
+        "能解释混淆矩阵、精确率、召回率、F1和切分理由"
+      ],
+      "practiceDomains": [
+        "2"
+      ],
+      "questionCount": 243,
+      "practicalTaskCount": 10,
+      "status": "coverage-mapped"
+    },
+    {
+      "id": "design",
+      "name": "智能系统设计与交互",
+      "theoryWeight": 30,
+      "practicalWeight": 35,
+      "overview": [
+        "system"
+      ],
+      "knowledge": [
+        "人机交互、异常分支、监控、部署、反馈、可用性和业务指标"
+      ],
+      "evidence": [
+        "至少2次系统任务",
+        "提交正常/不确定/异常流程、监控指标、回退和验收方案"
+      ],
+      "practiceDomains": [
+        "3"
+      ],
+      "questionCount": 118,
+      "practicalTaskCount": 10,
+      "status": "coverage-mapped"
+    },
+    {
+      "id": "coaching",
+      "name": "培训与指导",
+      "theoryWeight": 5,
+      "practicalWeight": 5,
+      "overview": [
+        "system"
+      ],
+      "knowledge": [
+        "培训目标、演示、练习、评价、反馈和初级人员指导"
+      ],
+      "evidence": [
+        "至少2次指导任务",
+        "提交教案、演示步骤、练习、常见错误和评分标准"
+      ],
+      "practiceDomains": [
+        "4"
+      ],
+      "questionCount": 20,
+      "practicalTaskCount": 10,
+      "status": "coverage-mapped"
+    }
+  ]
+}
