@@ -11,6 +11,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
@@ -33,7 +34,14 @@ public class Main {
         System.setProperty("sun.net.httpserver.maxReqTime","20");
         System.setProperty("sun.net.httpserver.maxRspTime","180");
         System.setProperty("sun.net.httpserver.maxReqHeaders","60");
-        HttpServer server = HttpServer.create(new InetSocketAddress(System.getProperty("bind.address","127.0.0.1"),Config.port()), 64);
+        HttpServer server;
+        try {
+            server = HttpServer.create(new InetSocketAddress(System.getProperty("bind.address","127.0.0.1"),Config.port()), 64);
+        } catch (BindException e) {
+            System.err.println("[ERROR] 端口 " + Config.port() + " 已被占用。学习平台可能已经在运行，请访问 http://127.0.0.1:" + Config.port() + "/login；如非本平台，请先关闭占用端口的程序。");
+            System.exit(1);
+            return;
+        }
         server.createContext("/", new HttpHandler() {
             @Override
             public void handle(HttpExchange exchange) throws IOException {
