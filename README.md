@@ -22,7 +22,7 @@ DeepSeek API Key 需在管理后台填写。运行环境可离线安装；DeepSe
 
 详见 [一键部署指南](deploy/windows/README.md)。
 
-版本提示：最新 `v1.1.1` Release 已包含当前源码、48 节 Python 小课、题库领域标签和一键安装包；`v1.0.0` 仅作为历史版本保留。源码课程说明见 [Python 基础学习指南](docs/PYTHON_FOUNDATIONS.md)。
+版本提示：`v1.1.1` Release 包含截至 `5aa8d60` 的源码、48 节 Python 小课、题库领域标签和一键安装包；`v1.0.0` 仅作为历史版本保留。当前 main 分支另已修复 Python 学习记录持久保存问题，该修复尚未进入旧安装包。源码课程说明见 [Python 基础学习指南](docs/PYTHON_FOUNDATIONS.md)。
 
 ## 源码与开发
 

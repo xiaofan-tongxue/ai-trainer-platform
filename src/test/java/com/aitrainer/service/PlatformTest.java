@@ -22,6 +22,10 @@ public class PlatformTest {
         System.out.println("ALL "+checks+" CHECKS PASSED");
     }
     private static void unit(){
+        check(PythonProgressService.lesson("py-01")&&PythonProgressService.lesson("py-48")&&!PythonProgressService.lesson("py-49"),"Python progress accepts only actual lessons");
+        rejects(()->PythonProgressService.validate(map("progress",map("py-01",map("quiz","true")))),"Python progress rejects non-boolean milestones");
+        rejects(()->PythonProgressService.validate(map("progress",map(),"userId",2)),"Python progress never accepts a client user id");
+        rejects(()->PythonProgressService.validate(map("progress",map("py-99",map("read",true)))),"Python progress rejects unknown lessons");
         Map<String,Object> empty=ReadinessEngine.evaluate(Collections.emptyList(),Collections.emptyList());
         check(Json.obj(empty.get("estimate")).get("value")==null,"no evidence gives no probability");
         Map<String,Object> diagnostic=ReadinessEngine.evaluate(Arrays.asList(exam("diagnostic",50)),Collections.emptyList());
@@ -108,6 +112,23 @@ public class PlatformTest {
             Map<String,Object> lesson=Curriculum.lesson("start-1"),qa=new LinkedHashMap<String,Object>();List<Object> quiz=Json.arr(lesson.get("quiz"));for(int i=0;i<quiz.size();i++)qa.put(""+i,Json.obj(quiz.get(i)).get("answer"));
             check(Boolean.TRUE.equals(post("/learning/check",token,map("lessonId","start-1","answers",qa)).get("passed")),"course self-check persisted");
             check(Json.integer(get("/learning/curriculum",otherToken).get("completed"),-1)==0,"course progress isolated by user");
+            check(Json.integer(Json.obj(request("/learning/python-progress","GET",null,null)).get("status"),0)==401,"Python progress requires authentication");
+            post("/learning/python-progress",token,map("progress",map("py-01",map("read",true,"quiz",true,"guided",true,"independent",true)),"lastLesson","py-02"));
+            post("/learning/python-progress",token,map("progress",map("py-02",map("read",true))));
+            post("/learning/python-progress",token,map("progress",map("py-01",map("quiz",false))));
+            Map<String,Object> pyState=get("/learning/python-progress",token);
+            check(Boolean.TRUE.equals(Json.obj(Json.obj(pyState.get("progress")).get("py-01")).get("quiz")),"stale Python progress cannot erase a completed milestone");
+            check(Json.obj(pyState.get("progress")).size()==2&&"py-02".equals(pyState.get("lastLesson")),"Python records merge lessons and preserve bookmark");
+            check(Json.obj(get("/learning/python-progress",otherToken).get("progress")).isEmpty(),"Python progress is isolated between accounts");
+            check(Json.integer(Json.obj(request("/learning/python-progress","POST",token,map("userId",otherId,"progress",map()))).get("status"),0)==400,"Python progress rejects ownership spoofing");
+            check(Json.integer(get("/learning/snapshot",token).get("completedLessons"),-1)==1,"Python milestones do not inflate overview or exam progress");
+            post("/auth/logout",token,map());
+            token=Json.str(post("/auth/login",null,map("username","verify_"+suffix,"password","Verify!Security6327")).get("token"));
+            check(Json.stringify(get("/learning/python-progress",token)).equals(Json.stringify(pyState)),"Python progress survives logout and fresh login");
+            java.sql.Connection pyConnection=DB.conn();
+            try(java.sql.PreparedStatement stmt=pyConnection.prepareStatement("SELECT score FROM lesson_progress WHERE user_id=? AND lesson_id='python:last'")){
+                stmt.setLong(1,uid);try(java.sql.ResultSet rows=stmt.executeQuery()){check(rows.next()&&rows.getString(1).startsWith("ENC:v1:"),"Python bookmark is encrypted at rest");}
+            }finally{DB.release(pyConnection);}
             for(String mode:Arrays.asList("diagnostic","theory","shanghai","practical")){
                 Map<String,Object> p=post("/exam/generate?mode="+mode,token,map());String id=Json.str(p.get("sessionId"));check(!id.isEmpty(),mode+" paper generated");
                 List<Object> questions=Json.arr(p.get("questions"));check(questions.size()==(mode.equals("theory")?100:mode.equals("diagnostic")?18:mode.equals("shanghai")?190:4),mode+" question count");

@@ -20,7 +20,7 @@ function api(path, method, body) {
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined
   }).then(async r => {
-    if (r.status === 401) { doLogout(true); throw new Error('未登录'); }
+    if (r.status === 401) { doLogout(true, true); throw new Error('未登录'); }
     const j = await r.json().catch(() => ({ code: 1, message: '响应解析失败' }));
     if(j.message==='PASSWORD_CHANGE_REQUIRED'){location.href='/password.html';throw new Error('请先更新密码');}
     if (j.code !== 0) throw new Error(j.message || '请求失败');
@@ -28,7 +28,10 @@ function api(path, method, body) {
   });
 }
 
-function doLogout(redirect) {
+async function doLogout(redirect, expired) {
+  if (!expired && window.flushPythonProgress && !(await window.flushPythonProgress())) {
+    toast('学习记录尚未同步，请恢复连接并重试后再退出。'); return;
+  }
   if(AUTH.token)fetch('/api/auth/logout',{method:'POST',headers:{'X-CSRF-Token':sessionStorage.getItem('csrf')||''}}).catch(()=>{});
   sessionStorage.clear();
   AUTH = { token: '', user: null };

@@ -1,4 +1,4 @@
-(function () {
+(async function () {
   'use strict';
   if (!requireAuth()) return;
   const course = window.PYTHON_COURSE;
@@ -8,7 +8,12 @@
   let storageWarning = '';
   try { saved = JSON.parse(sessionStorage.getItem(storageKey) || '{}'); } catch (_) { saved = {}; }
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) saved = {};
-  let state = saved.progress && typeof saved.progress === 'object' ? saved.progress : {};
+  const progress = createPythonProgress({legacyKey:storageKey, onChange:message => {
+    storageWarning = message;
+    const note = document.getElementById('storageNote'); if(note)note.textContent = message;
+    if(document.getElementById('lessonRecord')) { renderNav(); renderRecord(); }
+  }});
+  const state = progress.state;
   let drafts = saved.drafts && typeof saved.drafts === 'object' ? saved.drafts : {};
   let current = course.lessons.find(l => l.id === new URLSearchParams(location.search).get('lesson')) || course.lessons[0];
   let worker = null, pending = null, timer = null, runSerial = 0, viewSerial = 0;
@@ -20,6 +25,7 @@
     try { sessionStorage.setItem(storageKey, JSON.stringify({progress: state, drafts})); }
     catch (_) { storageWarning = '浏览器暂存不可用，刷新可能丢失记录；可下载代码留存。'; }
     const note = document.getElementById('storageNote'); if (note) note.textContent = storageWarning;
+    progress.save();
   }
   function download(name, text, type = 'text/plain;charset=utf-8') {
     const url = URL.createObjectURL(new Blob([text], {type}));
@@ -32,11 +38,11 @@
     document.getElementById('lessonNav').innerHTML = course.units.map((u, i) => {
       const lessons = matches.filter(l => l.unit === i);
       if (!lessons.length) return '';
-      return `<details ${query || current.unit === i ? 'open' : ''}><summary>${i + 1}. ${esc(u.title)}</summary>${lessons.map(l => `<button type="button" data-lesson="${l.id}" ${current.id === l.id ? 'aria-current="page"' : ''}>${complete(l.id) ? '✓ ' : ''}${l.id.slice(3)} · ${esc(l.title)}</button>`).join('')}</details>`;
+      return `<details ${query || current.unit === i ? 'open' : ''}><summary>${i + 1}. ${esc(u.title)}</summary>${lessons.map(l => `<button type="button" data-lesson="${l.id}" ${current.id === l.id ? 'aria-current="page"' : ''}>${l.id.slice(3)} · ${esc(l.title)} · ${complete(l.id) ? '✓ 已完成' : record(l.id).read ? '已读' : Object.values(record(l.id)).some(Boolean) ? '学习中' : '未完成'}</button>`).join('')}</details>`;
     }).join('') || '<p class="py-empty">没有找到该主题，试试“变量”“循环”或“文件”。</p>';
     document.querySelectorAll('[data-lesson]').forEach(b => b.onclick = () => openLesson(b.dataset.lesson));
     const count = course.lessons.filter(l => complete(l.id)).length;
-    document.getElementById('pyProgress').innerHTML = `<strong>本标签页练习记录：${count} / ${course.lessons.length}</strong><progress max="${course.lessons.length}" value="${count}" aria-label="本标签页完成的小课数量"></progress><span>理解题、跟做、独立练习均完成对照后记一课；不计入考试通过率。</span>`;
+    document.getElementById('pyProgress').innerHTML = `<strong>账号学习记录：${count} / ${course.lessons.length}</strong><progress max="${course.lessons.length}" value="${count}" aria-label="已完成的小课数量"></progress><span>理解题、跟做、独立练习均完成对照后记一课；已读单独标记。复习不清除历史完成记录，不计入考试通过率。</span>`;
   }
   function feedback(kind, html) { document.getElementById(kind + 'Feedback').innerHTML = html; }
   function taskSection(kind, title) {
@@ -72,14 +78,14 @@
       e.preventDefault(); const choice = new FormData(e.target).get('choice');
       if (choice === null) return;
       const correct = Number(choice) === current.quiz.answer;
-      record().quiz = correct; store(); renderNav(); renderRecord();
+      if(correct)record().quiz = true; store(); renderNav(); renderRecord();
       document.getElementById('quizFeedback').innerHTML = `<div class="py-note ${correct ? '' : 'py-warn'}"><strong>${correct ? '理解正确' : '先回到概念再看一遍'}</strong><br>${esc(current.quiz.explanation)}</div>`;
     };
     ['guided','independent'].forEach(kind => {
       const editor = document.getElementById(kind+'Editor'), input = document.getElementById(kind+'Input');
       function changed() {
         drafts[current.id+':'+kind] = {code:editor.value, input:input.value};
-        record()[kind] = false; delete lastResults[current.id+':'+kind];
+        delete lastResults[current.id+':'+kind];
         store(); renderNav(); renderRecord();
         feedback(kind,'代码或输入已变化，请重新运行对照。');
       }
@@ -94,7 +100,7 @@
       document.querySelector(`[data-reset="${kind}"]`).onclick = () => {
         if(editor.value!==current[kind].starter && !window.confirm('恢复本题起始代码和输入？当前编辑内容会被替换，可先下载保存。'))return;
         editor.value=current[kind].starter; input.value=current[kind].inputs;
-        record()[kind+'Reference']=false; changed();
+        changed();
       };
       let hintIndex=0;
       document.querySelector(`[data-hint="${kind}"]`).onclick = () => {
@@ -105,11 +111,15 @@
       document.querySelector(`[data-ai="${kind}"]`).onclick = () => askAi(kind);
     });
     document.querySelectorAll('[data-move]').forEach(b => b.onclick=()=>openLesson(course.lessons[Number(b.dataset.move)].id));
+    const mark = document.createElement('button'); mark.id='markRead'; mark.className='btn ghost'; mark.type='button';
+    mark.onclick=()=>{record().read=true;store();renderNav();renderRecord();};
+    document.getElementById('lessonRecord').after(mark);
     renderRecord(); renderNav();
   }
   function renderRecord() {
     const p=record(); const el=document.getElementById('lessonRecord'); if(!el)return;
-    el.textContent=`理解题：${p.quiz?'已答对':'待检查'}；跟做：${p.guided?'样例匹配':'待运行'}；独立练习：${p.independent?'样例匹配':'待运行'}${p.independentReference?'（查看过参考解法）':''}。本地对照只检查给定样例和指定文件，不代表所有情况正确或已掌握全部知识。`;
+    el.textContent=`阅读：${p.read?'已标记读完':'未标记'}；理解题：${p.quiz?'曾答对':'待检查'}；跟做：${p.guided?'曾匹配样例':'待运行'}；独立练习：${p.independent?'曾匹配样例':'待运行'}${p.independentReference?'（查看过参考解法）':''}。这是历史学习记录；当前修改后的代码仍需重新运行验证，不代表已掌握全部知识。`;
+    const mark=document.getElementById('markRead');if(mark){mark.disabled=!!p.read;mark.textContent=p.read?'本课已读':'标记本课已读';}
   }
   function busy(value) {
     document.querySelectorAll('[data-run], #runExample').forEach(b=>b.disabled=value);
@@ -150,14 +160,14 @@
       if(context.kind==='example') {if(data.type==='error')document.getElementById('runtimeStatus').textContent=errorHelp(data.message);return;}
       if(!stillSame){feedback(context.kind,'运行期间代码或输入已改变；这是旧版本的输出，请重新运行当前版本。');return;}
       lastResults[context.lessonId+':'+context.kind]={...context,output:data.output||'',error:data.message||'',files:data.files||{}};
-      if(data.type==='error'){record()[context.kind]=false;store();renderNav();renderRecord();feedback(context.kind,`<div class="py-note py-warn">${esc(errorHelp(data.message))}</div>`);dispose();return;}
+      if(data.type==='error'){store();renderNav();renderRecord();feedback(context.kind,`<div class="py-note py-warn">${esc(errorHelp(data.message))}</div>`);dispose();return;}
       if(norm(context.inputs)!==norm(context.task.inputs)){
-        record()[context.kind]=false;store();renderNav();renderRecord();
+        store();renderNav();renderRecord();
         feedback(context.kind,'这是更改输入后的探索运行。固定样例不作通过判断；恢复题目给定输入后再对照。');return;
       }
       const fileMatch=Object.entries(context.task.files||{}).every(([name,value])=>norm(data.files[name])===norm(value));
       const matched=norm(data.output)===norm(context.task.expected)&&fileMatch;
-      record()[context.kind]=matched;store();renderNav();renderRecord();
+      if(matched)record()[context.kind]=true;store();renderNav();renderRecord();
       feedback(context.kind,`<div class="py-note ${matched?'':'py-warn'}"><strong>${matched?'给定样例匹配':'先找出结果不同的那一步'}</strong><br>${matched?'继续解释每一行的作用，再换一个输入验证。查看过参考解法的记录会单独标记。':'对照上方预期输出，检查输入、运算、边界和换行。'+(!fileMatch?' 生成文件的内容也不一致。':'')}</div>${Object.keys(context.task.files||{}).map(name=>`<button class="btn ghost" data-result-file="${esc(name)}">下载 ${esc(name)}</button>`).join('')}`);
       document.querySelectorAll('[data-result-file]').forEach(b=>b.onclick=()=>{const name=b.dataset.resultFile;if(Object.hasOwn(data.files,name))download(name,data.files[name]);});
     };
@@ -182,13 +192,22 @@
     current=next;viewSerial++;
     if(replace)history.replaceState(null,'','?lesson='+id);
     renderLesson();document.getElementById('lessonBody').scrollIntoView({block:'start'});
+    progress.visit(current.id);
   }
-  root.innerHTML=`<header class="py-hero"><div class="py-kicker">真正从零开始 · 先学明白，再动手</div><h2>每次只跨一个台阶。</h2><p>从认识编辑区、引号和变量开始，按 12 单元学习 48 节小课。每课都有完整示范、逐行解释、理解题、跟做与独立练习。遇到不会的地方就停下来补，不要求一上来交一整段程序。</p><p class="py-muted">48 个示例 · 96 个编程练习 · 48 个理解检查。建议预留 24 小时读课与基础尝试，另留 12—24 小时复习和项目；这是安排参考，不是学完全部 Python 的承诺。</p><div class="py-actions"><a class="btn ghost" href="#resources">资料与5份练习数据</a><a class="btn ghost" href="/python-practice.html">原有41题补充练习</a><a class="btn ghost" href="/journey.html">返回备考路线</a></div><p class="py-muted">进度和代码按账号暂存在当前标签页，关闭标签页或退出登录后可能丢失；重要代码请下载保存。运行数据是模拟或公开教学资料。</p><p id="storageNote" role="status"></p></header>
+  root.innerHTML='<section class="card pad" role="status">正在读取账号学习记录…</section>';
+  await progress.refresh();
+  if(!new URLSearchParams(location.search).has('lesson') && progress.lastLesson)
+    current=course.lessons.find(l=>l.id===progress.lastLesson)||current;
+  root.innerHTML=`<header class="py-hero"><div class="py-kicker">真正从零开始 · 先学明白，再动手</div><h2>每次只跨一个台阶。</h2><p>从认识编辑区、引号和变量开始，按 12 单元学习 48 节小课。每课都有完整示范、逐行解释、理解题、跟做与独立练习。遇到不会的地方就停下来补，不要求一上来交一整段程序。</p><p class="py-muted">48 个示例 · 96 个编程练习 · 48 个理解检查。建议预留 24 小时读课与基础尝试，另留 12—24 小时复习和项目；这是安排参考，不是学完全部 Python 的承诺。</p><div class="py-actions"><a class="btn ghost" href="#resources">资料与5份练习数据</a><a class="btn ghost" href="/python-practice.html">原有41题补充练习</a><a class="btn ghost" href="/journey.html">返回备考路线</a></div><p class="py-muted">已读、完成记录和最近课程保存到当前账号，下次登录自动恢复。代码草稿仍暂存在当前标签页，请下载重要代码。此记录用于学习导航，不作为考试成绩。</p><p id="storageNote" role="status"></p></header>
     <div class="py-layout"><aside class="card py-side"><div class="py-progress" id="pyProgress"></div><label for="lessonSearch">查找课程或知识点</label><input id="lessonSearch" type="search" placeholder="例如：变量、缩进、CSV"><nav id="lessonNav" aria-label="Python 课程目录"></nav></aside><div class="py-body"><div id="lessonBody"></div></div></div>
     <section class="card py-lesson py-resources" id="glossary"><h2>看不懂术语时，在这里查</h2><dl class="py-glossary">${course.glossary.map(([term,meaning])=>`<div><dt>${esc(term)}</dt><dd>${esc(meaning)}</dd></div>`).join('')}</dl></section>
     <section class="card py-lesson py-resources" id="resources"><div class="py-kicker">核查日期 ${course.updatedAt}</div><h2>按学习顺序使用资料</h2><p>先完成小课，再查官方文档。资料是学习参考和教学数据，不是四川历次考试真题。</p><div class="py-resource-grid">${course.sources.map(s=>`<article class="py-resource"><span class="py-kicker">${esc(s.level)}</span><h4><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a></h4><p>${esc(s.note)}</p></article>`).join('')}</div><h3>先用小表理解，再用公开数据练习</h3><div class="py-resource-grid">${course.datasets.map((d,i)=>`<article class="py-resource"><span class="py-kicker">${esc(d.level)} · ${d.rows} 条</span><h4>${esc(d.title)}</h4><p>${esc(d.fields)}</p><p class="py-muted">${esc(d.citation||d.source)} · ${esc(d.license)}</p>${d.licenseUrl?`<p class="py-muted"><a href="${esc(d.source)}" target="_blank" rel="noopener noreferrer">来源</a> · <a href="${esc(d.licenseUrl)}" target="_blank" rel="noopener noreferrer">许可</a><br>${esc(d.changes)}</p>`:''}<ol>${d.tasks.map(t=>`<li>${esc(t)}</li>`).join('')}</ol><details><summary>先预览表头与前5行</summary><pre class="py-expected py-data-preview">${esc(d.text.split('\n').slice(0,6).join('\n'))}</pre></details><details><summary>完成后对照</summary><p>${esc(d.answer)}</p></details><div class="py-actions"><button class="btn primary" data-dataset="${i}">下载 CSV</button><a class="btn ghost" href="?lesson=${d.lesson}">对应小课</a></div></article>`).join('')}</div></section>`;
   document.getElementById('lessonSearch').oninput=renderNav;
+  const retry=document.createElement('button');retry.type='button';retry.className='btn ghost';retry.textContent='重试同步';retry.id='retryProgress';
+  retry.onclick=async()=>{retry.disabled=true;await progress.refresh();await progress.flush();retry.disabled=false;};
+  document.getElementById('storageNote').after(retry);
   document.querySelectorAll('[data-dataset]').forEach(b=>b.onclick=()=>{const d=course.datasets[Number(b.dataset.dataset)];download(d.file,d.text,'text/csv;charset=utf-8');});
   window.addEventListener('beforeunload',()=>{store();dispose();});
+  window.flushPythonProgress = () => progress.dirty() ? progress.flush() : Promise.resolve(true);
   renderLesson();store();
 })();
