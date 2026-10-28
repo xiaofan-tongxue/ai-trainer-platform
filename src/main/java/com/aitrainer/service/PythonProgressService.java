@@ -57,4 +57,13 @@ public final class PythonProgressService {
         if(!last.isEmpty())DB.update("INSERT INTO lesson_progress(user_id,lesson_id,status,score,attempts,updated_at) VALUES(?,'python:last','python_bookmark',?,1,NOW()) ON DUPLICATE KEY UPDATE score=VALUES(score),updated_at=NOW()",uid,seal("lesson_progress","score",Integer.parseInt(last.substring(3))));
         return load(uid);
     }
+    public static Map<String,Object> summary(Map<String,Object> progress) {
+        int completed=0;String next=null;
+        for(int n=1;n<=48;n++){
+            String id=String.format(java.util.Locale.ROOT,"py-%02d",n);Map<String,Object> p=Json.obj(progress.get(id));
+            boolean done=true;for(String part:Arrays.asList("read","quiz","guided","independent"))done&=Boolean.TRUE.equals(p.get(part));
+            if(done)completed++;else if(next==null)next=id;
+        }
+        return map("completedPythonLessons",completed,"nextPythonLesson",next,"totalPythonLessons",48);
+    }
 }

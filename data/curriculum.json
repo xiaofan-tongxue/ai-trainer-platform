@@ -1,8 +1,8 @@
 {
-  "version": "2026.09.11",
+  "version": "2026.10.26",
   "institution": "四川省科教兴川促进会",
   "title": "人工智能训练师三级 · 从零基础到双科备考",
-  "hours": 100,
+  "hours": 136,
   "stages": [
     {
       "id": "start",
@@ -1489,11 +1489,11 @@
     {
       "id": "national",
       "title": "《人工智能训练师国家职业技能标准（2021年版）》",
-      "url": "https://www.cdp.edu.cn/__local/F/32/90/C6CFE95FFD7768B1D16877F8668_28B50D3E_339D0.pdf",
+      "url": "https://www.mohrss.gov.cn/xxgk2020/fdzdgknr/rcrs_4225/jnrc/202112/W020211227626977039770.pdf",
       "type": "国家标准",
       "date": "2021",
       "scope": "已核读项目内正式版全文相关页：PDF 第6、11–12、17–18页。双科60分，理论≥90分钟、技能≥120分钟，三级能力与权重。",
-      "verification": "本地正式版全文核对；网络同名文件仅作入口"
+      "verification": "2026-10-26复核本地正式版PDF第6、11—12、17—18页；人社部发布链接可检索，直连超时。"
     },
     {
       "id": "kjxc-2023",

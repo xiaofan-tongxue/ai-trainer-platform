@@ -26,6 +26,7 @@ $jar=Get-ChildItem $connector -Recurse -Filter 'mysql-connector-j-8.4.0.jar'|Sel
 if(-not $jar){throw 'Connector/J8.4 missing'}
 Copy-Item -LiteralPath $jar.FullName -Destination "$app/lib/connector.jar" -Force
 foreach($directory in @('webapp','data','materials','db','src')){Copy-Item -LiteralPath (Join-Path $project $directory) -Destination $app -Recurse -Force}
+Copy-Item -LiteralPath (Join-Path $project 'requirements-labs.txt') -Destination $app -Force
 # Include only fresh public seed content, never old account credentials or runtime data.
 $seed=[IO.File]::ReadAllText("$project/db/seed.sql")
 $seed=[regex]::Replace($seed,'(?s)-- 默认账号:.*?-- 理论知识章节','-- 理论知识章节')

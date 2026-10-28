@@ -13,7 +13,14 @@ public class PlatformTest {
     private static int checks=0;
     private static void check(boolean b,String label){if(!b)throw new AssertionError(label);checks++;System.out.println("PASS "+label);}
     private static void rejects(Runnable fn,String label){boolean rejected=false;try{fn.run();}catch(IllegalArgumentException|DeepSeekClient.AiFailure e){rejected=true;}check(rejected,label);}
-    private static Map<String,Object> exam(String mode,double score){List<Object> detail=new ArrayList<Object>();Map<String,Object> domains=new LinkedHashMap<String,Object>();for(int i=2;i<6;i++){detail.add(map("mode","deepseek_review"));domains.put(Knowledge.IDS[i],map("max",Knowledge.PRACTICAL[i],"score",score*Knowledge.PRACTICAL[i]/100));}return map("mode",mode,"submitted_at","2026-09-11","result",map("complete",true,"score",score,"durationSec",600,"gradingMode",mode.equals("theory")?"objective":"deepseek_review","detail",detail,"domains",domains));}
+    private static Map<String,Object> exam(String mode,double score){
+        List<Object> detail=new ArrayList<Object>();Map<String,Object> domains=new LinkedHashMap<String,Object>();boolean theory=mode.equals("theory");
+        for(int i=0;i<6;i++){int weight=theory?Knowledge.THEORY[i]:Knowledge.PRACTICAL[i];if(weight==0)continue;
+            domains.put(Knowledge.IDS[i],map("max",weight,"score",score*weight/100));
+            for(int n=0;n<(theory?weight:1);n++)detail.add(map("mode",theory?"objective":"deepseek_review","domain",Knowledge.IDS[i]));
+        }
+        return map("mode",mode,"submitted_at","2026-10-26","result",map("complete",true,"score",score,"total",theory?100:4,"durationSec",theory?5400:7200,"gradingMode",theory?"objective":"deepseek_review","detail",detail,"domains",domains));
+    }
     public static void main(String[] args)throws Exception{
         if(Arrays.asList(args).contains("--ui-create")){createUi();return;}
         if(Arrays.asList(args).contains("--ui-cleanup")){cleanupUi();return;}
@@ -22,6 +29,7 @@ public class PlatformTest {
         System.out.println("ALL "+checks+" CHECKS PASSED");
     }
     private static void unit(){
+        contentQuality();
         check(PythonProgressService.lesson("py-01")&&PythonProgressService.lesson("py-48")&&!PythonProgressService.lesson("py-49"),"Python progress accepts only actual lessons");
         rejects(()->PythonProgressService.validate(map("progress",map("py-01",map("quiz","true")))),"Python progress rejects non-boolean milestones");
         rejects(()->PythonProgressService.validate(map("progress",map(),"userId",2)),"Python progress never accepts a client user id");
@@ -63,11 +71,65 @@ public class PlatformTest {
         Map<String,Object> beginnerPlan=LearningService.localPlan(empty);
         check(Json.str(Json.obj(Json.arr(beginnerPlan.get("weeklyPlan")).get(0)).get("task")).contains("文件"),"zero foundation plan starts with computer basics rather than model training");
         check(Json.arr(beginnerPlan.get("weeklyPlan")).stream().allMatch(o->Json.integer(Json.obj(o).get("minutes"),0)<=15),"foundation plan respects fifteen minute budget");
-        empty.put("foundationLessons",4);check(!LearningService.needsFoundation(empty),"passed prerequisites unlock evidence based planning");
+        empty.put("foundationLessons",4);check(LearningService.needsFoundation(empty),"four overview quizzes cannot replace Python prerequisites");
+        empty.put("completedPythonLessons",20);empty.put("nextPythonLesson","py-21");
+        check(Json.str(Json.obj(Json.arr(LearningService.localPlan(empty).get("weeklyPlan")).get(0)).get("task")).contains("第21小课"),"foundation plan resumes unfinished Python lesson");
+        empty.put("completedPythonLessons",48);check(LearningService.needsFoundation(empty),"basic data bridge lessons are also prerequisites");empty.put("foundationBridgeLessons",4);check(!LearningService.needsFoundation(empty),"completed overview, Python and data bridge prerequisites unlock planning");
         Json.obj(empty.get("profile")).put("foundation","experienced");
         check(Json.str(Json.obj(Json.arr(LearningService.localPlan(empty).get("weeklyPlan")).get(0)).get("task")).contains("另外预约20分钟"),"short budget schedules diagnosis in separate time slot");
-        check(Curriculum.lessons().size()==24,"all 24 lessons loaded");
+        check(Curriculum.lessons().size()==44,"24 overview and 20 bridge lessons loaded");
+        rejects(()->LearningEvidenceService.validate(map("lessonId","bridge-files","index",0,"checked",true,"userId",99)),"evidence rejects client ownership");
+        rejects(()->LearningEvidenceService.validate(map("lessonId","bridge-files","index",0.5,"checked",true)),"evidence rejects fractional index");
+        rejects(()->LearningEvidenceService.validate(map("lessonId",null,"index",0,"checked",true)),"evidence rejects missing lesson without server error");
+        rejects(()->LearningEvidenceService.validate(map("lessonId","start-1","index",0,"checked",true)),"only actual checklist items can be saved");
+        check(Boolean.TRUE.equals(LearningEvidenceService.validate(map("lessonId","bridge-files","index",0,"checked",true)).get("checked")),"valid deliverable check accepted");
+        check(Json.integer(PythonProgressService.summary(map("py-01",map("read",true,"quiz",true,"guided",true,"independent",true),"py-02",map("read",true))).get("completedPythonLessons"),0)==1,"Python prerequisites require all four milestones");
+        Map<String,Object> corrected=com.aitrainer.dao.PracticalDao.decorate(map("code","1.1.1","reference_answer","pd.cut(data['BMI'], bmi_bins, bmi_labels, right=False)"));
+        check(Json.str(corrected.get("reference_answer")).contains("labels=bmi_labels"),"existing database reference typo corrected on read");
+        Map<String,Object> shortTheory=Json.obj(exam("theory",90).get("result"));shortTheory.put("durationSec",60);
+        check(ReadinessEngine.exclusion("theory",shortTheory)!=null,"one minute theory score excluded from probability");
+        Map<String,Object> shortSkill=Json.obj(exam("practical",90).get("result"));shortSkill.put("durationSec",120);
+        check(ReadinessEngine.exclusion("practical",shortSkill)!=null,"two minute skill score excluded from probability");
+        Map<String,Object> boundary=Json.obj(exam("practical",90).get("result"));boundary.put("durationSec",7199);
+        check(ReadinessEngine.exclusion("practical",boundary)==null,"database second truncation allowed at full session boundary");
+        Json.obj(Json.arr(boundary.get("detail")).get(0)).put("domain","training");
+        check(ReadinessEngine.exclusion("practical",boundary)!=null,"repeated skill domain cannot substitute missing domain");
+        Map<String,Object> incomplete=Json.obj(exam("theory",90).get("result"));Json.obj(incomplete.get("domains")).remove("ethics");
+        check(ReadinessEngine.exclusion("theory",incomplete)!=null,"missing theory domain excluded from estimate");
         check(!Json.obj(Json.arr(Json.obj(Json.arr(Curriculum.view().get("lessons")).get(0)).get("quiz")).get(0)).containsKey("answer"),"course answers hidden before checking");
+    }
+    private static void contentQuality(){
+        try{
+            Map<String,Object> seed=Json.obj(Json.parse(new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("data/seed_data.json")),java.nio.charset.StandardCharsets.UTF_8)));
+            int supplemented=0,quarantined=0;Map<String,Object> flagged=null;
+            for(Object item:Json.arr(seed.get("questions"))){Map<String,Object> q=Json.obj(item);boolean missing=Json.str(q.get("analysis"),"").trim().isEmpty();com.aitrainer.dao.QuestionDao.decorate(q);
+                if(missing&&!Json.str(q.get("analysis"),"").trim().isEmpty())supplemented++;
+                if(Boolean.FALSE.equals(q.get("examEligible"))){quarantined++;flagged=q;}
+            }
+            check(supplemented==300,"all 300 explanations match real questions across Java/Python fingerprints");
+            check(quarantined==151,"151 unresolved theory items quarantined without changing original keys");
+            Map<String,Object> publicQ=com.aitrainer.dao.QuestionDao.publicView(flagged);
+            check(!publicQ.containsKey("analysis")&&!publicQ.containsKey("answer")&&!publicQ.containsKey("questionFingerprint"),"public questions hide explanations and answer-dependent hashes");
+            Map<String,Object> custom=new LinkedHashMap<String,Object>(flagged);custom.put("question","A revised custom question");custom.put("analysis","Custom explanation");
+            com.aitrainer.dao.QuestionDao.decorate(custom);check("Custom explanation".equals(custom.get("analysis")),"edited questions never receive an unrelated explanation");
+            Map<String,Object> oldTheory=Json.obj(exam("theory",90).get("result"));Map<String,Object> d=Json.obj(Json.arr(oldTheory.get("detail")).get(0));d.putAll(flagged);d.put("correctAnswer",d.remove("answer"));d.remove("questionFingerprint");d.remove("examEligible");
+            check(ReadinessEngine.exclusion("theory",oldTheory)!=null,"old theoretical results with newly disputed content excluded");
+            Map<String,Object> legacyQ=new LinkedHashMap<String,Object>(flagged);legacyQ.put("points",100);legacyQ.put("domain",flagged.get("knowledge"));legacyQ.put("analysis","");
+            Map<String,Object> legacyResult=ExamService.gradeTheory(map("questions",Arrays.asList(legacyQ)),map());
+            check(legacyResult.get("contentWarning")!=null&&!Json.str(Json.obj(Json.arr(legacyResult.get("detail")).get(0)).get("analysis")).isEmpty(),"legacy paper grading adds explanation and content warning");
+            check(Json.integer(ReadinessEngine.evaluate(Collections.emptyList(),Arrays.asList(map("question_id",9,"is_correct",1,"domain","training","examEligible",false))).get("uniquePractice"),-1)==0,"uncertain answer keys do not affect domain mastery");
+            int eligible=0,guided=0;
+            for(Object item:Json.arr(seed.get("practical"))){Map<String,Object> raw=Json.obj(item),t=new LinkedHashMap<String,Object>(raw);t.put("reference_answer",t.remove("reference"));
+                com.aitrainer.dao.PracticalDao.decorate(t);if(Boolean.TRUE.equals(t.get("examEligible")))eligible++;if(t.containsKey("learningGuide"))guided++;
+                String first=Json.stringify(t);com.aitrainer.dao.PracticalDao.decorate(t);if(!first.equals(Json.stringify(t)))throw new AssertionError("non-idempotent practical decoration "+t.get("code"));
+                Map<String,Object> hidden=new LinkedHashMap<String,Object>(t);ContentQuality.hideSolutions(hidden);if(hidden.containsKey("reference_answer")||hidden.containsKey("learningGuide"))throw new AssertionError("practical solution leaked");
+            }
+            check(eligible==36&&guided==40,"40 practical guides loaded; four defective materials excluded");
+            Map<String,Object> customTask=com.aitrainer.dao.PracticalDao.decorate(map("code","2.2.1","reference_answer","My custom solution"));
+            check("My custom solution".equals(customTask.get("reference_answer"))&&Boolean.FALSE.equals(customTask.get("examEligible")),"custom practical references preserved and require revalidation");
+            Map<String,Object> oldSkill=Json.obj(exam("practical",90).get("result"));Json.obj(Json.arr(oldSkill.get("detail")).get(0)).put("code","3.2.4");
+            check(ReadinessEngine.exclusion("practical",oldSkill)!=null,"old mismatched-model practical result excluded");
+        }catch(java.io.IOException e){throw new IllegalStateException(e);}
     }
     private static void adapter()throws Exception{
         HttpServer fixture=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);final int[] calls={0};
@@ -112,6 +174,14 @@ public class PlatformTest {
             Map<String,Object> lesson=Curriculum.lesson("start-1"),qa=new LinkedHashMap<String,Object>();List<Object> quiz=Json.arr(lesson.get("quiz"));for(int i=0;i<quiz.size();i++)qa.put(""+i,Json.obj(quiz.get(i)).get("answer"));
             check(Boolean.TRUE.equals(post("/learning/check",token,map("lessonId","start-1","answers",qa)).get("passed")),"course self-check persisted");
             check(Json.integer(get("/learning/curriculum",otherToken).get("completed"),-1)==0,"course progress isolated by user");
+            post("/learning/check",token,map("lessonId","start-1","answers",map()));
+            check(Json.integer(get("/learning/curriculum",token).get("completed"),0)==1,"later quiz mistake preserves achieved course completion");
+            post("/learning/evidence",token,map("lessonId","bridge-files","index",0,"checked",true));
+            check(Json.arr(Json.obj(get("/learning/curriculum",token).get("evidence")).get("bridge-files")).size()==1,"deliverable check restored from account");
+            check(Json.obj(get("/learning/curriculum",otherToken).get("evidence")).isEmpty(),"deliverable checks isolated by account");
+            check(Json.integer(Json.obj(request("/learning/evidence","POST",token,map("lessonId","bridge-files","index",0,"checked",true,"userId",otherId))).get("status"),0)==400,"deliverable check rejects ownership spoof");
+            post("/learning/evidence",token,map("lessonId","bridge-files","index",0,"checked",false));
+            check(Json.obj(get("/learning/curriculum",token).get("evidence")).isEmpty(),"learner can undo a self-declared check");
             check(Json.integer(Json.obj(request("/learning/python-progress","GET",null,null)).get("status"),0)==401,"Python progress requires authentication");
             post("/learning/python-progress",token,map("progress",map("py-01",map("read",true,"quiz",true,"guided",true,"independent",true)),"lastLesson","py-02"));
             post("/learning/python-progress",token,map("progress",map("py-02",map("read",true))));
@@ -132,16 +202,25 @@ public class PlatformTest {
             for(String mode:Arrays.asList("diagnostic","theory","shanghai","practical")){
                 Map<String,Object> p=post("/exam/generate?mode="+mode,token,map());String id=Json.str(p.get("sessionId"));check(!id.isEmpty(),mode+" paper generated");
                 List<Object> questions=Json.arr(p.get("questions"));check(questions.size()==(mode.equals("theory")?100:mode.equals("diagnostic")?18:mode.equals("shanghai")?190:4),mode+" question count");
-                for(Object o:questions){Map<String,Object> q=Json.obj(o);if(q.containsKey("answer")||q.containsKey("reference_answer"))throw new AssertionError("answer leak");}
+                for(Object o:questions){Map<String,Object> q=Json.obj(o);if(q.containsKey("answer")||q.containsKey("reference_answer")||q.containsKey("analysis")||q.containsKey("learningGuide")||q.containsKey("questionFingerprint"))throw new AssertionError("answer leak");if(!Boolean.TRUE.equals(q.get("examEligible")))throw new AssertionError("unreviewed content in exam");}
+                check(true,mode+" excludes disputed items and hides teaching solutions");
                 check(id.equals(post("/exam/generate?mode="+mode,token,map()).get("sessionId")),mode+" resumes active paper");
                 check(Json.integer(Json.obj(request("/exam/session/"+id,"GET",otherToken,null)).get("status"),0)==400,"exam session ownership enforced");
                 check(Json.integer(Json.obj(request("/exam/save","POST",token,map("sessionId",id,"answers",map("99999999","A")))).get("status"),0)==400,"out-of-paper answer rejected");
                 if(!mode.equals("practical")){
                     Map<String,Object> raw=Json.obj(Json.parse(Json.str(DB.queryOne("SELECT paper FROM exam_sessions WHERE id=?",id).get("paper"))));Map<String,Object> first=Json.obj(Json.arr(raw.get("questions")).get(0));String qid=Json.str(first.get("id"));
-                    post("/exam/save",token,map("sessionId",id,"answers",map(qid,first.get("answer"))));
+                    Long quarantinedId=null;
+                    if(mode.equals("diagnostic")){
+                        Map<String,Object> legacy=new LinkedHashMap<String,Object>(new com.aitrainer.dao.QuestionDao().allTagged().stream().filter(v->Boolean.FALSE.equals(v.get("examEligible"))).findFirst().get());
+                        legacy.put("points",first.get("points"));legacy.put("domain",first.get("domain"));legacy.put("analysis","");legacy.remove("examEligible");
+                        Json.arr(raw.get("questions")).set(0,legacy);first=legacy;qid=Json.str(first.get("id"));quarantinedId=Json.lng(first.get("id"),0);
+                        DB.update("UPDATE exam_sessions SET paper=? WHERE id=?",com.aitrainer.security.ProtectedFields.seal("exam_sessions","paper",Json.stringify(raw)),id);
+                    }
+                    post("/exam/save",token,map("sessionId",id,"answers",map(qid,quarantinedId==null?first.get("answer"):"WRONG")));
                     check(Json.obj(get("/exam/session/"+id,token).get("answers")).containsKey(qid),"answer survives reload");
                     Map<String,Object> result=post("/exam/submit",token,map("sessionId",id,"answers",Collections.emptyMap()));
                     check(Json.integer(result.get("total"),0)==questions.size(),"submission includes every assigned question");
+                    if(quarantinedId!=null)check(DB.count("SELECT COUNT(*) FROM mistakes WHERE user_id=? AND question_id=?",uid,quarantinedId)==0&&result.get("contentWarning")!=null,"legacy paper keeps disputed key out of mistakes and warns learner");
                     check(Json.stringify(result).equals(Json.stringify(post("/exam/submit",token,map("sessionId",id,"answers",map(qid,"WRONG"))))),"duplicate submit is idempotent");
                     check(Json.integer(Json.obj(request("/exam/record/"+result.get("recordId"),"GET",otherToken,null)).get("status"),0)==404,"legacy record ownership enforced");
                 }else{
@@ -155,6 +234,13 @@ public class PlatformTest {
             Map<String,Object> questions=get("/questions?type=ALL&domain=training&size=1",token);Map<String,Object> q=Json.obj(Json.arr(questions.get("list")).get(0));check(!q.containsKey("answer"),"practice answers only returned after submission");
             post("/practice/answer",token,map("questionId",q.get("id"),"answer","wrong"));post("/practice/answer",token,map("questionId",q.get("id"),"answer","wrong"));check(Json.integer(get("/learning/snapshot",token).get("uniquePractice"),0)==1,"repeated practice counts once in actual database");
             check(Json.integer(get("/questions?type=ALL&mode=wrong",token).get("total"),0)>0,"wrong-question drill filters owned mistakes");
+            Map<String,Object> disputed=new com.aitrainer.dao.QuestionDao().allTagged().stream().filter(v->Boolean.FALSE.equals(v.get("examEligible"))).findFirst().get();
+            Map<String,Object> response=post("/practice/answer",token,map("questionId",disputed.get("id"),"answer","A"));
+            check(Boolean.FALSE.equals(response.get("examEligible"))&&!Json.str(response.get("analysis")).isEmpty(),"existing database receives flagged explanations after answering");
+            check(Json.integer(get("/learning/snapshot",token).get("uniquePractice"),0)==1,"flagged attempts remain saved but excluded from actual mastery");
+            Map<String,Object> broken=DB.queryOne("SELECT id FROM practical_tasks WHERE code='2.1.2'");
+            check(Boolean.FALSE.equals(get("/practical/"+broken.get("id"),token).get("examEligible")),"constant-target dataset identified in actual detail endpoint");
+            check(Json.integer(Json.obj(request("/practical/"+broken.get("id")+"/submit","POST",token,map("content","fixture - must not reach provider"))).get("status"),0)==400,"server rejects grading a quarantined task without calling AI");
             List<Map<String,Object>> mats=DB.query("SELECT id,materials FROM practical_tasks WHERE materials IS NOT NULL");boolean downloaded=false;
             for(Map<String,Object> row:mats){List<Object> files=Json.arr(Json.parse(Json.str(row.get("materials"),"[]")));if(files.isEmpty())continue;String name=Json.str(Json.obj(files.get(0)).get("name"));HttpURLConnection c=(HttpURLConnection)new URL(BASE+"/api/practical/"+row.get("id")+"/material?file="+URLEncoder.encode(name,"UTF-8")).openConnection();c.setRequestProperty("Authorization","Bearer "+token);downloaded=c.getResponseCode()==200;c.disconnect();break;}
             check(downloaded,"authenticated material download succeeds");

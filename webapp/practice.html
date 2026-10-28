@@ -62,6 +62,7 @@ function renderQuestion(q, i) {
       ${typeBadge(q.type)}
       <div class="q-title" style="flex:1">${(state.page-1)*state.size + i + 1}. ${esc(q.question)}</div>
     </div>
+    ${q.examEligible===false?'<p class="notice small">待复核题：用于辨析，不纳入模拟、错题判定和能力评估。</p>':''}
     ${multi}<div id="opts-${qid}" data-type="${q.type}">${opts}</div>
     <div id="fb-${qid}"></div>
   </div>`;
@@ -98,6 +99,7 @@ function submitAnswer(qid, answer, wrap, fb) {
   api('/practice/answer', 'POST', { questionId: qid, answer }).then(r => {
     // 标记正确/错误选项
     wrap.querySelectorAll('.option').forEach(o => {
+      if(r.examEligible===false)return;
       const label = o.querySelector('.tag-opt').textContent.trim();
       const ca = r.correctAnswer || '';
       if (r.correct) {
@@ -107,12 +109,12 @@ function submitAnswer(qid, answer, wrap, fb) {
       }
     });
     const cur = [...wrap.querySelectorAll('.option.selected')];
-    if (!r.correct) cur.forEach(o => { if (!o.classList.contains('correct')) o.classList.add('wrong'); });
+    if (!r.correct&&r.examEligible!==false) cur.forEach(o => { if (!o.classList.contains('correct')) o.classList.add('wrong'); });
     fb.innerHTML = `
-      <div class="feedback ${r.correct ? 'ok' : 'no'}">
-        <strong>${r.correct ? '✓ 回答正确' : '✗ 回答错误'}</strong>
-        <span class="muted">正确答案：${esc(r.correctAnswer)}</span>
-        ${r.analysis ? `<div class="mt-8" style="color:inherit">${esc(r.analysis)}</div>` : ''}
+      <div class="feedback ${r.examEligible===false?'':r.correct ? 'ok' : 'no'}">
+        <strong>${r.examEligible===false ? '待复核题：本次对照不计入能力评估' : r.correct ? '✓ 回答正确' : '✗ 回答错误'}</strong>
+        <span class="muted">${r.examEligible===false?'原资料答案（待核查）':'参考答案'}：${esc(r.correctAnswer)}</span>
+        ${r.analysis ? `<div class="mt-8" style="color:inherit;white-space:pre-wrap">${esc(r.analysis)}</div>` : '<p class="small">原题资料暂缺解析，请先回课程核对概念并写出各选项的理由，不要只记答案。<a href="/journey.html">进入课程复习 →</a></p>'}
       </div>`;
   }).catch(e => { wrap.dataset.done = ''; fb.innerHTML = `<div class="feedback no">${esc(e.message)}</div>`; });
 }

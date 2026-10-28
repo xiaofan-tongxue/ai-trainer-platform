@@ -11,7 +11,7 @@
 <script src="/js/common.js"></script>
 <script>
 if (!requireAuth()) throw new Error();
-const content = renderLayout('practical', '实操训练', '40 道操作技能题 · AI 智能评分');
+const content = renderLayout('practical', '实操训练', '40 道技能练习 · 分步指引 · AI 材料审阅');
 const S = { tasks: [], current: null, submitting: false, openedLink: false };
 
 function listView() {
@@ -31,7 +31,7 @@ function listView() {
       ${groups[cat].map(t => `
         <div class="question-item row" style="cursor:pointer;align-items:center" onclick="detail(${t.id})">
           <span class="badge blue">${esc(t.code)}</span>
-          <div style="flex:1"><strong>${esc(t.title)}</strong></div>
+          <div style="flex:1"><strong>${esc(t.title)}</strong>${t.examEligible===false?'<span class="badge gray">待核查 · 仅学习</span>':''}</div>
           <span class="muted small">${esc(t.duration || '')}</span>
           <button class="btn sm ghost">进入 →</button>
         </div>`).join('')}
@@ -45,14 +45,16 @@ function detail(id) {
     S.current = t;
     const mats = t.materials || [];
     content.innerHTML = `
-      <div class="row mb-16">
+      <div class="row mb-16 practical-heading">
         <button class="btn ghost" onclick="listView()">← 返回列表</button>
         <span class="badge blue">${esc(t.code)}</span>
-        <h2 style="margin:0;flex:1">${esc(t.title)}</h2>
+        <h2>${esc(t.title)}</h2>
         <span class="badge gray">${esc(t.category)}</span>
       </div>
-      <div class="split" style="align-items:flex-start">
-        <div style="flex:1;min-width:0">
+      <div class="notice mb-16" id="qualityNotice">${esc(t.qualityNotice||'教学练习，实际考试以评价机构通知为准。')}${t.examEligible===false?' 本题暂停 AI 评分，不纳入模拟及通过率评估。':''}</div>
+      ${renderGuide(t)}
+      <div class="split practical-columns" style="align-items:flex-start">
+        <div class="practical-main">
           <div class="card mb-16">
             <div class="card-h">题目信息</div>
             <div class="card-b">
@@ -73,9 +75,10 @@ function detail(id) {
             <div class="card-b">
               <label>在此编写/粘贴你的答案（代码或文字分析）</label>
               <textarea id="answer" class="code-editor" maxlength="30000" placeholder="填写代码、分析步骤与运行结果。提交材料将发送给DeepSeek进行审阅，不会代替实际运行验证。"></textarea>
-              <div class="row mt-16">
-                <button class="btn primary" id="submitWork" onclick="submitWork()">提交审阅</button>
+              <div class="row mt-16 practical-actions">
+                <button class="btn primary" id="submitWork" onclick="submitWork()" ${t.examEligible===false?'disabled':''}>提交审阅</button>
                 <button class="btn ghost" onclick="toggleRef()">查看参考答案</button>
+                ${/```python/.test(t.reference_answer||'')?'<button class="btn ghost" id="downloadReference" onclick="downloadReference()">下载参考脚本</button>':''}
               </div>
               <div id="aiResult" class="mt-16"></div>
               <div id="refAnswer" class="mt-16" style="display:none"></div>
@@ -101,6 +104,25 @@ function detail(id) {
     document.getElementById('answer').oninput=e=>{try{sessionStorage.setItem(draftKey,e.target.value);}catch(err){}};
     content.querySelectorAll('[data-download]').forEach(b=>b.onclick=()=>downloadWorkMaterial(t.id,b.dataset.download));
   }).catch(e => content.innerHTML = `<div class="empty">${esc(e.message)}<br><button class="btn primary mt-16" onclick="listView()">返回</button></div>`);
+}
+
+function renderGuide(t) {
+  const g=t.learningGuide;if(!g)return '';
+  return `<div class="card mb-16" id="learningGuide"><div class="card-h">从哪里开始、如何完成</div><div class="card-b">
+    <p>${esc(g.firstStep)}</p>
+    <p class="small">先修学习：${(g.prerequisites||[]).map(l=>`<a href="/journey.html?lesson=${encodeURIComponent(l.id)}">${esc(l.title)}</a>`).join(' · ')}</p>
+    <ol>${(g.runSteps||[]).map(v=>`<li>${esc(v)}</li>`).join('')}</ol>
+    <details><summary>做完后怎么检查</summary><ul>${(g.checklist||[]).map(v=>`<li>${esc(v)}</li>`).join('')}</ul></details>
+    <details><summary>遇到问题怎么排查</summary><ul>${(g.troubleshooting||[]).map(v=>`<li>${esc(v)}</li>`).join('')}</ul></details>
+    <p class="muted small">${g.validationScope==='bundled-code'?'配套参考示例已在项目测试环境运行；这不代表学员提交的程序已执行或通过评分。':'本题为方案写作，已检查配套素材；请自行验证数据和方案，不能只复制参考文本。'}</p>
+  </div></div>`;
+}
+
+function downloadReference() {
+  const blocks=[...(S.current.reference_answer||'').matchAll(/```python\s*\n([\s\S]*?)```/g)].map(m=>m[1]);
+  if(!blocks.length)return;
+  const text=blocks.join('\n\n');const url=URL.createObjectURL(new Blob([text],{type:'text/x-python;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download=S.current.code+'-reference.py';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function toggleRef() {

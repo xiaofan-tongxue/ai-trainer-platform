@@ -176,6 +176,13 @@ table.tbl tr:hover td { background: #fafbfd; }
 .split { display: flex; gap: 20px; }
 .split > .left { flex: 1; min-width: 0; }
 .split > .right { width: 360px; flex: 0 0 360px; }
+.practical-main { flex:1;min-width:0;max-width:100%; }
+.practical-heading { flex-wrap:wrap; }
+.practical-heading > * { flex:0 0 auto; }
+.practical-heading h2 { margin:0;flex:1 1 320px;min-width:0; }
+.practical-actions { flex-wrap:wrap; }
+.practical-actions > * { flex:0 1 auto; }
+@media (max-width:1000px) { .practical-main { width:100%; } }
 @media (max-width: 1000px) { .split { flex-direction: column; } .split > .right { width: 100%; flex: auto; } }
 
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -224,7 +231,7 @@ h3 { line-height:1.5; }
 .lesson-link { width:100%;display:flex;gap:10px;border:0;background:transparent;padding:11px 10px;text-align:left;border-radius:7px;font:inherit;font-size:13px;cursor:pointer;color:#506373; }
 .lesson-link.active { background:#e6f5f4;color:#056776;font-weight:600; }
 .lesson-link:hover { background:#eef5f6; }
-.lesson-body { scroll-margin-top:76px; }
+.lesson-body { scroll-margin-top:76px;min-width:0;overflow-wrap:anywhere; }
 .deliverable { background:#eef7f7;border-left:3px solid var(--primary);border-radius:6px;padding:18px;margin:24px 0; }
 .deliverable p { margin-bottom:0; }
 .quiz { border:0;padding:12px 0;margin:12px 0;min-width:0; }

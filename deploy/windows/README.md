@@ -17,7 +17,7 @@
 
 此包用于全新部署，包含900理论题、40实操任务和完整学习资料，不包含原电脑的学员账号、答卷、API Key或数据库文件。不要把现有runtime/security直接复制到另一电脑充当迁移；已有学员数据迁移需要匹配的数据和密钥恢复流程。
 
-Python运行文件来自已验证数字签名的官方完整安装程序，部署时独立解压，包含标准库、SSL、SQLite、Tk和pip，未自动安装机器学习第三方包。需扩展时在环境终端运行 `python -m pip install 包名`，下载依赖需要联网。无需卸载现有Python；环境终端自动配置本实例的解释器和工具路径。
+Python运行文件来自已验证数字签名的官方完整安装程序，部署时独立解压，包含标准库、SSL、SQLite、Tk和pip，未自动安装机器学习第三方包。当前源码提供 `requirements-labs.txt`：新打包版本可在环境终端进入应用目录后执行 `python -m pip install -r requirements-labs.txt`，下载依赖需要联网；旧Release需要先取得该清单。无需卸载现有Python；环境终端自动配置本实例的解释器和工具路径。参考示例本轮在Python3.10执行验证，尚未对包内Python3.13的全部依赖组合复验。
 
 下文“instance”表示上述实际安装目录，启动界面会显示该路径。安装状态记录于instance/installation.json。失败不会删除数据目录或覆盖已有数据库；查看database.err.log/application.err.log，修正后重新运行入口。若种子导入阶段中断，会保留现场并要求人工核查，避免重复导入污染数据。不要删除标记、修改端口或覆盖密钥强行重装。
 

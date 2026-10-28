@@ -1,0 +1,1535 @@
+{
+  "version": "2026-10-26",
+  "tasks": {
+    "1.1.1": {
+      "sourceReferenceSha256": "e45b88e225a685fb7d7c21e9e44e774717d15a21b4870040dc4ee371dcd6456e",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先读懂输入字段与业务目标，再画出数据从采集到审核的流向。",
+      "checklist": [
+        "列出字段名、类型、单位、允许值和缺失规则",
+        "按输入→处理→输出→复核写流程，并标明责任人",
+        "用至少一个正常样本和一个异常样本验证规则"
+      ],
+      "prerequisiteLessons": [
+        "bridge-process",
+        "bridge-clean"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-process",
+          "title": "业务流程设计：采集、处理、审核与返工"
+        },
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 1.1.1 智能医疗系统中的业务数据处理流程设计\n\n## 题目要求\n\n1. 统计住院天数超过7天的患者数量及其占比，住院天数>7天为高风险患者，否则为低风险患者\n2. 统计不同BMI区间中高风险患者的比例和患者数（偏瘦<18.5，正常18.5~23.9，超重24.0~27.9，肥胖>=28.0）\n3. 统计不同年龄区间中高风险患者的比例和患者数（<=25岁，26-35岁，36-45岁，46-55岁，56-65岁，>65岁）\n\n## 答案代码\n\n```python\n# ====== Cell 1: 读取数据集 ======\nimport pandas as pd\nimport numpy as np\n\n# 读取数据集 1分\ndata = pd.read_csv('patient_data.csv')\n```\n\n```python\n# ====== Cell 2: 统计住院天数超过7天的患者数量及其占比 ======\n# 1. 统计住院天数超过7天的患者数量及其占比\n# 创建新列'RiskLevel'，根据住院天数判断风险等级 3分\ndata['RiskLevel'] = np.where(data['DaysInHospital'] > 7, '高风险患者', '低风险患者')\n# 统计不同风险等级的患者数量 2分\nrisk_counts = data['RiskLevel'].value_counts()\n# 计算高风险患者占比 1分\nhigh_risk_ratio = risk_counts['高风险患者'] / len(data)\n# 计算低风险患者占比 1分\nlow_risk_ratio = risk_counts['低风险患者'] / len(data)\n\n# 输出结果\nprint(\"高风险患者数量:\", risk_counts['高风险患者'])\nprint(\"低风险患者数量:\", risk_counts['低风险患者'])\nprint(\"高风险患者占比:\", high_risk_ratio)\nprint(\"低风险患者占比:\", low_risk_ratio)\n```\n\n```python\n# ====== Cell 3: 统计不同BMI区间中高风险患者的比例和患者数 ======\n# 2. 统计不同BMI区间中高风险患者的比例和统计不同BMI区间中的患者数\n# 定义BMI区间和标签\nbmi_bins = [0, 18.5, 24, 28, np.inf]\nbmi_labels = ['偏瘦', '正常', '超重', '肥胖']\n# 根据BMI值划分指定区间 4分\ndata['BMIRange'] = pd.cut(data['BMI'], bmi_bins, labels=bmi_labels, right=False)  # 使用左闭右开区间\n# 计算每个BMI区间中高风险患者的比例 2分\nbmi_risk_rate = data.groupby('BMIRange')['RiskLevel'].apply(lambda x: (x == '高风险患者').mean())\n# 统计每个BMI区间的患者数量 1分\nbmi_patient_count = data['BMIRange'].value_counts()\n\n# 输出结果\nprint(\"BMI区间中高风险患者的比例和患者数:\")\nprint(bmi_risk_rate)\nprint(bmi_patient_count)\n```\n\n```python\n# ====== Cell 4: 统计不同年龄区间中高风险患者的比例和患者数 ======\n# 3. 统计不同年龄区间中高风险患者的比例和统计不同年龄区间中的患者数\n# 定义年龄区间和标签\nage_bins = [0, 26, 36, 46, 56, 66, np.inf]\nage_labels = ['≤25岁', '26-35岁', '36-45岁', '46-55岁', '56-65岁', '＞65岁']\n# 根据年龄值划分指定区间 4分\ndata['AgeRange'] = pd.cut(data['Age'], age_bins, labels=age_labels, right=False)  # 使用左闭右开区间\n# 计算每个年龄区间中高风险患者的比例 2分\nage_risk_rate = data.groupby('AgeRange')['RiskLevel'].apply(lambda x: (x == '高风险患者').mean())\n# 统计每个年龄区间的患者数量 1分\nage_patient_count = data['AgeRange'].value_counts()\n\n# 输出结果\nprint(\"年龄区间中高风险患者的比例和患者数:\")\nprint(age_risk_rate)\nprint(age_patient_count)\n```\n\n## 代码解析\n\n### Cell 1 - 读取数据\n- 使用 `pd.read_csv('patient_data.csv')` 读取患者数据集，包含 PatientID、Age、BMI、BloodPressure、Cholesterol、DaysInHospital 共6个字段，1000条记录\n\n### Cell 2 - 高风险患者统计（对应截图 1.1.1-1）\n- `np.where(data['DaysInHospital'] > 7, '高风险患者', '低风险患者')`：根据住院天数是否超过7天，创建 RiskLevel 列\n- `data['RiskLevel'].value_counts()`：统计高风险和低风险患者的数量\n- `risk_counts['高风险患者'] / len(data)`：计算高风险患者占总人数的比例\n\n### Cell 3 - BMI区间统计（对应截图 1.1.1-2）\n- `pd.cut(data['BMI'], bmi_bins, labels=bmi_labels, right=False)`：将BMI值按区间分组（左闭右开），分为偏瘦/正常/超重/肥胖四类\n- `data.groupby('BMIRange')['RiskLevel'].apply(lambda x: (x == '高风险患者').mean())`：按BMI区间分组，计算每组中高风险患者的比例\n- `data['BMIRange'].value_counts()`：统计每个BMI区间的患者数量\n\n### Cell 4 - 年龄区间统计（对应截图 1.1.1-3）\n- `pd.cut(data['Age'], age_bins, labels=age_labels, right=False)`：将年龄按区间分组，分为6个年龄段\n- `data.groupby('AgeRange')['RiskLevel'].apply(lambda x: (x == '高风险患者').mean())`：按年龄区间分组，计算每组中高风险患者的比例\n- `data['AgeRange'].value_counts()`：统计每个年龄区间的患者数量\n\n### 填空答案速查表\n\n| 位置 | 填写内容 |\n|------|----------|\n| Cell1: `data = _____` | `pd.read_csv('patient_data.csv')` |\n| Cell2: 第1个空 `_____ = ` | `data['RiskLevel']` |\n| Cell2: 第2个空 `= _____(` | `np.where` |\n| Cell2: 第3个空 `np.where(_____, ` | `data['DaysInHospital'] > 7` |\n| Cell2: `data_____.____` | `['RiskLevel'].value_counts()` |\n| Cell2: `/ _____` (两处) | `len(data)` |\n| Cell3: `pd.cut(_____, _____, labels=_____, right=False)` | `data['BMI'], bmi_bins, labels=bmi_labels` |\n| Cell3: `_____(_____)['RiskLevel']` | `data.groupby('BMIRange')` |\n| Cell3: `data_____` | `['BMIRange'].value_counts()` |\n| Cell4: `pd.cut(_____, _____, labels=_____, right=False)` | `data['Age'], age_bins, labels=age_labels` |\n| Cell4: `_____(_____)['RiskLevel']` | `data.groupby('AgeRange')` |\n| Cell4: `data_____` | `['AgeRange'].value_counts()` |\n"
+    },
+    "1.1.2": {
+      "sourceReferenceSha256": "1224b089b7b4f796479d4ccc871cdff9471184bb93062a16b8cf649b5414281e",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先读懂输入字段与业务目标，再画出数据从采集到审核的流向。",
+      "checklist": [
+        "列出字段名、类型、单位、允许值和缺失规则",
+        "按输入→处理→输出→复核写流程，并标明责任人",
+        "用至少一个正常样本和一个异常样本验证规则"
+      ],
+      "prerequisiteLessons": [
+        "bridge-process",
+        "bridge-clean"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-process",
+          "title": "业务流程设计：采集、处理、审核与返工"
+        },
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 1.1.2 智能农业系统中的业务数据采集和处理流程设计\n\n## 题目要求\n\n1. 传感器数据统计：统计每种传感器的数据数量和平均值（截图 1.1.2-1）\n2. 按位置统计温度和湿度数据的平均值（截图 1.1.2-2）\n3. 数据清洗和异常值处理：标记异常温度（<-10 或 >50）和湿度（<0 或 >100），用前向/后向填充缺失值，保存为 cleaned_sensor_data.csv\n\n## 答案代码\n\n```python\n# ====== Cell 1: 读取数据集 ======\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\n# 读取数据集 2分\ndata = pd.read_csv('sensor_data.csv')\n```\n\n```python\n# ====== Cell 2: 传感器数据统计 ======\n# 1. 传感器数据统计\n# 对传感器类型进行分组，并计算每个组的数据数量和平均值 3分\nsensor_stats = data.groupby('SensorType')['Value'].agg(['count', 'mean'])\n# 输出结果\nprint(\"传感器数据数量和平均值:\")\nprint(sensor_stats)\n```\n\n```python\n# ====== Cell 3: 按位置统计温度和湿度数据 ======\n# 2. 按位置统计温度和湿度数据\n# 筛选出温度和湿度数据，然后按位置和传感器类型分组，计算每个组的平均值 2分\nlocation_stats = data[data['SensorType'].isin(['Temperature', 'Humidity'])].groupby(['Location', 'SensorType'])['Value'].mean().unstack()\n# 输出结果\nprint(\"每个位置的温度和湿度数据平均值:\")\nprint(location_stats)\n```\n\n```python\n# ====== Cell 4: 数据清洗和异常值处理 ======\n# 3. 数据清洗和异常值处理\n# 标记异常值 3分\ndata['is_abnormal'] = np.where(\n    ((data['SensorType'] == 'Temperature') & ((data['Value'] < -10) | (data['Value'] > 50))) |\n    ((data['SensorType'] == 'Humidity') & ((data['Value'] < 0) | (data['Value'] > 100))),\n    True, False\n)\n# 输出异常值数量 2分\nprint(\"异常值数量:\", data['is_abnormal'].sum())\n# 填补缺失值\n# 使用前向填充和后向填充的方法填补缺失值 4分\ndata['Value'].fillna(method='ffill', inplace=True)\ndata['Value'].fillna(method='bfill', inplace=True)\n# 保存清洗后的数据\n# 删除用于标记异常值的列，并将清洗后的数据保存到新的CSV文件中 4分\ncleaned_data = data.drop(columns=['is_abnormal'])\ncleaned_data.to_csv('cleaned_sensor_data.csv', index=False)\nprint(\"数据清洗完成，已保存为 'cleaned_sensor_data.csv'\")\n```\n\n## 代码解析\n\n### Cell 1 - 读取数据\n- 读取 sensor_data.csv，包含 SensorID、Timestamp、SensorType、Value、Location 共5个字段，10000条记录\n- 传感器类型包括：Temperature（温度）、Humidity（湿度）、SoilMoisture（土壤水分）、SoilPH（土壤酸碱度）、Light（光传感器）\n\n### Cell 2 - 传感器数据统计（对应截图 1.1.2-1）\n- `data.groupby('SensorType')`：按传感器类型分组\n- `['Value'].agg(['count', 'mean'])`：同时计算每组的数据数量和平均值\n\n### Cell 3 - 按位置统计温度和湿度（对应截图 1.1.2-2）\n- `data['SensorType'].isin(['Temperature', 'Humidity'])`：筛选温度和湿度类型的数据\n- `.groupby(['Location', 'SensorType'])`：按位置和传感器类型双重分组\n- `.mean().unstack()`：计算平均值后转为透视表，使温度和湿度成为列\n\n### Cell 4 - 数据清洗（生成 cleaned_sensor_data.csv）\n- 标记异常值：温度<-10或>50为异常，湿度<0或>100为异常\n- `data['is_abnormal'].sum()`：统计异常值总数\n- `fillna(method='ffill')`：前向填充（用前面的值填充缺失值）\n- `fillna(method='bfill')`：后向填充（如果前面也没有值，用后面的值填充）\n- `data.drop(columns=['is_abnormal'])`：删除临时标记列\n- `to_csv('cleaned_sensor_data.csv', index=False)`：保存清洗后的数据\n\n### 填空答案速查表\n\n| 位置 | 填写内容 |\n|------|----------|\n| Cell1: `data = _____` | `pd.read_csv('sensor_data.csv')` |\n| Cell2: `_____(_____)['Value']._____` | `data.groupby('SensorType')['Value'].agg(['count', 'mean'])` |\n| Cell3: `data[data['SensorType']._____._____['Value']` | `.isin(['Temperature', 'Humidity'])].groupby(['Location', 'SensorType'])` |\n| Cell4: 第1个条件空 `(_____) &` | `data['SensorType'] == 'Temperature'` |\n| Cell4: 第2个条件空 `(_____) &` | `data['SensorType'] == 'Humidity'` |\n| Cell4: `data['is_abnormal']._____` | `.sum()` |\n| Cell4: `_____(_____, inplace=True)` 前向 | `.fillna(method='ffill', inplace=True)` |\n| Cell4: `_____(_____, inplace=True)` 后向 | `.fillna(method='bfill', inplace=True)` |\n| Cell4: `_____(_____)` 删除列 | `data.drop(columns=['is_abnormal'])` |\n| Cell4: `_____('cleaned_sensor_data.csv', _____)` | `cleaned_data.to_csv('cleaned_sensor_data.csv', index=False)` |\n"
+    },
+    "1.1.3": {
+      "sourceReferenceSha256": "17471587d47f927dc97722484818a00215275ea78ac8c1e1b4253e1e73bb1530",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先读懂输入字段与业务目标，再画出数据从采集到审核的流向。",
+      "checklist": [
+        "列出字段名、类型、单位、允许值和缺失规则",
+        "按输入→处理→输出→复核写流程，并标明责任人",
+        "用至少一个正常样本和一个异常样本验证规则"
+      ],
+      "prerequisiteLessons": [
+        "bridge-process",
+        "bridge-clean"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-process",
+          "title": "业务流程设计：采集、处理、审核与返工"
+        },
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 1.1.3 金融机构信用评估系统中的业务数据审核流程设计\n\n## 题目要求\n\n1. 数据完整性审核：检查缺失值和重复值（截图 1.1.3-1）\n2. 数据合理性审核：年龄18-70，收入>2000，贷款金额<收入5倍，信用评分300-850（截图 1.1.3-2）\n3. 数据清洗：删除不合理数据行，保存为 cleaned_credit_data.csv\n\n## 答案代码\n\n```python\n# ====== Cell 1: 读取数据集 ======\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\n# 读取数据集\ndata = pd.read_csv('credit_data.csv')\n```\n\n```python\n# ====== Cell 2: 数据完整性审核 ======\n# 1. 数据完整性审核\nmissing_values = data.isnull().sum()       #数据缺失值统计 2分\nduplicate_values = data.duplicated().sum()     #数据重复值统计 2分\n# 输出结果\nprint(\"缺失值统计:\")\nprint(missing_values)\nprint(\"重复值统计:\")\nprint(duplicate_values)\n```\n\n```python\n# ====== Cell 3: 数据合理性审核 ======\n# 2. 数据合理性审核\ndata['is_age_valid'] = data['Age'].between(18, 70)              #Age数据的合理性审核 2分\ndata['is_income_valid'] = data['Income'] > 2000                 #Income数据的合理性审核 2分\ndata['is_loan_amount_valid'] = data['LoanAmount'] < (data['Income'] * 5)      #LoanAmount数据的合理性审核 2分\ndata['is_credit_score_valid'] = data['CreditScore'].between(300, 850)   #CreditScore数据的合理性审核 2分\n# 合理性检查结果\nvalidity_checks = data[['is_age_valid', 'is_income_valid', 'is_loan_amount_valid', 'is_credit_score_valid']].all(axis=1)\ndata['is_valid'] = validity_checks\n# 输出结果\nprint(\"数据合理性检查:\")\nprint(data[['is_age_valid', 'is_income_valid', 'is_loan_amount_valid', 'is_credit_score_valid', 'is_valid']].describe())\n```\n\n```python\n# ====== Cell 4: 数据清洗和异常值处理 ======\n# 3. 数据清洗和异常值处理\n# 标记不合理数据\ninvalid_rows = data[~data['is_valid']]\n# 删除不合理数据行\ncleaned_data = data[data['is_valid']]\n# 删除标记列\ncleaned_data = cleaned_data.drop(columns=['is_age_valid', 'is_income_valid', 'is_loan_amount_valid', 'is_credit_score_valid', 'is_valid'])\n# 保存清洗后的数据\ncleaned_data.to_csv('cleaned_credit_data.csv', index=False)\nprint(\"数据清洗完成，已保存为 'cleaned_credit_data.csv'\")\n```\n\n## 代码解析\n\n### Cell 1 - 读取数据\n- 读取 credit_data.csv，包含 CustomerID、Name、Age、Income、LoanAmount、LoanTerm、CreditScore、Default、TransactionHistory 共9个字段，1000条记录\n- 注意 Age 和 Income 为 float64 类型（可能含有缺失值导致），其余数值字段为 int64\n\n### Cell 2 - 数据完整性审核（对应截图 1.1.3-1）\n- `data.isnull().sum()`：统计每个字段的缺失值数量\n- `data.duplicated().sum()`：统计重复行的数量\n\n### Cell 3 - 数据合理性审核（对应截图 1.1.3-2）\n- `data['Age'].between(18, 70)`：检查年龄是否在18到70之间（含边界）\n- `data['Income'] > 2000`：检查收入是否大于2000\n- `data['LoanAmount'] < (data['Income'] * 5)`：检查贷款金额是否小于收入的5倍\n- `data['CreditScore'].between(300, 850)`：检查信用评分是否在300到850之间\n- `.all(axis=1)`：对每行所有合理性检查取与操作，全部通过才为 True\n- `.describe()`：输出各合理性字段的统计描述（包括 True/False 的计数等）\n\n### Cell 4 - 数据清洗（生成 cleaned_credit_data.csv）\n- `data[~data['is_valid']]`：标记出不合理的数据行\n- `data[data['is_valid']]`：只保留合理的数据行\n- `.drop(columns=[...])`：删除所有用于合理性检查的临时标记列\n- `to_csv('cleaned_credit_data.csv', index=False)`：保存清洗后的数据\n\n### 填空答案速查表\n\n| 位置 | 填写内容 |\n|------|----------|\n| Cell2: `data._____` 缺失值 | `isnull().sum()` |\n| Cell2: `data._____` 重复值 | `duplicated().sum()` |\n| Cell3: `_____._____(18, 70)` | `data['Age'].between(18, 70)` |\n| Cell3: `_____ > _____` | `data['Income'] > 2000` |\n| Cell3: `_____ < (_____ * 5)` | `data['LoanAmount'] < (data['Income'] * 5)` |\n| Cell3: `_____._____(300, 850)` | `data['CreditScore'].between(300, 850)` |\n| Cell4: `_____._____(_____, index=False)` | `cleaned_data.to_csv('cleaned_credit_data.csv', index=False)` |\n"
+    },
+    "1.1.4": {
+      "sourceReferenceSha256": "5cf5c651bc011245a70087f0985abd8f57093234494f0e2b387d3f3a54b6764a",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先读懂输入字段与业务目标，再画出数据从采集到审核的流向。",
+      "checklist": [
+        "列出字段名、类型、单位、允许值和缺失规则",
+        "按输入→处理→输出→复核写流程，并标明责任人",
+        "用至少一个正常样本和一个异常样本验证规则"
+      ],
+      "prerequisiteLessons": [
+        "bridge-process",
+        "bridge-clean"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-process",
+          "title": "业务流程设计：采集、处理、审核与返工"
+        },
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 1.1.4 电商平台用户行为分析系统的数据采集与处理流程设计\n\n## 题目要求\n\n1. 数据采集：读取 user_behavior_data.csv，打印前5条数据\n2. 数据清洗与预处理：处理缺失值（删除）、数据类型转换、处理异常值（年龄/购买金额/评分）、标准化购买金额和评分，保存为 cleaned_user_behavior_data.csv\n3. 数据统计：每个购买类别的用户数（截图 1.1.4-1）、不同性别的平均购买金额（截图 1.1.4-2）、不同年龄段的用户数（截图 1.1.4-3）\n\n## 答案代码\n\n```python\n# ====== Cell 1: 数据采集 ======\nimport pandas\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# 1. 数据采集\n# 从本地文件中读取数据  2分\ndata = pandas.read_csv('user_behavior_data.csv')\nprint(\"数据采集完成，已加载到DataFrame中\")\n\n# 打印数据的前5条记录  2分\nprint(data.head())\n```\n\n```python\n# ====== Cell 2: 数据清洗与预处理 ======\n# 2. 数据清洗与预处理\n# 处理缺失值（删除）  2分\ndata = data.dropna()\n\n# 数据类型转换\ndata['Age'] = data['Age'].astype(int)   # Age数据类型转换为int 2分\ndata['PurchaseAmount'] = data['PurchaseAmount'].astype(float) # PurchaseAmount数据类型转换为float  2分\ndata['ReviewScore'] = data['ReviewScore'].astype(int)   # ReviewScore数据类型转换为int 2分\n\n# 处理异常值  2分\ndata = data[(data['Age'].between(18, 70)) &\n            (data['PurchaseAmount'] > 0) &\n            (data['ReviewScore'].between(1, 5))]\n\n# 数据标准化\ndata['PurchaseAmount'] = (data['PurchaseAmount'] - data['PurchaseAmount'].mean()) / data['PurchaseAmount'].std()  # PurchaseAmount数据标准化 2分\ndata['ReviewScore'] = (data['ReviewScore'] - data['ReviewScore'].mean()) / data['ReviewScore'].std()        # ReviewScore数据标准化 2分\n\n# 保存清洗后的数据  1分\ndata.to_csv('cleaned_user_behavior_data.csv', index=False)\nprint(\"数据清洗完成，已保存为 'cleaned_user_behavior_data.csv'\")\n```\n\n```python\n# ====== Cell 3: 数据统计 ======\n# 3. 数据统计\n# 统计每个购买类别的用户数 2分\npurchase_category_counts = data['PurchaseCategory'].value_counts()\nprint(\"每个购买类别的用户数:\\n\", purchase_category_counts)\n\n# 统计不同性别的平均购买金额 2分\ngender_purchase_amount_mean = data.groupby('Gender')['PurchaseAmount'].mean()\nprint(\"不同性别的平均购买金额:\\n\", gender_purchase_amount_mean)\n\n# 统计不同年龄段的用户数 2分\nbins = [18, 26, 36, 46, 56, 66, np.inf]\nlabels = ['18-25', '26-35', '36-45', '46-55', '56-65', '65+']\ndata['AgeGroup'] = pandas.cut(data['Age'], bins=bins, labels=labels, right=False)\nage_group_counts = data['AgeGroup'].value_counts().sort_index()\nprint(\"不同年龄段的用户数:\\n\", age_group_counts)\n```\n\n## 代码解析\n\n### Cell 1 - 数据采集\n- 注意此题导入的是 `import pandas` 而非 `import pandas as pd`，所以后续使用 `pandas.read_csv` 和 `pandas.cut`\n- `pandas.read_csv('user_behavior_data.csv')`：读取用户行为数据集\n- `data.head()`：打印前5条记录\n\n### Cell 2 - 数据清洗与预处理（生成 cleaned_user_behavior_data.csv）\n- `data.dropna()`：删除含缺失值的行\n- `.astype(int)` / `.astype(float)`：确保数据类型正确\n- `data['Age'].between(18, 70)`：筛选合理年龄范围\n- `data['PurchaseAmount'] > 0`：筛选正的购买金额\n- `data['ReviewScore'].between(1, 5)`：筛选合理评分范围\n- Z-score标准化公式：`(x - mean) / std`\n  - `data['PurchaseAmount'].mean()` 和 `.std()`：计算均值和标准差\n  - 同理对 ReviewScore 进行标准化\n\n### Cell 3 - 数据统计（对应截图 1.1.4-1、1.1.4-2、1.1.4-3）\n- `data['PurchaseCategory'].value_counts()`：统计每个购买类别的用户数\n- `data.groupby('Gender')['PurchaseAmount'].mean()`：按性别分组计算平均购买金额\n- `pandas.cut(data['Age'], bins=bins, labels=labels, right=False)`：按年龄区间分组\n- `.value_counts().sort_index()`：统计各年龄段人数并按顺序排列\n\n### 填空答案速查表\n\n| 位置 | 填写内容 |\n|------|----------|\n| Cell1: `data = _____` | `pandas.read_csv('user_behavior_data.csv')` |\n| Cell1: `print(_____)` | `data.head()` |\n| Cell2: `data = _____` 删除缺失值 | `data.dropna()` |\n| Cell2: `data_____ = _____(int)` Age | `data['Age'] = data['Age'].astype(int)` |\n| Cell2: `data_____ = _____(float)` Amount | `data['PurchaseAmount'] = data['PurchaseAmount'].astype(float)` |\n| Cell2: `data_____ = _____(int)` Score | `data['ReviewScore'] = data['ReviewScore'].astype(int)` |\n| Cell2: `(_____._____(18, 70))` | `data['Age'].between(18, 70)` |\n| Cell2: `(_____._____(1, 5))` | `data['ReviewScore'].between(1, 5)` |\n| Cell2: `- _____) / _____` Amount标准化 | `data['PurchaseAmount'].mean()) / data['PurchaseAmount'].std()` |\n| Cell2: `- _____) / _____` Score标准化 | `data['ReviewScore'].mean()) / data['ReviewScore'].std()` |\n| Cell2: `_____('cleaned_...csv', index=False)` | `data.to_csv` |\n| Cell3: `_____.____` 购买类别 | `data['PurchaseCategory'].value_counts()` |\n| Cell3: `_____(_____)['PurchaseAmount'].mean()` | `data.groupby('Gender')` |\n| Cell3: `pandas._____(_____, right=False)` | `cut(data['Age'], bins=bins, labels=labels` |\n"
+    },
+    "1.1.5": {
+      "sourceReferenceSha256": "6580218ad1751c247390b1a4e284c4161ad5d7d6bf35762d6fa7af625ba09da1",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先读懂输入字段与业务目标，再画出数据从采集到审核的流向。",
+      "checklist": [
+        "列出字段名、类型、单位、允许值和缺失规则",
+        "按输入→处理→输出→复核写流程，并标明责任人",
+        "用至少一个正常样本和一个异常样本验证规则"
+      ],
+      "prerequisiteLessons": [
+        "bridge-process",
+        "bridge-clean"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-process",
+          "title": "业务流程设计：采集、处理、审核与返工"
+        },
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 1.1.5 智能交通系统的数据采集、处理和审核流程设计\n\n## 题目要求\n\n1. 数据采集：读取 vehicle_traffic_data.csv，显示前5行（截图 1.1.5-1）\n2. 数据清洗与预处理：删除缺失值、数据类型转换、删除异常值（年龄18-70、车速0-200、距离1-1000、时间1-1440），保存为 cleaned_vehicle_traffic_data.csv\n3. 数据合理性审核：审核年龄/车速/距离/时间的合理性，标记不合理数据（截图 1.1.5-2）\n4. 数据统计：每种交通事件次数（截图 1.1.5-3）、不同性别平均车速/距离/时间（截图 1.1.5-4）、不同年龄段驾驶员数（截图 1.1.5-5）\n\n## 答案代码\n\n```python\n# ====== Cell 1: 数据采集 ======\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# 1. 数据采集\n# 从本地文件中读取数据  2分\ndata = pd.read_csv('vehicle_traffic_data.csv')\nprint(\"数据采集完成，已加载到DataFrame中\")\n\n# 打印数据的前5条记录 2分\nprint(data.head())\n```\n\n```python\n# ====== Cell 2: 数据清洗与预处理 ======\n# 2. 数据清洗与预处理\n# 处理缺失值（删除）  2分\ndata = data.dropna()\n\n# 数据类型转换\ndata['Age'] = data['Age'].astype(int)       #Age数据类型转换为int 1分\ndata['Speed'] = data['Speed'].astype(float)     #Speed数据类型转换为float 1分\ndata['TravelDistance'] = data['TravelDistance'].astype(float)     #TravelDistance数据类型转换为float 1分\ndata['TravelTime'] = data['TravelTime'].astype(float)     #TravelTime数据类型转换为float 1分\n\n# 处理异常值  2分\ndata = data[(data['Age'].between(18, 70))  &\n            (data['Speed'].between(0, 200)) &\n            (data['TravelDistance'].between(1, 1000)) &\n            (data['TravelTime'].between(1, 1440))]\n\n# 保存清洗后的数据  1分\ndata.to_csv('cleaned_vehicle_traffic_data.csv', index=False)\nprint(\"数据清洗完成，已保存为 'cleaned_vehicle_traffic_data.csv'\")\n```\n\n```python\n# ====== Cell 3: 数据合理性审核和数据统计 ======\n# 3. 数据合理性审核\n# 审核字段合理性 1分\nunreasonable_data = data[~((data['Age'].between(18, 70)) &\n                           (data['Speed'].between(0, 200)) &\n                           (data['TravelDistance'].between(1, 1000)) &\n                           (data['TravelTime'].between(1, 1440)))]\nprint(\"不合理的数据:\\n\", unreasonable_data)\n\n# 4. 数据统计\n# 统计每种交通事件的发生次数  2分\ntraffic_event_counts = data['TrafficEvent'].value_counts()\nprint(\"每种交通事件的发生次数:\\n\", traffic_event_counts)\n\n# 统计不同性别的平均车速、行驶距离和行驶时间  2分\ngender_stats = data.groupby('Gender')[['Speed', 'TravelDistance', 'TravelTime']].mean()\nprint(\"不同性别的平均车速、行驶距离和行驶时间:\\n\", gender_stats)\n\n# 统计不同年龄段的驾驶员数  5分\nage_bins = [18, 26, 36, 46, 56, 66, np.inf]\nage_labels = ['18-25', '26-35', '36-45', '46-55', '56-65', '65+']\ndata['AgeGroup'] = pd.cut(data['Age'], bins=age_bins, labels=age_labels, right=False)\nage_group_counts = data['AgeGroup'].value_counts().sort_index()\nprint(\"不同年龄段的驾驶员数:\\n\", age_group_counts)\n```\n\n## 代码解析\n\n### Cell 1 - 数据采集（对应截图 1.1.5-1）\n- `pd.read_csv('vehicle_traffic_data.csv')`：读取车辆行驶数据集，包含 VehicleID、DriverName、Age、Gender、Speed、TravelDistance、TravelTime、TrafficEvent 共8个字段，1000条记录\n- `data.head()`：显示前5行数据\n\n### Cell 2 - 数据清洗与预处理（生成 cleaned_vehicle_traffic_data.csv）\n- `data.dropna()`：删除缺失值行\n- `.astype(int)` / `.astype(float)`：数据类型转换\n- `.between(min, max)`：筛选合理范围内的数据\n  - 年龄：18-70岁\n  - 车速：0-200 km/h\n  - 行驶距离：1-1000 km\n  - 行驶时间：1-1440分钟（24小时）\n- `to_csv('cleaned_vehicle_traffic_data.csv', index=False)`：保存清洗后数据\n\n### Cell 3 - 数据审核和统计（对应截图 1.1.5-2 到 1.1.5-5）\n- 合理性审核：对清洗后的数据再次审核（清洗后应无不合理数据，输出为空 DataFrame）\n- `data['TrafficEvent'].value_counts()`：统计每种交通事件（Normal、Accident、Traffic Jam、Breakdown）的发生次数\n- `data.groupby('Gender')[['Speed', 'TravelDistance', 'TravelTime']].mean()`：按性别分组统计平均车速、距离、时间\n- `pd.cut(data['Age'], bins=age_bins, labels=age_labels, right=False)`：按年龄区间分组\n- `.value_counts().sort_index()`：统计各年龄段人数并排序\n\n### 填空答案速查表\n\n| 位置 | 填写内容 |\n|------|----------|\n| Cell1: `data = _____` | `pd.read_csv('vehicle_traffic_data.csv')` |\n| Cell1: `print(_____)` | `data.head()` |\n| Cell2: `data = _____` | `data.dropna()` |\n| Cell2: `data_____ = _____(int)` Age | `data['Age'] = data['Age'].astype(int)` |\n| Cell2: `data_____ = _____(float)` Speed | `data['Speed'] = data['Speed'].astype(float)` |\n| Cell2: `data_____ = _____(float)` Distance | `data['TravelDistance'] = data['TravelDistance'].astype(float)` |\n| Cell2: `data_____ = _____(float)` Time | `data['TravelTime'] = data['TravelTime'].astype(float)` |\n| Cell2: `(_____(18, 70))` | `data['Age'].between(18, 70)` |\n| Cell2: `(_____(0, 200))` | `data['Speed'].between(0, 200)` |\n| Cell2: `(_____(1, 1000))` | `data['TravelDistance'].between(1, 1000)` |\n| Cell2: `(_____(1, 1440))` | `data['TravelTime'].between(1, 1440)` |\n| Cell2: `_____('cleaned_...csv', index=False)` | `data.to_csv` |\n| Cell3: 审核4个 `_____` | 同Cell2的4个between条件 |\n| Cell3: `traffic_event_counts = _____` | `data['TrafficEvent'].value_counts()` |\n| Cell3: `data._____._____` 性别统计 | `groupby('Gender')[['Speed', 'TravelDistance', 'TravelTime']].mean()` |\n| Cell3: `_____(_____, _____, _____, right=False)` | `pd.cut(data['Age'], bins=age_bins, labels=age_labels` |\n| Cell3: `age_group_counts = _____` | `data['AgeGroup'].value_counts().sort_index()` |\n"
+    },
+    "1.2.1": {
+      "sourceReferenceSha256": "cb07240c4526ff67621c378debee5d69011656c969da989e1b5745ec7732e510",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先找瓶颈，再提出能够测量效果的改进方案。",
+      "checklist": [
+        "写清当前流程、等待点、返工原因和证据",
+        "给出改进前后流程、风险与回退办法",
+        "设定效率、质量、成本的验收口径与抽检方案"
+      ],
+      "prerequisiteLessons": [
+        "bridge-improve",
+        "bridge-quality"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-improve",
+          "title": "业务模块优化：定位瓶颈与设计对照"
+        },
+        {
+          "id": "bridge-quality",
+          "title": "标注质检：抽样、一致率与返工闭环"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 1.2.1 顾客评价情感识别业务模块效果优化\n\n## 题目要求\n\n某电商平台的顾客评价情感识别模块存在情感识别准确性不高、响应速度慢、用户界面不友好、缺乏定制化服务等问题。需要分析用户最不满的问题并设计优化方案。\n\n## 答案\n\n### 答题项1（1.2.1-1）：用户反映最强烈的两个问题及不满原因\n\n**问题一：情感识别准确性不高，导致分析结果偏差**\n\n该问题让用户感到不满的原因如下：\n\n1. **决策误导**：当系统将负面评价错误识别为正面，或将正面评价误判为负面时，商家基于错误数据做出的运营决策会偏离实际情况，例如忽视了本应重视的产品质量投诉，或过度紧张于实际上的好评。\n2. **信任度下降**：用户使用情感识别系统的核心目的是获取准确的顾客情感洞察。当识别结果频繁出错，用户会质疑系统的专业性和可靠性，进而对整个平台的数据分析能力产生怀疑。\n3. **额外工作负担**：不准确的识别结果迫使用户需要人工复核大量评价数据，反而增加了工作量，违背了使用AI工具提升效率的初衷。\n\n**问题二：响应速度慢，用户需长时间等待识别结果**\n\n该问题让用户感到不满的原因如下：\n\n1. **影响工作效率**：电商运营节奏快，商家需要及时了解顾客反馈以快速调整策略。长时间的等待使得用户无法在关键时间窗口内获取分析结果，错失处理负面评价的最佳时机。\n2. **用户体验断裂**：在提交分析请求后需要长时间等待，打断了用户的工作流程，降低了操作的流畅性和连贯性，导致用户使用意愿下降。\n3. **业务时效性受损**：在促销活动、新品上市等关键节点，商家需要实时掌握顾客情感动态。响应速度慢意味着无法及时发现和处理突发的负面舆情，可能造成更大的商业损失。\n\n---\n\n### 答题项2（1.2.1-2）：优化方案设计\n\n#### 一、优化方案概述\n\n针对情感识别准确性和响应速度两个核心问题，从模型优化、架构升级和用户反馈闭环三个维度进行系统性优化。\n\n#### 二、关键实施步骤\n\n**步骤1：数据层优化（第1-2周）**\n- 收集电商领域高质量标注数据，特别是包含讽刺、反语、网络用语等复杂语义的评价样本。\n- 构建电商行业情感词典，涵盖商品品类专属表达（如\"翻车\"\"拔草\"\"回购\"等特定语义词汇）。\n- 对现有训练数据进行清洗和平衡处理，解决正负面样本比例失衡问题。\n\n**步骤2：模型层优化（第3-5周）**\n- 采用预训练语言模型（如BERT/RoBERTa）进行微调，提升对上下文语义的理解能力。\n- 引入多粒度情感分析，支持篇章级、句子级和方面级情感识别，提高细粒度分析准确率。\n- 增加置信度输出机制，对低置信度结果标记为\"需人工复核\"，减少误判影响。\n\n**步骤3：性能层优化（第3-4周）**\n- 引入模型蒸馏和量化技术，在保证准确率的前提下缩小模型体积、提升推理速度。\n- 部署异步处理和消息队列机制，支持批量评价并行处理。\n- 增加缓存机制，对相似评价文本复用已有分析结果，减少重复计算。\n\n**步骤4：反馈闭环建设（第5-6周）**\n- 建立用户纠错反馈通道，用户可对错误识别结果进行标注和修正。\n- 将用户反馈数据定期回流至训练集，形成模型持续迭代优化的闭环。\n- 设置准确率和响应时间的监控看板，实时跟踪系统效果。\n\n#### 三、预期优化效果\n\n| 指标 | 优化前 | 优化目标 |\n|------|--------|----------|\n| 情感识别准确率 | 约70% | 提升至90%以上 |\n| 平均响应时间 | >10秒 | 降至2秒以内 |\n| 用户满意度 | 较低 | 提升30%以上 |\n| 人工复核率 | 高 | 降低60%以上 |\n\n通过以上优化，系统将具备更精准的情感识别能力和更快的响应速度，有效提升商家的运营效率和用户体验。\n"
+    },
+    "1.2.2": {
+      "sourceReferenceSha256": "02322455a091dc06fc8f1c12682b73105e61cdc887b5d7de9c7bdec2400281a2",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先找瓶颈，再提出能够测量效果的改进方案。",
+      "checklist": [
+        "写清当前流程、等待点、返工原因和证据",
+        "给出改进前后流程、风险与回退办法",
+        "设定效率、质量、成本的验收口径与抽检方案"
+      ],
+      "prerequisiteLessons": [
+        "bridge-improve",
+        "bridge-quality"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-improve",
+          "title": "业务模块优化：定位瓶颈与设计对照"
+        },
+        {
+          "id": "bridge-quality",
+          "title": "标注质检：抽样、一致率与返工闭环"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 1.2.2 老年人健康监测与管理服务业务模块效果优化\n\n## 题目要求\n\n某智慧养老平台的心率监测模块存在数据准确性不高、异常预警响应慢等问题，需要分析问题原因及影响，并设计优化方案。\n\n## 答案\n\n### 答题项1（1.2.2-1）：心率监测模块问题分析\n\n#### 一、当前存在的具体问题\n\n**问题1：数据准确性不高**\n- 心率数据采集存在较大波动，静息状态下测量值偏差超出合理范围。\n- 运动状态切换时数据出现明显的跳变和异常值，影响趋势分析的可靠性。\n- 不同佩戴位置和皮肤状态下，传感器读数一致性差。\n\n**问题2：异常预警响应慢**\n- 从检测到异常心率到发出预警通知存在较长延迟（数分钟甚至更久）。\n- 预警消息推送不及时，家属和医护人员无法在第一时间获知异常情况。\n- 系统缺乏分级预警机制，轻度异常和危急情况使用相同的处理流程。\n\n**问题3：误报率高**\n- 日常活动（如起身、翻身）容易触发误报，导致用户和家属产生预警疲劳。\n- 个体差异未被充分考虑，统一的阈值标准不适用于所有老年人。\n\n#### 二、对老年人健康监测的影响\n\n1. **健康安全风险**：数据不准确可能导致真实的心率异常被遗漏，延误就医时机，对老年人的生命安全构成潜在威胁。\n2. **预警失效**：响应延迟使得紧急情况下的黄金救治时间被浪费，降低了系统作为健康守护工具的核心价值。\n3. **用户信任危机**：频繁误报使老年人及其家属对系统丧失信心，甚至选择关闭预警功能，反而增加了健康风险。\n4. **服务体验下降**：不可靠的监测数据导致医护人员无法依据系统数据进行准确的健康评估，降低了整个养老服务的专业性。\n\n#### 三、导致问题的主要原因\n\n1. **传感器精度不足**：低成本传感器在复杂环境下的采集精度有限，特别是老年人皮肤状态（干燥、松弛）对光电传感器的影响较大。\n2. **数据处理算法薄弱**：缺乏有效的信号去噪和运动伪影消除算法，原始数据质量差。\n3. **预警系统架构落后**：采用轮询式检测而非实时流式处理，导致异常发现和通知的延迟。\n4. **缺乏个性化基线**：未针对每位老年人建立个人健康基线模型，使用统一的异常判定阈值不符合个体差异需求。\n\n---\n\n### 答题项2（1.2.2-2）：优化方案设计\n\n#### 一、优化方案概述\n\n从数据采集精度提升、智能预警算法升级和协同服务流程优化三个层面，系统性改善心率监测模块的效果。\n\n#### 二、关键实施步骤\n\n**步骤1：数据采集与预处理优化**\n- 引入自适应滤波算法（如卡尔曼滤波），对原始心率信号进行实时去噪处理，消除运动伪影和环境干扰。\n- 采用多传感器融合方案，结合加速度计数据识别运动状态，对不同活动场景下的心率数据分别校准。\n- 建立数据质量评估机制，自动识别并标记低质量数据段，避免其参与后续分析。\n\n**步骤2：个性化基线模型构建**\n- 为每位老年人建立个人心率基线模型，通过持续学习其正常心率模式（包括昼夜节律、活动规律等）。\n- 采用机器学习算法（如孤立森林、LSTM时序模型）进行个性化异常检测，取代固定阈值判定。\n- 结合老年人的病史和用药信息，调整异常检测的灵敏度参数。\n\n**步骤3：实时预警系统升级**\n- 将系统架构从轮询模式改为基于流计算的实时处理架构（如Flink/Kafka Streams），实现秒级异常检测。\n- 建立三级预警机制：一级（关注级）仅记录日志；二级（警示级）推送至家属APP；三级（紧急级）同时通知家属、社区医护和120急救。\n- 增加预警确认和反馈机制，家属和医护可快速响应确认或标记误报。\n\n**步骤4：模型训练与持续迭代**\n- 收集标注好的真实异常事件数据，训练异常检测模型，提升准确率。\n- 将误报反馈数据纳入模型再训练流程，持续降低误报率。\n- 定期评估模型效果，每月更新个人基线模型参数。\n\n**步骤5：团队协调与资源保障**\n- 算法团队负责滤波算法和检测模型的开发与调优。\n- 后端团队负责实时流处理架构的搭建和部署。\n- 产品团队与养老机构合作，收集真实场景反馈并验证优化效果。\n- 建立定期评审机制，按周跟踪准确率和响应时间等关键指标。\n\n#### 三、预期优化效果\n\n- 心率数据采集准确率从当前水平提升至95%以上。\n- 异常预警响应时间从分钟级降低至30秒以内。\n- 误报率降低70%以上，有效缓解预警疲劳问题。\n- 老年人及家属的系统信任度和满意度显著提升，真正实现\"安心守护\"的服务目标。\n"
+    },
+    "1.2.3": {
+      "sourceReferenceSha256": "cb0f9027cf44413e29e6bbbea7e62d0ac3281d054f8ef500434edb2a15a56b3b",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先找瓶颈，再提出能够测量效果的改进方案。",
+      "checklist": [
+        "写清当前流程、等待点、返工原因和证据",
+        "给出改进前后流程、风险与回退办法",
+        "设定效率、质量、成本的验收口径与抽检方案"
+      ],
+      "prerequisiteLessons": [
+        "bridge-improve",
+        "bridge-quality"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-improve",
+          "title": "业务模块优化：定位瓶颈与设计对照"
+        },
+        {
+          "id": "bridge-quality",
+          "title": "标注质检：抽样、一致率与返工闭环"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 1.2.3 智慧金融服务业务模块效果优化\n\n## 题目要求\n\n某智慧金融服务平台在数据处理和异常预警方面存在数据准确性不高、异常预警响应慢等问题，需要分析用户反映的问题及不满原因，并设计优化方案。\n\n## 答案\n\n### 答题项1（1.2.3-1）：用户反映最强烈的问题及不满原因\n\n**问题一：数据准确性不高**\n\n用户不满原因：金融数据的准确性直接关系到资产安全和投资决策。当平台展示的账户余额、交易记录、收益计算等数据出现偏差时，用户会对自身资产状况产生困惑和焦虑。错误的数据可能导致用户做出不当的投资决策，造成实际经济损失。金融领域对数据精确度的要求极高，任何微小的误差都会严重损害用户对平台的信任。\n\n**问题二：异常预警响应慢**\n\n用户不满原因：金融交易具有强时效性，异常交易（如盗刷、异常转账）的发现和处理每延迟一秒，用户的资金风险就增加一分。预警响应慢意味着用户的账户在遭受异常操作后无法及时得到保护，等到通知到达时损失可能已经发生。这直接动摇了用户对平台安全防护能力的信心。\n\n**问题三：风险评估模型不够精准**\n\n用户不满原因：风险评估结果偏差导致两种极端体验——要么低估风险，让用户暴露在本不该承受的风险中；要么高估风险，过度限制用户的正常操作（如频繁冻结账户、拒绝合理交易），给用户带来极大的不便。两种情况都会让用户感到平台的智能化水平不够，无法准确理解用户的真实需求。\n\n**问题四：个性化金融服务缺失**\n\n用户不满原因：不同用户的财务状况、风险偏好和投资目标差异巨大。当平台对所有用户推送相同的理财产品和建议时，用户会觉得服务千篇一律、缺乏针对性，无法满足个人化的金融管理需求，降低了平台的使用价值和粘性。\n\n---\n\n### 答题项2（1.2.3-2）：优化方案设计\n\n#### 一、优化目标\n\n全面提升智慧金融服务平台的数据处理精度、异常预警时效性和个性化服务能力，增强用户信任度和使用体验。\n\n#### 二、关键实施步骤\n\n**步骤1：数据质量治理（第1-3周）**\n- 建立数据全链路校验机制，在采集、传输、存储、展示各环节增加校验逻辑，确保数据一致性。\n- 引入数据对账系统，定时与核心交易系统进行数据比对，自动发现和修复差异。\n- 建立数据质量监控看板，实时追踪数据准确率、完整率和时效性指标。\n\n**步骤2：实时异常检测引擎升级（第2-5周）**\n- 将批处理风控模式升级为基于流计算的实时风控引擎，采用CEP（复杂事件处理）技术实现毫秒级异常交易检测。\n- 构建多维度异常检测模型，综合分析交易金额、频率、地理位置、设备指纹、行为模式等特征。\n- 采用图神经网络技术识别关联账户的异常交易模式，提升团伙欺诈的发现能力。\n\n**步骤3：智能风控模型优化（第3-6周）**\n- 基于用户历史交易数据，为每个用户建立个性化风险画像，取代统一的风控阈值。\n- 引入半监督学习方法，充分利用大量未标注交易数据提升模型泛化能力。\n- 建立模型A/B测试机制，持续对比新旧模型效果，确保上线模型的准确率和召回率均有提升。\n\n**步骤4：个性化金融服务能力建设（第4-7周）**\n- 构建用户金融画像系统，整合用户的资产规模、交易偏好、风险承受能力等维度信息。\n- 基于协同过滤和深度学习推荐算法，为用户智能推荐匹配其风险偏好的理财产品。\n- 提供个性化的财务健康报告和智能投资建议，增强平台的顾问式服务价值。\n\n**步骤5：用户反馈与持续优化（持续进行）**\n- 建立用户反馈快速响应通道，对误报和漏报案例进行标注和回溯分析。\n- 每两周进行一次模型效果评估和参数调优，确保系统性能持续提升。\n\n#### 三、预期优化效果\n\n- **数据准确性**：数据处理准确率提升至99.9%以上，消除因数据偏差引发的用户投诉。\n- **异常预警时效**：异常交易检测响应时间从分钟级降低至秒级（<3秒），大幅缩短风险暴露窗口。\n- **风控精准度**：异常交易识别准确率提升至95%以上，误报率降低50%，在保障安全的同时减少对正常用户的干扰。\n- **用户满意度**：通过个性化服务提升用户粘性，预计平台活跃用户数增长20%以上。\n"
+    },
+    "1.2.4": {
+      "sourceReferenceSha256": "e5c5dc3c9e2c5d8c1d58c211c7a53df21e82c4ce6808c169bbdb783edeab3a4a",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先找瓶颈，再提出能够测量效果的改进方案。",
+      "checklist": [
+        "写清当前流程、等待点、返工原因和证据",
+        "给出改进前后流程、风险与回退办法",
+        "设定效率、质量、成本的验收口径与抽检方案"
+      ],
+      "prerequisiteLessons": [
+        "bridge-improve",
+        "bridge-quality"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-improve",
+          "title": "业务模块优化：定位瓶颈与设计对照"
+        },
+        {
+          "id": "bridge-quality",
+          "title": "标注质检：抽样、一致率与返工闭环"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 1.2.4 智能卖点生成系统业务模块效果优化\n\n## 题目要求\n\n智能卖点生成系统存在卖点生成不准确、缺乏个性化定制等问题，需要分析用户反映的问题及不满原因，并设计优化方案。\n\n## 答案\n\n### 答题项1（1.2.4-1）：用户反映最强烈的问题及不满原因\n\n**问题一：卖点生成不准确，与产品实际特征不匹配**\n\n不满原因：生成的卖点未能抓住产品的核心竞争力，或者描述与产品实际功能存在偏差。这不仅无法帮助商家有效营销，反而可能误导消费者，引发售后纠纷。商家花费时间使用系统却得到不可用的结果，需要大量人工修改甚至重写，严重降低了工作效率。\n\n**问题二：缺乏个性化定制，生成内容千篇一律**\n\n不满原因：不同品类、不同目标人群、不同销售渠道对卖点文案的风格和侧重点有完全不同的要求。系统生成的卖点内容模板化严重，缺乏差异化，无法体现品牌调性和产品独特价值。多个竞品使用后生成的文案高度雷同，失去了营销文案应有的吸引力和辨识度。\n\n**问题三：对行业专业术语和流行表达的理解不足**\n\n不满原因：不同行业有各自的专业表达方式（如美妆领域的\"成分党\"描述、数码产品的参数对比等），系统无法准确运用行业术语，生成的内容显得外行、不专业，无法赢得目标消费群体的认同。同时，系统对网络流行语和消费趋势的跟进不够及时，文案缺乏时代感。\n\n**问题四：多语言和多场景适配能力弱**\n\n不满原因：跨境电商用户需要多语言版本的卖点文案，但系统仅支持单一语言或翻译质量差。此外，同一产品在不同平台（短视频、详情页、直播话术）需要不同风格的卖点表达，系统缺乏场景化适配能力，用户需要针对每个场景单独调整。\n\n---\n\n### 答题项2（1.2.4-2）：优化方案设计\n\n#### 一、优化目标\n\n提升卖点生成的准确性和个性化水平，使系统能够根据产品特征、品牌调性和目标受众自动生成高质量、差异化的营销文案。\n\n#### 二、关键实施步骤\n\n**步骤1：产品知识图谱构建（第1-3周）**\n- 按品类建立产品属性知识图谱，涵盖核心功能、技术参数、使用场景、目标人群等结构化信息。\n- 整合行业报告、消费者评论和竞品分析数据，丰富产品特征的多维度描述。\n- 建立品类专属的卖点要素库，确保生成内容的专业性和准确性。\n\n**步骤2：大语言模型微调与优化（第2-5周）**\n- 收集高质量的电商卖点文案数据集，按品类、风格、场景进行标注分类。\n- 基于大语言模型（如GPT系列/通义千问）进行领域微调，提升对电商营销场景的理解和生成能力。\n- 引入RAG（检索增强生成）技术，在生成过程中实时检索产品数据库和行业知识库，确保卖点内容与产品事实一致。\n\n**步骤3：个性化定制能力开发（第3-6周）**\n- 设计品牌调性配置模块，用户可设置品牌风格（高端、亲民、科技感等）、目标受众（年轻人、家庭主妇、专业人士等）、文案调性（理性、感性、幽默等）。\n- 开发多场景模板引擎，支持商品详情页、短视频脚本、直播话术、社交媒体推文等不同场景的文案生成。\n- 提供卖点要素优先级自定义功能，用户可指定重点突出的产品特征。\n\n**步骤4：质量评估与人机协作（第5-7周）**\n- 建立卖点文案质量自动评估体系，从准确性、吸引力、品牌一致性、合规性等维度打分。\n- 开发\"AI生成+人工微调\"的协作模式，用户可以在AI生成的基础上快速编辑，编辑记录反馈至模型进行学习。\n- 引入A/B测试功能，支持生成多个版本的卖点文案并追踪营销效果，用数据驱动文案优化。\n\n**步骤5：效果验证与持续迭代**\n- 通过用户满意度调查和文案采纳率评估优化效果。\n- 定期更新行业词库和流行表达，保持文案的时效性。\n- 根据用户反馈和A/B测试结果持续优化模型。\n\n#### 三、预期优化效果\n\n- **准确性提升**：卖点与产品实际特征的匹配度提升至90%以上，减少人工修改需求。\n- **个性化水平**：同一产品在不同配置下可生成风格迥异的文案，品牌辨识度显著提高。\n- **效率提升**：商家文案创作效率提升3-5倍，从平均30分钟/产品降至5-10分钟/产品。\n- **营销效果**：采用优化后系统生成文案的商品，点击率和转化率预计提升15%-25%。\n"
+    },
+    "1.2.5": {
+      "sourceReferenceSha256": "190b38ff7eb20a7ebad1241f1e1f36e464b25ae7e1c4ab36acdbd1a05078192b",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先找瓶颈，再提出能够测量效果的改进方案。",
+      "checklist": [
+        "写清当前流程、等待点、返工原因和证据",
+        "给出改进前后流程、风险与回退办法",
+        "设定效率、质量、成本的验收口径与抽检方案"
+      ],
+      "prerequisiteLessons": [
+        "bridge-improve",
+        "bridge-quality"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-improve",
+          "title": "业务模块优化：定位瓶颈与设计对照"
+        },
+        {
+          "id": "bridge-quality",
+          "title": "标注质检：抽样、一致率与返工闭环"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 1.2.5 腾讯云智能数智人系统业务模块效果优化\n\n## 题目要求\n\n腾讯云智能数智人系统存在数智人响应不准确、缺乏个性化交互能力等问题，需要分析用户反映的问题及不满原因，并设计优化方案。\n\n## 答案\n\n### 答题项1（1.2.5-1）：用户反映最强烈的问题及不满原因\n\n**问题一：数智人响应不准确，回答质量参差不齐**\n\n不满原因：数智人作为智能交互的前端窗口，其回答的准确性直接决定了用户对系统的第一印象。当数智人对用户提问给出错误、偏题或含糊的回答时，不仅无法解决用户的实际问题，还会浪费用户的时间。在客服场景中，不准确的回答可能加剧用户的负面情绪；在知识问答场景中，错误信息会误导用户决策，严重降低系统的可信度和专业形象。\n\n**问题二：缺乏个性化交互能力，对话体验生硬机械**\n\n不满原因：用户期望与数智人的交互能像与真人对话一样自然流畅。当前系统的交互模式过于模板化，无法根据用户的身份、偏好、历史对话上下文进行个性化应答。这使得每次交互都像是与一个\"陌生人\"对话，缺乏连续性和亲和力。用户感受不到被理解和被重视，交互体验大打折扣。\n\n**问题三：多轮对话能力不足，上下文理解断裂**\n\n不满原因：在实际使用中，用户的需求往往需要通过多轮对话逐步明确。当前系统在多轮对话中频繁丢失上下文信息，导致用户需要反复重述需求，交互效率极低。这种\"健忘\"的体验让用户感到沟通成本过高，不如直接寻求人工服务。\n\n**问题四：数智人形象与表情动作不够自然**\n\n不满原因：数智人的虚拟形象是用户体验的重要组成部分。当前数智人的表情变化和肢体动作僵硬、不自然，口型与语音不同步，容易产生\"恐怖谷\"效应，让用户感到不适。不自然的形象表现削弱了数智人的亲和力，降低了用户的交互意愿。\n\n---\n\n### 答题项2（1.2.5-2）：优化方案设计\n\n#### 一、优化目标\n\n全面提升腾讯云智能数智人的响应准确性、个性化交互能力和视觉表现力，打造接近真人水平的智能交互体验。\n\n#### 二、关键实施步骤\n\n**步骤1：知识库与对话引擎升级（第1-4周）**\n- 构建领域知识图谱，将业务知识结构化存储，支持精准的知识检索和推理。\n- 采用RAG（检索增强生成）架构，将大语言模型与实时知识库结合，确保回答内容的准确性和时效性。\n- 优化意图识别模型，增加对模糊表达、方言、口语化表达的理解能力，提升问题匹配的准确率。\n- 引入答案置信度机制，低置信度问题自动转接人工客服，避免给出错误回答。\n\n**步骤2：多轮对话与上下文管理优化（第2-5周）**\n- 基于Transformer架构设计长程上下文记忆模块，支持保持20轮以上的对话上下文连贯性。\n- 引入对话状态跟踪（DST）技术，实时维护对话中的关键信息槽位（如用户身份、问题类型、已提供信息等）。\n- 开发主动澄清和确认机制，当用户意图不明确时，数智人能主动追问以明确需求，而非给出模糊回答。\n\n**步骤3：个性化交互能力建设（第3-6周）**\n- 建立用户画像系统，记录用户的基本信息、历史交互记录、偏好习惯等。\n- 开发个性化对话策略引擎，根据用户画像自动调整对话风格（正式/轻松）、回答详细程度和推荐内容。\n- 实现跨会话记忆功能，用户再次使用时数智人能关联历史对话，提供连续性服务体验。\n\n**步骤4：数智人形象与表现力优化（第4-7周）**\n- 采用神经网络驱动的面部动画技术，实现更自然的表情变化和唇形同步。\n- 增加情感感知能力，数智人的表情和语调能根据对话内容和用户情绪动态调整（如用户焦虑时表现出关切、用户满意时展现微笑）。\n- 提供多种数智人形象风格供企业选择定制，支持品牌化的虚拟形象设计。\n\n**步骤5：效果监控与持续迭代（持续进行）**\n- 建立对话质量评估体系，从回答准确率、用户满意度、任务完成率、平均对话轮数等维度综合评价。\n- 设置Bad Case自动收集和分析流程，定期对失败对话进行归因分析并针对性优化。\n- 每月进行一次模型效果评审，持续迭代优化。\n\n#### 三、预期优化效果\n\n- **响应准确率**：从当前水平提升至92%以上，大幅减少错误和无关回答。\n- **多轮对话成功率**：上下文保持能力覆盖20轮以上，多轮对话任务完成率提升40%。\n- **用户满意度**：通过个性化交互和自然的形象表现，用户交互满意度提升至85%以上。\n- **人工转接率**：通过提升自动回答能力，人工转接率降低30%，有效降低人力成本。\n- **形象自然度**：用户对数智人形象的好感度评分提升至4分以上（5分制）。\n"
+    },
+    "2.1.1": {
+      "sourceReferenceSha256": "31c560fc172df78460c4210065200641ad844197ab70cecf9f96649a8c58cefe",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先观察字段，再清洗；涉及建模时先划分数据，最后拟合预处理器。",
+      "checklist": [
+        "记录输入行数、字段、缺失比例和重复数",
+        "说明每条清洗规则及其依据，保留清洗前后统计",
+        "把标注对象、标签、边界例、复核与争议裁决写入规范"
+      ],
+      "prerequisiteLessons": [
+        "bridge-clean",
+        "bridge-text",
+        "bridge-split"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        },
+        {
+          "id": "bridge-text",
+          "title": "文本标注：写清标签定义与争议裁决"
+        },
+        {
+          "id": "bridge-split",
+          "title": "数据集维护：划分、泄漏与版本"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：智慧交通中燃油效率模型的数据清洗和标注流程设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\ndf = clean_columns(pd.read_csv(\"auto-mpg.csv\", na_values=[\"?\"]))\ntarget = \"mpg\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df.dropna(subset=[target])\nX, y = df.drop(columns=[target]), df[target]\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=None)\nprocessor = prepare(X_train)\ntrain_features = processor.fit_transform(X_train)\ntest_features = processor.transform(X_test)\nassert len(X_train) and len(X_test) and set(X_train.index).isdisjoint(X_test.index)\n# 导出原始单位的数据与划分标记，便于复核；不能把目标和标准化特征混写。\noutput = X.copy()\noutput[\"target\"] = y\noutput[\"split\"] = np.where(output.index.isin(X_train.index), \"train\", \"test\")\noutput.to_csv(\"2.1.1_cleaned_data.csv\", index=False, encoding=\"utf-8-sig\")\nprint(\"划分后特征形状：\", train_features.shape, test_features.shape)\nprint(\"已生成 2.1.1_cleaned_data.csv；target 保留原单位，split 记录划分。\")\n```\n\n## 交付与复核\n\n- 记录输入行数、字段、缺失比例和重复数\n- 说明每条清洗规则及其依据，保留清洗前后统计\n- 把标注对象、标签、边界例、复核与争议裁决写入规范"
+    },
+    "2.1.2": {
+      "sourceReferenceSha256": "3d139d171c3535702edc4d3b5e2194dfec0cb021f03a4cd1f682e0bbe3e07e0e",
+      "examEligible": false,
+      "notice": "所附数据中“低碳行为积极性”318条记录全部为0，无法据此学习有区分度的预测目标。仅练习清洗与数据质量检查，待标签来源核查后再纳入技能模拟。",
+      "firstStep": "先观察字段，再清洗；涉及建模时先划分数据，最后拟合预处理器。",
+      "checklist": [
+        "记录输入行数、字段、缺失比例和重复数",
+        "说明每条清洗规则及其依据，保留清洗前后统计",
+        "把标注对象、标签、边界例、复核与争议裁决写入规范"
+      ],
+      "prerequisiteLessons": [
+        "bridge-clean",
+        "bridge-text",
+        "bridge-split"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        },
+        {
+          "id": "bridge-text",
+          "title": "文本标注：写清标签定义与争议裁决"
+        },
+        {
+          "id": "bridge-split",
+          "title": "数据集维护：划分、泄漏与版本"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：低碳生活行为影响因素数据清洗和标注流程设计\n\n所附数据中“低碳行为积极性”318条记录全部为0，无法据此学习有区分度的预测目标。仅练习清洗与数据质量检查，待标签来源核查后再纳入技能模拟。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\ndf = clean_columns(pd.read_excel(\"大学生低碳生活行为的影响因素数据集.xlsx\"))\ntarget = \"低碳行为积极性\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df.dropna(subset=[target])\nprint(\"目标字段不同取值数：\", df[target].nunique())\nif df[target].nunique() < 2:\n    print(\"注意：配套目标列为常量，仅练习预处理；请核查标签来源后再做预测训练。\")\nX, y = df.drop(columns=[target]), df[target]\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=None)\nprocessor = prepare(X_train)\ntrain_features = processor.fit_transform(X_train)\ntest_features = processor.transform(X_test)\nassert len(X_train) and len(X_test) and set(X_train.index).isdisjoint(X_test.index)\n# 导出原始单位的数据与划分标记，便于复核；不能把目标和标准化特征混写。\noutput = X.copy()\noutput[\"target\"] = y\noutput[\"split\"] = np.where(output.index.isin(X_train.index), \"train\", \"test\")\noutput.to_csv(\"2.1.2_cleaned_data.csv\", index=False, encoding=\"utf-8-sig\")\nprint(\"划分后特征形状：\", train_features.shape, test_features.shape)\nprint(\"已生成 2.1.2_cleaned_data.csv；target 保留原单位，split 记录划分。\")\n```\n\n## 交付与复核\n\n- 记录输入行数、字段、缺失比例和重复数\n- 说明每条清洗规则及其依据，保留清洗前后统计\n- 把标注对象、标签、边界例、复核与争议裁决写入规范"
+    },
+    "2.1.3": {
+      "sourceReferenceSha256": "692d48c4e93e534a94024232f40e975f5cea155fd3e4c11908c1bf77724d9d2c",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先观察字段，再清洗；涉及建模时先划分数据，最后拟合预处理器。",
+      "checklist": [
+        "记录输入行数、字段、缺失比例和重复数",
+        "说明每条清洗规则及其依据，保留清洗前后统计",
+        "把标注对象、标签、边界例、复核与争议裁决写入规范"
+      ],
+      "prerequisiteLessons": [
+        "bridge-clean",
+        "bridge-text",
+        "bridge-split"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        },
+        {
+          "id": "bridge-text",
+          "title": "文本标注：写清标签定义与争议裁决"
+        },
+        {
+          "id": "bridge-split",
+          "title": "数据集维护：划分、泄漏与版本"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：信用评分模型数据清洗和标注流程设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\ndf = clean_columns(pd.read_csv(\"finance数据集.csv\"))\ntarget = \"SeriousDlqin2yrs\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df[df[target].isin([0, 1])].copy()\nX, y = df.drop(columns=[target]), df[target].astype(int)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nprocessor = prepare(X_train)\ntrain_features = processor.fit_transform(X_train)\ntest_features = processor.transform(X_test)\nassert len(X_train) and len(X_test) and set(X_train.index).isdisjoint(X_test.index)\n# 导出原始单位的数据与划分标记，便于复核；不能把目标和标准化特征混写。\noutput = X.copy()\noutput[\"target\"] = y\noutput[\"split\"] = np.where(output.index.isin(X_train.index), \"train\", \"test\")\noutput.to_csv(\"2.1.3_cleaned_data.csv\", index=False, encoding=\"utf-8-sig\")\nprint(\"划分后特征形状：\", train_features.shape, test_features.shape)\nprint(\"已生成 2.1.3_cleaned_data.csv；target 保留原单位，split 记录划分。\")\n```\n\n## 交付与复核\n\n- 记录输入行数、字段、缺失比例和重复数\n- 说明每条清洗规则及其依据，保留清洗前后统计\n- 把标注对象、标签、边界例、复核与争议裁决写入规范"
+    },
+    "2.1.4": {
+      "sourceReferenceSha256": "41f645b694877c471592941612d0bb1f94abd59cde69962d8db7a61da5d96804",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先观察字段，再清洗；涉及建模时先划分数据，最后拟合预处理器。",
+      "checklist": [
+        "记录输入行数、字段、缺失比例和重复数",
+        "说明每条清洗规则及其依据，保留清洗前后统计",
+        "把标注对象、标签、边界例、复核与争议裁决写入规范"
+      ],
+      "prerequisiteLessons": [
+        "bridge-clean",
+        "bridge-text",
+        "bridge-split"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        },
+        {
+          "id": "bridge-text",
+          "title": "文本标注：写清标签定义与争议裁决"
+        },
+        {
+          "id": "bridge-split",
+          "title": "数据集维护：划分、泄漏与版本"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：医疗研究数据清洗和标注设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\n\ndf = pd.read_csv(\"medical_data.csv\", encoding=\"gbk\").drop_duplicates()\ncounts = {\"input_rows\": len(df)}\n# 示例边界必须由业务方确认；越界设为缺失并记录，不凭空补造医疗事实。\nfor col, low, high in [(\"年龄\", 0, 120), (\"身高\", 30, 250), (\"体重\", 1, 400)]:\n    values = pd.to_numeric(df[col], errors=\"coerce\")\n    invalid = values.notna() & ~values.between(low, high)\n    counts[col + \"_invalid\"] = int(invalid.sum())\n    df[col] = values.where(values.between(low, high))\nfor col in [\"就诊日期\", \"诊断日期\"]:\n    df[col] = pd.to_datetime(df[col], errors=\"coerce\")\ndf[\"日期待核查\"] = df[\"诊断日期\"] < df[\"就诊日期\"]\ndf[\"BMI\"] = df[\"体重\"] / (df[\"身高\"] / 100) ** 2\nassert not np.isinf(df[\"BMI\"].dropna()).any()\n# 去除直接标识，不打印患者明细；原文件仍只留在本地。\ndf = df.drop(columns=[c for c in df if any(k in c for k in [\"姓名\", \"电话\", \"身份证\", \"患者ID\"])])\ndf.to_csv(\"2.1.4_cleaned_data.csv\", index=False, encoding=\"utf-8-sig\")\ncounts[\"output_rows\"] = len(df)\ncounts[\"date_review_rows\"] = int(df[\"日期待核查\"].sum())\nPath(\"2.1.4_quality.json\").write_text(json.dumps(counts, ensure_ascii=False, indent=2), encoding=\"utf-8\")\nprint(json.dumps(counts, ensure_ascii=False, indent=2))\nprint(\"输出仅用于教学；字段去除不等于已完成匿名化或可公开医疗数据。\")\n```\n\n## 交付与复核\n\n- 记录输入行数、字段、缺失比例和重复数\n- 说明每条清洗规则及其依据，保留清洗前后统计\n- 把标注对象、标签、边界例、复核与争议裁决写入规范"
+    },
+    "2.1.5": {
+      "sourceReferenceSha256": "6f457d251515ebb21dfa6d4edc10a90c224d85f1d06f17e0923b49c55518bb26",
+      "examEligible": false,
+      "notice": "年龄字段为区间类别，与转成精确整数年龄的要求不一致。修订例保留区间并编码，不推造真实年龄；本题暂不纳入技能模拟。",
+      "firstStep": "先观察字段，再清洗；涉及建模时先划分数据，最后拟合预处理器。",
+      "checklist": [
+        "记录输入行数、字段、缺失比例和重复数",
+        "说明每条清洗规则及其依据，保留清洗前后统计",
+        "把标注对象、标签、边界例、复核与争议裁决写入规范"
+      ],
+      "prerequisiteLessons": [
+        "bridge-clean",
+        "bridge-text",
+        "bridge-split"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-clean",
+          "title": "清洗规范：缺失、重复、异常与分箱边界"
+        },
+        {
+          "id": "bridge-text",
+          "title": "文本标注：写清标签定义与争议裁决"
+        },
+        {
+          "id": "bridge-split",
+          "title": "数据集维护：划分、泄漏与版本"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：健康与营养咨询数据预处理与数据规范设计\n\n年龄字段为区间类别，与转成精确整数年龄的要求不一致。修订例保留区间并编码，不推造真实年龄；本题暂不纳入技能模拟。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\ndf = clean_columns(pd.read_csv(\"健康咨询客户数据集.csv\"))\n# Your age 是区间类别，不能直接转整数，也不应把区间中点当成真实年龄。\ntarget = \"How healthy do you consider yourself?\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df.dropna(subset=[target])\nX, y = df.drop(columns=[target]), df[target]\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=None)\nprocessor = prepare(X_train)\ntrain_features = processor.fit_transform(X_train)\ntest_features = processor.transform(X_test)\nassert len(X_train) and len(X_test) and set(X_train.index).isdisjoint(X_test.index)\n# 导出原始单位的数据与划分标记，便于复核；不能把目标和标准化特征混写。\noutput = X.copy()\noutput[\"target\"] = y\noutput[\"split\"] = np.where(output.index.isin(X_train.index), \"train\", \"test\")\noutput.to_csv(\"2.1.5_cleaned_data.csv\", index=False, encoding=\"utf-8-sig\")\nprint(\"划分后特征形状：\", train_features.shape, test_features.shape)\nprint(\"已生成 2.1.5_cleaned_data.csv；target 保留原单位，split 记录划分。\")\n```\n\n## 交付与复核\n\n- 记录输入行数、字段、缺失比例和重复数\n- 说明每条清洗规则及其依据，保留清洗前后统计\n- 把标注对象、标签、边界例、复核与争议裁决写入规范"
+    },
+    "2.2.1": {
+      "sourceReferenceSha256": "6d3b6f754e7138bdbd0e473d73b16407de16cd75ae035f1857ff1df263f193d9",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先写清预测什么，再选择分类或回归，最后用独立测试集评价。",
+      "checklist": [
+        "明确目标字段及单位，删除目标泄漏和身份字段",
+        "记录训练/验证/测试划分、随机种子与训练参数",
+        "提交真实指标、错误案例、改进假设与未解决限制"
+      ],
+      "prerequisiteLessons": [
+        "bridge-pipeline",
+        "bridge-metrics",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-pipeline",
+          "title": "完整训练闭环：建立基线并复现结果"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：智能信用评分Logistic回归模型开发与测试\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\nfrom sklearn.linear_model import LogisticRegression, LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor, RandomForestClassifier\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.metrics import (accuracy_score, f1_score, confusion_matrix, roc_auc_score,\n                             mean_absolute_error, mean_squared_error, r2_score)\nfrom sklearn.base import clone\n\ndf = clean_columns(pd.read_csv(\"finance数据集.csv\"))\ntarget = \"SeriousDlqin2yrs\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df[df[target].isin([0, 1])].copy()\nX, y = df.drop(columns=[target]), df[target].astype(int)\n\n# 先留出最终测试集，再从剩余数据中分出验证集。验证集可用于调参。\nX_dev, X_test, y_dev, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X_dev, y_dev, test_size=0.25, random_state=42, stratify=y_dev)\nassert set(X_train.index).isdisjoint(X_valid.index)\nassert set(X_dev.index).isdisjoint(X_test.index)\nmodel = Pipeline([(\"prepare\", prepare(X_train)), (\"model\", LogisticRegression(max_iter=1500, class_weight=\"balanced\"))])\nmodel.fit(X_train, y_train)\nprint(\"验证集评分：\", round(model.score(X_valid, y_valid), 4))\n# 本例固定超参数。练习改进只能看验证结果，确定方案后才打开最终测试集。\nfinal_model = clone(model).fit(X_dev, y_dev)\nprediction = final_model.predict(X_test)\n\nmetrics = {\"accuracy\": float(accuracy_score(y_test, prediction)),\n           \"macro_f1\": float(f1_score(y_test, prediction, average=\"macro\", zero_division=0)),\n           \"labels\": final_model.classes_.tolist(),\n           \"confusion_matrix\": confusion_matrix(y_test, prediction, labels=final_model.classes_).tolist()}\nif len(final_model.classes_) == 2:\n    metrics[\"roc_auc\"] = float(roc_auc_score(y_test, final_model.predict_proba(X_test)[:, 1]))\n\nmetrics.update(train_rows=len(X_train), validation_rows=len(X_valid), test_rows=len(X_test), random_state=42)\nPath(\"2.2.1_metrics.json\").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding=\"utf-8\")\nassert all(np.isfinite(v) for v in metrics.values() if isinstance(v, float))\nprint(json.dumps(metrics, ensure_ascii=False, indent=2))\nprint(\"已生成 2.2.1_metrics.json；一次固定划分只提供本数据集的测试证据。\")\n```\n\n## 交付与复核\n\n- 明确目标字段及单位，删除目标泄漏和身份字段\n- 记录训练/验证/测试划分、随机种子与训练参数\n- 提交真实指标、错误案例、改进假设与未解决限制"
+    },
+    "2.2.2": {
+      "sourceReferenceSha256": "047baae71b4d5df4b8106b83ec07108a73640f113c4a5477512d3068c8bfc4c9",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先写清预测什么，再选择分类或回归，最后用独立测试集评价。",
+      "checklist": [
+        "明确目标字段及单位，删除目标泄漏和身份字段",
+        "记录训练/验证/测试划分、随机种子与训练参数",
+        "提交真实指标、错误案例、改进假设与未解决限制"
+      ],
+      "prerequisiteLessons": [
+        "bridge-pipeline",
+        "bridge-metrics",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-pipeline",
+          "title": "完整训练闭环：建立基线并复现结果"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：智慧交通中燃油效率随机森林模型开发与测试\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\nfrom sklearn.linear_model import LogisticRegression, LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor, RandomForestClassifier\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.metrics import (accuracy_score, f1_score, confusion_matrix, roc_auc_score,\n                             mean_absolute_error, mean_squared_error, r2_score)\nfrom sklearn.base import clone\n\ndf = clean_columns(pd.read_csv(\"auto-mpg.csv\", na_values=[\"?\"]))\ntarget = \"mpg\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df.dropna(subset=[target])\nX, y = df.drop(columns=[target]), df[target]\n\n# 先留出最终测试集，再从剩余数据中分出验证集。验证集可用于调参。\nX_dev, X_test, y_dev, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=None)\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X_dev, y_dev, test_size=0.25, random_state=42, stratify=None)\nassert set(X_train.index).isdisjoint(X_valid.index)\nassert set(X_dev.index).isdisjoint(X_test.index)\nmodel = Pipeline([(\"prepare\", prepare(X_train)), (\"model\", RandomForestRegressor(n_estimators=100, max_depth=8, random_state=42, n_jobs=2))])\nmodel.fit(X_train, y_train)\nprint(\"验证集评分：\", round(model.score(X_valid, y_valid), 4))\n# 本例固定超参数。练习改进只能看验证结果，确定方案后才打开最终测试集。\nfinal_model = clone(model).fit(X_dev, y_dev)\nprediction = final_model.predict(X_test)\n\nmetrics = {\"MAE\": float(mean_absolute_error(y_test, prediction)),\n           \"RMSE\": float(np.sqrt(mean_squared_error(y_test, prediction))),\n           \"R2\": float(r2_score(y_test, prediction))}\n# MAE、RMSE 与目标同单位；R² 可以为负，不是分类准确率。\n\nmetrics.update(train_rows=len(X_train), validation_rows=len(X_valid), test_rows=len(X_test), random_state=42)\nPath(\"2.2.2_metrics.json\").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding=\"utf-8\")\nassert all(np.isfinite(v) for v in metrics.values() if isinstance(v, float))\nprint(json.dumps(metrics, ensure_ascii=False, indent=2))\nprint(\"已生成 2.2.2_metrics.json；一次固定划分只提供本数据集的测试证据。\")\n```\n\n## 交付与复核\n\n- 明确目标字段及单位，删除目标泄漏和身份字段\n- 记录训练/验证/测试划分、随机种子与训练参数\n- 提交真实指标、错误案例、改进假设与未解决限制"
+    },
+    "2.2.3": {
+      "sourceReferenceSha256": "28e3892bfd5b776431f27ffe38c653a537b96268e985bfb5062f0a7864be20c7",
+      "examEligible": false,
+      "notice": "标题写运动量，正文写年龄，素材年龄为区间。旧例把类别编号做回归不合适；修订例仅演示年龄区间分类。本题暂不纳入技能模拟，待题面与数据统一。",
+      "firstStep": "先写清预测什么，再选择分类或回归，最后用独立测试集评价。",
+      "checklist": [
+        "明确目标字段及单位，删除目标泄漏和身份字段",
+        "记录训练/验证/测试划分、随机种子与训练参数",
+        "提交真实指标、错误案例、改进假设与未解决限制"
+      ],
+      "prerequisiteLessons": [
+        "bridge-pipeline",
+        "bridge-metrics",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-pipeline",
+          "title": "完整训练闭环：建立基线并复现结果"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：日常运动量随机森林预测模型开发与测试\n\n标题写运动量，正文写年龄，素材年龄为区间。旧例把类别编号做回归不合适；修订例仅演示年龄区间分类。本题暂不纳入技能模拟，待题面与数据统一。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\nfrom sklearn.linear_model import LogisticRegression, LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor, RandomForestClassifier\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.metrics import (accuracy_score, f1_score, confusion_matrix, roc_auc_score,\n                             mean_absolute_error, mean_squared_error, r2_score)\nfrom sklearn.base import clone\n\ndf = clean_columns(pd.read_csv(\"fitness analysis.csv\"))\n# 原题标题写运动量，正文写年龄；这里只演示年龄区间分类，不声称预测精确年龄。\ntarget = \"Your age\"\nfeatures = [\"Your gender\", \"How important is exercise to you ?\", \"How healthy do you consider yourself?\"]\ndf = df.dropna(subset=[target])\nX, y = df[features], df[target].astype(str)\n\n# 先留出最终测试集，再从剩余数据中分出验证集。验证集可用于调参。\nX_dev, X_test, y_dev, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X_dev, y_dev, test_size=0.25, random_state=42, stratify=y_dev)\nassert set(X_train.index).isdisjoint(X_valid.index)\nassert set(X_dev.index).isdisjoint(X_test.index)\nmodel = Pipeline([(\"prepare\", prepare(X_train)), (\"model\", RandomForestClassifier(n_estimators=100, max_depth=6, random_state=42, n_jobs=2))])\nmodel.fit(X_train, y_train)\nprint(\"验证集评分：\", round(model.score(X_valid, y_valid), 4))\n# 本例固定超参数。练习改进只能看验证结果，确定方案后才打开最终测试集。\nfinal_model = clone(model).fit(X_dev, y_dev)\nprediction = final_model.predict(X_test)\n\nmetrics = {\"accuracy\": float(accuracy_score(y_test, prediction)),\n           \"macro_f1\": float(f1_score(y_test, prediction, average=\"macro\", zero_division=0)),\n           \"labels\": final_model.classes_.tolist(),\n           \"confusion_matrix\": confusion_matrix(y_test, prediction, labels=final_model.classes_).tolist()}\nif len(final_model.classes_) == 2:\n    metrics[\"roc_auc\"] = float(roc_auc_score(y_test, final_model.predict_proba(X_test)[:, 1]))\n\nmetrics.update(train_rows=len(X_train), validation_rows=len(X_valid), test_rows=len(X_test), random_state=42)\nPath(\"2.2.3_metrics.json\").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding=\"utf-8\")\nassert all(np.isfinite(v) for v in metrics.values() if isinstance(v, float))\nprint(json.dumps(metrics, ensure_ascii=False, indent=2))\nprint(\"已生成 2.2.3_metrics.json；一次固定划分只提供本数据集的测试证据。\")\n```\n\n## 交付与复核\n\n- 明确目标字段及单位，删除目标泄漏和身份字段\n- 记录训练/验证/测试划分、随机种子与训练参数\n- 提交真实指标、错误案例、改进假设与未解决限制"
+    },
+    "2.2.4": {
+      "sourceReferenceSha256": "8cf5003fc651141dd7bde33a4fc87250caa430237f4aead3cd8af2c4e8b7f4c9",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先写清预测什么，再选择分类或回归，最后用独立测试集评价。",
+      "checklist": [
+        "明确目标字段及单位，删除目标泄漏和身份字段",
+        "记录训练/验证/测试划分、随机种子与训练参数",
+        "提交真实指标、错误案例、改进假设与未解决限制"
+      ],
+      "prerequisiteLessons": [
+        "bridge-pipeline",
+        "bridge-metrics",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-pipeline",
+          "title": "完整训练闭环：建立基线并复现结果"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：低碳生活行为影响因素预测线性回归模型开发与测试\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\nfrom sklearn.linear_model import LogisticRegression, LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor, RandomForestClassifier\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.metrics import (accuracy_score, f1_score, confusion_matrix, roc_auc_score,\n                             mean_absolute_error, mean_squared_error, r2_score)\nfrom sklearn.base import clone\n\ndf = clean_columns(pd.read_excel(\"大学生低碳生活行为的影响因素数据集.xlsx\"))\n# 这四项问卷均值只是演示用代理目标，不是经过外部验证的行为测量标准。\nlabel_columns = [\"15.日常生活中，我会......—对垃圾进行分类\", \"重复利用废旧物品\", \"避免使用一次性产品\", \"劝说周围的人进行低碳生活\"]\nlabels = df[label_columns].apply(pd.to_numeric, errors=\"coerce\")\ndf = df.loc[labels.notna().all(axis=1)].copy()\ny = labels.loc[df.index].mean(axis=1)\nX = df.drop(columns=label_columns)\nassert not set(label_columns).intersection(X.columns), \"目标构成项不能作为输入特征\"\n\n# 先留出最终测试集，再从剩余数据中分出验证集。验证集可用于调参。\nX_dev, X_test, y_dev, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=None)\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X_dev, y_dev, test_size=0.25, random_state=42, stratify=None)\nassert set(X_train.index).isdisjoint(X_valid.index)\nassert set(X_dev.index).isdisjoint(X_test.index)\nmodel = Pipeline([(\"prepare\", prepare(X_train)), (\"model\", LinearRegression())])\nmodel.fit(X_train, y_train)\nprint(\"验证集评分：\", round(model.score(X_valid, y_valid), 4))\n# 本例固定超参数。练习改进只能看验证结果，确定方案后才打开最终测试集。\nfinal_model = clone(model).fit(X_dev, y_dev)\nprediction = final_model.predict(X_test)\n\nmetrics = {\"MAE\": float(mean_absolute_error(y_test, prediction)),\n           \"RMSE\": float(np.sqrt(mean_squared_error(y_test, prediction))),\n           \"R2\": float(r2_score(y_test, prediction))}\n# MAE、RMSE 与目标同单位；R² 可以为负，不是分类准确率。\n\nmetrics.update(train_rows=len(X_train), validation_rows=len(X_valid), test_rows=len(X_test), random_state=42)\nPath(\"2.2.4_metrics.json\").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding=\"utf-8\")\nassert all(np.isfinite(v) for v in metrics.values() if isinstance(v, float))\nprint(json.dumps(metrics, ensure_ascii=False, indent=2))\nprint(\"已生成 2.2.4_metrics.json；一次固定划分只提供本数据集的测试证据。\")\n```\n\n## 交付与复核\n\n- 明确目标字段及单位，删除目标泄漏和身份字段\n- 记录训练/验证/测试划分、随机种子与训练参数\n- 提交真实指标、错误案例、改进假设与未解决限制\n\n目标为四项问卷均值，须说明代理指标的定义与局限，不能宣称已证明真实低碳行为或因果关系。"
+    },
+    "2.2.5": {
+      "sourceReferenceSha256": "895b8abc88d2eb71aa1d82cc7367bc8837310621d7ac825b16c440484f4f587b",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先写清预测什么，再选择分类或回归，最后用独立测试集评价。",
+      "checklist": [
+        "明确目标字段及单位，删除目标泄漏和身份字段",
+        "记录训练/验证/测试划分、随机种子与训练参数",
+        "提交真实指标、错误案例、改进假设与未解决限制"
+      ],
+      "prerequisiteLessons": [
+        "bridge-pipeline",
+        "bridge-metrics",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-pipeline",
+          "title": "完整训练闭环：建立基线并复现结果"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：智能步数预测模型开发与测试\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n先阅读每段中文注释，再逐段运行。训练集用于学习参数；验证集用于比较方案；最终测试集仅在方案确定后评价。不要复制示例数字作为自己的运行结果。\n\n```python\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\n# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。\ndef prepare(X):\n    numeric = X.select_dtypes(include=\"number\").columns.tolist()\n    categorical = [c for c in X.columns if c not in numeric]\n    return ColumnTransformer([\n        (\"number\", Pipeline([(\"fill\", SimpleImputer(strategy=\"median\")),\n                             (\"scale\", StandardScaler())]), numeric),\n        (\"category\", Pipeline([(\"fill\", SimpleImputer(strategy=\"most_frequent\")),\n                               (\"encode\", OneHotEncoder(handle_unknown=\"ignore\"))]), categorical)\n    ])\n\ndef clean_columns(df):\n    df.columns = df.columns.str.strip()\n    return df.drop(columns=[c for c in df if c.startswith(\"Unnamed:\") or c in\n                           [\"Timestamp\", \"Your name\", \"序号\", \"所用时间\", \"car name\"]], errors=\"ignore\").drop_duplicates()\n\nfrom sklearn.linear_model import LogisticRegression, LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor, RandomForestClassifier\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.metrics import (accuracy_score, f1_score, confusion_matrix, roc_auc_score,\n                             mean_absolute_error, mean_squared_error, r2_score)\nfrom sklearn.base import clone\n\ndf = clean_columns(pd.read_csv(\"fitness analysis.csv\"))\ntarget = \"daily_steps\"\ndf[target] = pd.to_numeric(df[target], errors=\"coerce\")\ndf = df.dropna(subset=[target])\nX, y = df.drop(columns=[target]), df[target]\n\n# 先留出最终测试集，再从剩余数据中分出验证集。验证集可用于调参。\nX_dev, X_test, y_dev, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=None)\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X_dev, y_dev, test_size=0.25, random_state=42, stratify=None)\nassert set(X_train.index).isdisjoint(X_valid.index)\nassert set(X_dev.index).isdisjoint(X_test.index)\nmodel = Pipeline([(\"prepare\", prepare(X_train)), (\"model\", DecisionTreeRegressor(max_depth=8, min_samples_leaf=5, random_state=42))])\nmodel.fit(X_train, y_train)\nprint(\"验证集评分：\", round(model.score(X_valid, y_valid), 4))\n# 本例固定超参数。练习改进只能看验证结果，确定方案后才打开最终测试集。\nfinal_model = clone(model).fit(X_dev, y_dev)\nprediction = final_model.predict(X_test)\n\nmetrics = {\"MAE\": float(mean_absolute_error(y_test, prediction)),\n           \"RMSE\": float(np.sqrt(mean_squared_error(y_test, prediction))),\n           \"R2\": float(r2_score(y_test, prediction))}\n# MAE、RMSE 与目标同单位；R² 可以为负，不是分类准确率。\n\nmetrics.update(train_rows=len(X_train), validation_rows=len(X_valid), test_rows=len(X_test), random_state=42)\nPath(\"2.2.5_metrics.json\").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding=\"utf-8\")\nassert all(np.isfinite(v) for v in metrics.values() if isinstance(v, float))\nprint(json.dumps(metrics, ensure_ascii=False, indent=2))\nprint(\"已生成 2.2.5_metrics.json；一次固定划分只提供本数据集的测试证据。\")\n```\n\n## 交付与复核\n\n- 明确目标字段及单位，删除目标泄漏和身份字段\n- 记录训练/验证/测试划分、随机种子与训练参数\n- 提交真实指标、错误案例、改进假设与未解决限制"
+    },
+    "3.1.1": {
+      "sourceReferenceSha256": "e218d296c83d958281feb801afe071b38dbf1fd1a923ef578af838576515fd5f",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先根据表格计算指标，再提出优化建议；参考文案中的数字必须自行核算。",
+      "checklist": [
+        "写明指标分子、分母、单位、时间范围和缺失处理",
+        "计算总体和分组统计，画图并标明样本量",
+        "用证据区分现象与原因，提出可验证的改进及告警阈值"
+      ],
+      "prerequisiteLessons": [
+        "bridge-monitor",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-monitor",
+          "title": "系统监控：质量、延迟、漂移与回退"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 3.1.1 智能音箱产品的数据分析与优化\n\n## 题目要求\n\n根据智能音箱数据集（1000条记录，包含用户ID、时间戳、功能调用类型、响应时间），从用户使用习惯、功能使用频率和响应时间三方面进行分析，输出分析报告（3.1.1-1.docx）和3个优化方向及解决方案（3.1.1-2.docx）。\n\n## 答案\n\n### 答题项1：数据分析报告（3.1.1-1.docx）\n\n#### 一、用户使用习惯分析\n\n**数据集概况：** 共1000条使用记录，涉及100个用户，时间跨度为2023年全年，涵盖8种功能。\n\n**时段分布分析：**\n- 使用高峰时段集中在上午10时（52次）和傍晚18时（52次），其次为上午9时（51次）和上午11时（49次）。\n- 使用低谷时段为晚间23时（29次）和下午20时（30次）、上午8时（30次）。\n- 整体呈现\"双峰\"分布模式：上午9-11时为第一个高峰（信息获取需求），傍晚18时为第二个高峰（娱乐休闲需求）。\n- 凌晨时段（0-5时）仍有一定使用量（平均每小时约42次），说明部分用户有夜间使用习惯。\n\n**用户使用特征：**\n- 用户覆盖ID范围为1-100，平均每用户产生10条使用记录。\n- 用户全天候使用智能音箱，没有明显的\"零使用\"时段，体现了智能音箱作为家庭常驻设备的特性。\n\n#### 二、功能使用频率分析\n\n| 功能名称 | 使用次数 | 占比 |\n|---------|---------|------|\n| 调整音量 | 137 | 13.7% |\n| 查询新闻 | 133 | 13.3% |\n| 查天气 | 132 | 13.2% |\n| 查询知识 | 125 | 12.5% |\n| 提醒事项 | 123 | 12.3% |\n| 设置闹钟 | 120 | 12.0% |\n| 控制家居 | 119 | 11.9% |\n| 播放音乐 | 111 | 11.1% |\n\n**分析结论：**\n- 8种功能的使用频率较为均衡，差异不大（111-137次），说明各功能均有较好的用户认可度。\n- **最受欢迎的功能**为\"调整音量\"（137次）、\"查询新闻\"（133次）和\"查天气\"（132次），属于日常高频交互操作。\n- **使用较少的功能**为\"播放音乐\"（111次）和\"控制家居\"（119次），可能存在功能体验或用户认知不足的问题。\n- 信息查询类功能（查询新闻+查天气+查询知识=390次，占39%）占据最大比重，说明用户将智能音箱主要作为信息获取工具。\n\n#### 三、响应时间分析\n\n**总体响应时间统计：**\n- 平均响应时间：1.99秒\n- 最短响应时间：1.00秒\n- 最长响应时间：3.00秒\n- 中位数：1.97秒\n- 标准差：0.58秒\n\n**各功能平均响应时间排名：**\n\n| 功能名称 | 平均响应时间(秒) | 最小值 | 最大值 |\n|---------|----------------|--------|--------|\n| 控制家居 | 2.07 | 1.00 | 2.99 |\n| 查天气 | 2.06 | 1.01 | 2.97 |\n| 播放音乐 | 2.05 | 1.03 | 3.00 |\n| 设置闹钟 | 2.04 | 1.01 | 2.97 |\n| 查询知识 | 2.00 | 1.00 | 3.00 |\n| 调整音量 | 1.98 | 1.01 | 2.99 |\n| 提醒事项 | 1.89 | 1.02 | 3.00 |\n| 查询新闻 | 1.87 | 1.02 | 2.94 |\n\n**瓶颈分析：**\n- \"控制家居\"功能响应时间最长（2.07秒），可能因为需要与外部智能设备通信，存在网络延迟。\n- \"查天气\"功能响应时间较长（2.06秒），需要实时调用外部API获取天气数据。\n- \"查询新闻\"和\"提醒事项\"响应最快（<1.9秒），属于本地处理或缓存数据可直接返回的场景。\n- 整体响应时间偏高（均值约2秒），对于语音交互场景，建议优化至1.5秒以内以提升用户体验。\n\n---\n\n### 答题项2：优化方案（3.1.1-2.docx）\n\n#### 优化方向一：降低高延迟功能的响应时间\n\n**问题描述：** \"控制家居\"（2.07秒）和\"查天气\"（2.06秒）等功能响应时间超过2秒，影响用户体验。\n\n**解决方案：**\n1. **本地缓存策略**：对天气、新闻等高频查询数据建立本地缓存机制，设置合理的缓存过期时间（如天气数据每30分钟更新一次），减少对外部API的实时调用。\n2. **智能家居设备直连**：将\"控制家居\"功能从云端转发改为局域网直连模式，通过本地网关直接与智能设备通信，降低通信链路延迟。\n3. **预加载机制**：根据用户使用习惯，在高峰时段（10时和18时）前主动预加载热门数据，实现\"零等待\"响应。\n4. **目标指标**：将平均响应时间从1.99秒优化至1.5秒以内。\n\n#### 优化方向二：提升低频功能（播放音乐、控制家居）的使用率\n\n**问题描述：** \"播放音乐\"仅111次使用，\"控制家居\"仅119次，低于平均水平（125次），功能价值未被充分挖掘。\n\n**解决方案：**\n1. **主动推荐机制**：在用户完成高频操作后，智能推荐相关低频功能。例如用户查完天气后推荐\"要不要播放一首适合今天心情的音乐？\"。\n2. **简化控制家居交互流程**：当前控制家居可能需要多轮对话确认设备和操作，优化为支持一句话完成指令（如\"关闭客厅灯并将空调调到26度\"）。\n3. **场景联动功能**：创建\"回家模式\"\"睡眠模式\"等预设场景，将播放音乐和控制家居整合到一个语音指令中，提升功能的实际使用场景覆盖。\n4. **新手引导**：首次使用时提供功能引导教程，让用户了解智能音箱的完整功能范围。\n\n#### 优化方向三：基于用户行为的个性化服务优化\n\n**问题描述：** 数据显示用户使用呈明显的双峰时段分布（上午10时和傍晚18时），但当前系统未针对不同时段和用户偏好进行差异化服务。\n\n**解决方案：**\n1. **时段感知服务**：根据时段自动调整服务策略。早晨主动播报天气和日程提醒；傍晚推荐新闻摘要和音乐推荐；夜间降低音量并切换为轻柔语调。\n2. **用户画像建模**：基于每个用户的历史使用记录（100个用户，每人约10条），构建个性化偏好模型，预测用户可能的需求并主动提供服务。\n3. **智能降噪与唤醒优化**：凌晨仍有使用量（约40次/小时），需优化夜间场景下的语音识别灵敏度和音量控制，避免打扰其他家庭成员。\n4. **数据反馈闭环**：建立用户满意度反馈机制，定期收集用户对响应速度、功能准确性的评价，形成\"数据采集-分析-优化-验证\"的持续改进循环。\n"
+    },
+    "3.1.2": {
+      "sourceReferenceSha256": "91c1eb614c474bc6d53849687a39ec0320ec2ca65e22de3fb60e1563ee681f10",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先根据表格计算指标，再提出优化建议；参考文案中的数字必须自行核算。",
+      "checklist": [
+        "写明指标分子、分母、单位、时间范围和缺失处理",
+        "计算总体和分组统计，画图并标明样本量",
+        "用证据区分现象与原因，提出可验证的改进及告警阈值"
+      ],
+      "prerequisiteLessons": [
+        "bridge-monitor",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-monitor",
+          "title": "系统监控：质量、延迟、漂移与回退"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 3.1.2 智能照明系统的数据分析与优化\n\n## 题目要求\n\n根据智能照明系统数据集（1000条记录，包含时间戳、用户标识、亮度值(0-100)、色温值(1000K-6500K)、使用场景、响应时间），从用户使用习惯、功能使用频率和响应时间三方面进行分析，输出分析报告（3.1.2-1.docx）和3个优化方向及解决方案（3.1.2-2.docx）。\n\n## 答案\n\n### 答题项1：数据分析报告（3.1.2-1.docx）\n\n#### 一、用户使用习惯分析\n\n**数据集概况：** 共1000条记录，时间为2024年7月19日全天（07:18至23:57），涉及约100个用户，记录亮度（0-100）和色温（1000K-6500K）偏好。\n\n**不同时段灯光亮度偏好：**\n\n| 时段 | 平均亮度 | 平均色温(K) |\n|------|---------|------------|\n| 上午6-12时 | 51.7 | 3690 |\n| 下午12-18时 | 49.9 | 3732 |\n| 晚上18-24时 | 48.1 | 3661 |\n\n**分析结论：**\n- 亮度偏好呈现从早到晚逐渐降低的趋势：上午最高（51.7），晚间最低（48.1），符合人体生物节律和自然光变化规律。\n- 色温变化幅度不大（3661K-3732K），集中在中性偏暖色温范围，说明用户总体偏好柔和的暖白光。\n- 下午时段色温最高（3732K），可能与工作学习需要较明亮的冷白光有关；晚间色温最低（3661K），用户倾向使用暖光营造放松氛围。\n- 整体亮度均值约50，说明用户普遍不使用极端亮度，偏好中等亮度。\n\n**亮度和色温统计特征：**\n- 亮度范围：0-100，平均49.8，标准差29.6，分布较均匀。\n- 色温范围：1001K-6495K，平均3695K，标准差1594K，覆盖了从暖光到冷光的完整范围。\n\n#### 二、功能使用频率分析（智能场景模式）\n\n| 场景模式 | 使用次数 | 占比 |\n|---------|---------|------|\n| Relax Mode（放松模式） | 273 | 27.3% |\n| Reading Mode（阅读模式） | 264 | 26.4% |\n| Work Mode（工作模式） | 237 | 23.7% |\n| Sleep Mode（睡眠模式） | 226 | 22.6% |\n\n**分析结论：**\n- **最受欢迎的场景**为\"放松模式\"（273次，27.3%）和\"阅读模式\"（264次，26.4%），两者合计占比超过一半（53.7%），说明用户主要在休闲和阅读场景使用智能照明。\n- **使用较少的场景**为\"睡眠模式\"（226次，22.6%），可能因为睡眠时关灯的用户较多，或该模式的功能设计（如渐暗、自动关闭）未能满足用户预期。\n- 四种场景模式的使用分布相对均衡（22.6%-27.3%），说明系统设计的场景覆盖了用户主要的生活需求。\n- 建议考虑增加更多细分场景（如\"影视模式\"\"聚会模式\"等）以满足多样化需求。\n\n#### 三、响应时间分析\n\n**总体响应时间统计：**\n- 平均响应时间：1.06秒\n- 最短响应时间：0.10秒\n- 最长响应时间：2.00秒\n- 中位数：1.10秒\n- 标准差：0.55秒\n\n**各场景模式平均响应时间：**\n\n| 场景模式 | 平均响应时间(秒) |\n|---------|----------------|\n| Relax Mode | 1.11 |\n| Sleep Mode | 1.09 |\n| Work Mode | 1.06 |\n| Reading Mode | 1.00 |\n\n**瓶颈分析：**\n- 整体响应时间表现良好，平均约1秒，优于行业2秒的标准。\n- \"放松模式\"响应时间最长（1.11秒），可能因为该模式涉及多灯联动调整（亮度+色温同步变化），处理逻辑较复杂。\n- \"阅读模式\"响应最快（1.00秒），该模式通常只需调整单一参数（亮度调高），执行逻辑简单。\n- 最大响应时间为2.00秒，个别请求存在延迟，可能与网络通信或设备负载有关。\n- 约25%的请求响应时间低于0.58秒，说明系统在理想条件下具备快速响应能力。\n\n---\n\n### 答题项2：优化方案（3.1.2-2.docx）\n\n#### 优化方向一：智能场景自适应调节\n\n**问题描述：** 数据显示用户在不同时段有明确的亮度和色温偏好变化趋势（上午亮高温冷，晚间亮低温暖），但当前系统需要用户手动切换场景模式。\n\n**解决方案：**\n1. **时段自动匹配算法**：基于数据分析结果，建立时间-亮度-色温的自适应模型。系统根据当前时间自动推荐或切换最优的灯光参数：早晨自动提升亮度至50+并使用中性色温（~3700K），晚间自动降低亮度至48以下并切换暖色温（~3660K）。\n2. **环境光传感器联动**：集成环境光传感器，根据自然光强度实时调整室内照明的亮度补偿，实现\"自然光+人工光\"的智能平衡。\n3. **用户习惯学习**：通过机器学习算法记录每个用户的历史偏好，建立个人照明画像，实现个性化的自动调光方案。\n4. **渐变过渡**：场景切换时采用渐变方式（3-5秒内平滑过渡），避免突然变化对眼睛的刺激。\n\n#### 优化方向二：提升睡眠模式的功能体验\n\n**问题描述：** 睡眠模式使用率最低（22.6%，226次），且响应时间较高（1.09秒），说明该功能的用户体验有待改善。\n\n**解决方案：**\n1. **渐暗入睡功能**：增加15-30分钟的渐暗关灯模式，模拟日落效果，亮度从当前值线性降低至0，色温从当前值逐步降至2000K（极暖光），帮助用户自然入睡。\n2. **小夜灯模式**：在睡眠模式中集成智能小夜灯功能，当检测到用户夜间起身（通过运动传感器），自动开启极低亮度（5-10）的暖色光，既不影响睡眠又保证安全。\n3. **智能闹钟联动**：与手机闹钟或智能音箱联动，在闹钟响起前15分钟逐渐提升亮度和色温，模拟日出效果实现自然唤醒。\n4. **睡眠质量反馈**：与智能手环等设备联动，根据睡眠质量数据自动优化照明参数。\n\n#### 优化方向三：降低多灯联动场景的响应延迟\n\n**问题描述：** 放松模式响应时间最高（1.11秒），个别请求延迟达2秒，多灯协同调节存在性能瓶颈。\n\n**解决方案：**\n1. **本地网关优化**：将场景控制逻辑从云端迁移至本地智能网关执行，减少云端通信延迟。网关预存所有场景的灯光参数配置，收到指令后直接下发至各灯具。\n2. **并行指令下发**：对多灯联动场景采用并行而非串行的指令下发方式。所有灯具同时接收和执行调光指令，而非逐一执行。\n3. **预计算与缓存**：对常用的4种场景模式预计算好灯光参数并缓存在设备端内存中，收到切换指令后直接读取缓存数据执行，省去实时计算时间。\n4. **Mesh组网优化**：采用蓝牙Mesh或Zigbee Mesh组网协议，建立灯具之间的点对点通信链路，减少对中心网关的依赖，提升多灯同步的时效性。目标将响应时间控制在0.5秒以内。\n"
+    },
+    "3.1.3": {
+      "sourceReferenceSha256": "bee186dc50f02d921da49312b234f15fef5b8c3d6d15806b7e25f0a0d18953fb",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先根据表格计算指标，再提出优化建议；参考文案中的数字必须自行核算。",
+      "checklist": [
+        "写明指标分子、分母、单位、时间范围和缺失处理",
+        "计算总体和分组统计，画图并标明样本量",
+        "用证据区分现象与原因，提出可验证的改进及告警阈值"
+      ],
+      "prerequisiteLessons": [
+        "bridge-monitor",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-monitor",
+          "title": "系统监控：质量、延迟、漂移与回退"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 3.1.3 智能健康手环的数据分析与优化\n\n## 题目要求\n\n根据智能健康手环数据集（16800条记录，包含用户、时间、步数），从用户活动模式、健康指标关注度和数据同步性能三方面进行分析，输出分析报告（3.1.3-1.docx）和3个优化方向及解决方案（3.1.3-2.docx）。\n\n## 答案\n\n### 答题项1：数据分析报告（3.1.3-1.docx）\n\n#### 一、用户活动模式分析\n\n**数据集概况：** 共16800条记录，涉及100个用户，时间范围为2024年9月15日至9月21日（完整的一周），每小时记录一次步数数据，每用户168条记录（7天 x 24小时）。\n\n**一天中各时段的平均步数分布：**\n\n| 时段 | 平均步数 | 活动水平 |\n|------|---------|---------|\n| 0-5时 | 0 | 静止（睡眠） |\n| 6-8时 | 5,068 | **高峰时段（晨练）** |\n| 9-16时 | 1,103 | 中等（日常活动） |\n| 17-20时 | 5,006 | **高峰时段（晚练）** |\n| 21-23时 | 1,097 | 中等偏低 |\n\n**关键发现：**\n- **高峰时段**：6-8时（平均5,068步/小时）和17-20时（平均5,006步/小时），呈现明显的\"双峰\"模式，与典型的晨练和晚间锻炼习惯高度吻合。\n- **低谷时段**：0-5时步数为0，用户处于睡眠状态。\n- **最高活跃小时**：6时，平均步数5,080步。\n- **日间活动**：9-16时平均步数约1,100步/小时，属于日常办公或轻度活动水平。\n- 高峰期步数是日间活动的约4.6倍，说明用户有明确的集中运动时段。\n\n**一周各天的平均步数分布：**\n\n| 星期 | 平均步数 |\n|------|---------|\n| 周一 | 1,948 |\n| 周二 | 1,981 |\n| 周三 | 1,977 |\n| 周四 | 1,991 |\n| 周五 | 1,969 |\n| 周六 | 1,970 |\n| 周日 | 1,972 |\n\n- 一周各天活动量差异极小（1,948-1,991步），未发现显著的工作日/休息日差异。\n- 用户总步数范围：305,388步 - 361,693步（一周），平均每用户每周331,384步，即每日约47,341步。\n\n#### 二、健康指标关注度分析\n\n**数据集分析：** 当前数据集仅包含\"步数\"这一健康指标，共16800条有效记录，数据完整度为100%（无缺失值）。\n\n**步数指标统计特征：**\n- 均值：1,973步/小时\n- 中位数：1,187步/小时\n- 标准差：2,243步/小时\n- 最大值：7,999步/小时\n- 75%分位数：2,920步/小时\n- 25%分位数：150步/小时\n\n**关注度分析：**\n- 步数作为最基础的健康指标，数据采集覆盖24小时不间断，说明步数是用户最核心关注的指标。\n- 数据中未包含心率和睡眠时长等其他指标的独立数据列，但从步数为0的时段（0-5时）可以间接推断睡眠时段信息。\n- 基于数据特征，建议手环增加心率监测、睡眠质量评估等指标的采集和展示功能，以满足用户对综合健康管理的需求。\n\n#### 三、数据同步性能分析\n\n**数据集分析：** 数据集中未包含显式的\"同步延迟\"或\"传输时间\"字段。基于现有数据的间接评估如下：\n\n**数据完整性评估：**\n- 100个用户 x 7天 x 24小时 = 16,800条预期记录，实际记录数为16,800条，数据完整率为100%。\n- 每条记录精确到整点小时，时间间隔均匀（1小时/条），说明数据采集和同步具有良好的规律性和稳定性。\n- 未发现数据缺失、重复或异常跳变的情况，表明手环与手机之间的数据同步机制运行稳定。\n\n**同步性能推断：**\n- 数据按整点时间戳记录且无遗漏，说明同步延迟在可接受范围内（预计小于采样间隔1小时）。\n- 所有用户的数据记录量一致（168条/人），说明不同设备和网络环境下的同步质量均匀。\n- 建议后续数据集增加\"数据生成时间\"和\"同步完成时间\"两个字段，以便精确测量同步延迟。\n\n---\n\n### 答题项2：优化方案（3.1.3-2.docx）\n\n#### 优化方向一：基于活动模式的智能运动提醒\n\n**问题描述：** 数据显示用户活动呈明显的双峰模式（6-8时和17-20时），日间9-16时活动量较低（仅约1,100步/小时），长时间久坐不利于健康。\n\n**解决方案：**\n1. **久坐提醒功能**：当用户连续2小时步数低于200步时，通过震动提醒用户起身活动。根据数据，建议在9时、11时、14时、16时设置默认提醒点。\n2. **个性化运动目标**：基于用户一周的活动数据（平均日步数47,341步），为每位用户设定个性化的每日目标，并在高峰时段前发送运动激励推送。\n3. **运动模式自动识别**：当检测到步数在短时间内急剧增加（如从0跳至5,000+步/小时），自动启动运动模式，增加心率采样频率，记录运动时长和卡路里消耗。\n4. **社交激励机制**：增加好友排行榜和运动打卡功能，利用社交激励提升用户在低谷时段的活动量。\n\n#### 优化方向二：扩展健康指标监测维度\n\n**问题描述：** 当前数据集仅有步数单一指标，无法为用户提供全面的健康画像。用户对心率监测、睡眠分析等功能的需求无法满足。\n\n**解决方案：**\n1. **心率连续监测**：增加光电容积脉搏波（PPG）传感器，实现全天候心率监测。在运动高峰时段（6-8时、17-20时）自动提升采样频率至每秒一次，其余时段每5分钟一次以节省电量。\n2. **智能睡眠分析**：利用加速度传感器和心率数据，自动识别入睡时间（当步数从活跃变为0的时段）、睡眠阶段（浅睡/深睡/REM）和觉醒次数。从数据看，0-5时为稳定睡眠期，可作为算法校准基准。\n3. **血氧饱和度监测**：增加SpO2传感器，在睡眠期间监测血氧水平，对睡眠呼吸暂停等健康风险进行早期预警。\n4. **综合健康报告**：每周自动生成包含步数趋势、心率变化、睡眠质量评分的综合健康报告，帮助用户全面了解健康状况。\n\n#### 优化方向三：优化数据同步与采集精度\n\n**问题描述：** 当前数据按每小时采样一次，时间粒度较粗，无法精确捕捉用户的短时运动行为和运动强度变化。\n\n**解决方案：**\n1. **提升采样精度**：将步数采样间隔从1小时缩短为5分钟，使运动数据更细粒度化。这样可以区分\"一小时匀速走5000步\"和\"集中10分钟跑5000步\"两种截然不同的运动模式。\n2. **智能同步策略**：采用分级同步机制：运动模式下实时同步（每分钟一次），日常模式下定期同步（每小时一次），睡眠模式下暂停同步（次日早晨批量上传），在数据及时性和电量消耗间取得平衡。\n3. **离线数据缓存**：手环内置足够的存储空间（建议至少7天数据），在手机不在身边或蓝牙断开时保存数据，重新连接后自动补传，确保数据完整性维持100%。\n4. **数据压缩传输**：对步数等整型数据采用差分编码压缩，减少蓝牙传输的数据量，降低同步时间和功耗。目标将单次同步时间控制在3秒以内。\n"
+    },
+    "3.1.4": {
+      "sourceReferenceSha256": "925da08c5762303c1051f5f7b6577dfe4136e114510d4e49adc60018ae7c5ce4",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先根据表格计算指标，再提出优化建议；参考文案中的数字必须自行核算。",
+      "checklist": [
+        "写明指标分子、分母、单位、时间范围和缺失处理",
+        "计算总体和分组统计，画图并标明样本量",
+        "用证据区分现象与原因，提出可验证的改进及告警阈值"
+      ],
+      "prerequisiteLessons": [
+        "bridge-monitor",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-monitor",
+          "title": "系统监控：质量、延迟、漂移与回退"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 3.1.4 智能健康监测系统的数据分析与优化\n\n## 题目要求\n\n根据智能健康监测系统数据集（168条记录，包含时间戳、收缩压、舒张压、血糖、体脂率、响应时间），从用户活动周期、健康指标偏好度和系统响应与准确性三方面进行分析，输出分析报告（3.1.4-1.docx）和3个优化方向及解决方案（3.1.4-2.docx）。\n\n## 答案\n\n### 答题项1：数据分析报告（3.1.4-1.docx）\n\n#### 一、用户活动周期分析\n\n**数据集概况：** 共168条监测记录，时间范围为2024年9月15日至9月22日（约一周），包含血压（收缩压/舒张压）、血糖、体脂率三类健康指标及系统响应时间。\n\n**各时段健康指标变化趋势（收缩压）：**\n\n| 时段 | 平均收缩压(mmHg) | 风险等级 |\n|------|----------------|---------|\n| 0时 | 110.5 | 正常 |\n| 6时 | 113.8 | 正常 |\n| 7时 | **131.4** | **偏高（高风险）** |\n| 10时 | 115.9 | 正常偏高 |\n| 12时 | **118.8** | 正常偏高 |\n| 13时 | 115.4 | 正常偏高 |\n| 16时 | 114.5 | 正常 |\n| 18时 | 106.9 | 正常 |\n| 19时 | 110.0 | 正常 |\n| 22时 | 111.0 | 正常 |\n\n**关键发现：**\n- **高风险时段**：7时收缩压平均达131.4 mmHg，显著高于其他时段，属于\"晨峰血压\"现象。这是心脑血管事件的高发时段，需重点监测和预警。\n- **安全时段**：18时收缩压最低（106.9 mmHg），傍晚至夜间血压呈下降趋势，符合正常的血压昼夜节律。\n- **午间波动**：12时出现次高点（118.8 mmHg），可能与午餐后消化系统活跃导致的血压波动有关。\n- 整体血压范围：收缩压90-150 mmHg，舒张压60-90 mmHg，部分记录接近高血压阈值（140/90），系统需要及时预警。\n\n#### 二、健康指标偏好度分析\n\n**各健康指标监测频次统计：**\n\n| 健康指标 | 有效记录数 | 占比 | 监测频率 |\n|---------|-----------|------|---------|\n| 血压（收缩压+舒张压） | 80 | **47.6%** | 约每天11次 |\n| 血糖 | 80 | **47.6%** | 约每天11次 |\n| 体脂率 | 8 | 4.8% | 约每天1次 |\n\n**指标统计特征：**\n\n| 指标 | 均值 | 标准差 | 最小值 | 最大值 |\n|------|------|--------|--------|--------|\n| 收缩压(mmHg) | 114.8 | 15.7 | 90 | 150 |\n| 舒张压(mmHg) | 74.5 | 9.2 | 60 | 90 |\n| 血糖(mmol/L) | 5.65 | 1.12 | 4.02 | 7.75 |\n| 体脂率 | 0.17 | 0.00 | 0.17 | 0.17 |\n\n**偏好度分析：**\n- **最受青睐的功能**：血压监测和血糖监测使用频率最高，各80次记录（各占47.6%），说明用户对心血管健康和代谢指标最为关注。\n- **使用较少的功能**：体脂率监测仅8次记录（4.8%），且数值恒定为0.17，显示该功能使用频率极低。可能原因：(1) 体脂变化缓慢，不需要频繁测量；(2) 体脂测量需要特定条件（如空腹、静止状态），使用便捷性不足；(3) 测量数据恒定不变（均为0.17），可能存在传感器精度问题或算法缺陷。\n- 血压和血糖的监测密度相当，说明用户将两者视为同等重要的日常健康监控指标。\n- 血糖数据范围4.02-7.75 mmol/L，部分值接近糖尿病前期阈值（7.0），系统需要具备异常值预警功能。\n\n#### 三、系统响应与准确性分析\n\n**总体响应时间统计：**\n- 平均响应时间：0.61秒\n- 最短响应时间：0.20秒\n- 最长响应时间：0.99秒\n- 中位数：0.63秒\n- 标准差：0.22秒\n\n**各指标监测的平均响应时间：**\n\n| 监测类型 | 平均响应时间(秒) |\n|---------|----------------|\n| 体脂率 | 0.66 |\n| 血压 | 0.62 |\n| 血糖 | 0.60 |\n\n**准确性与潜在问题分析：**\n- 整体响应时间优秀，平均0.61秒，远低于2秒的可接受阈值，用户体验良好。\n- 三类指标的响应时间差异较小（0.60-0.66秒），系统处理能力均匀。\n- **体脂率数据异常**：8条体脂率记录数值完全相同（均为0.17），标准差为0，这极不正常。可能原因：(1) 传感器故障导致测量值固定；(2) 数据采集程序存在bug，返回了默认值；(3) 体脂分析算法未正确处理输入参数。此问题需要紧急排查修复。\n- **误报风险**：7时收缩压高达131.4 mmHg，系统需要区分\"晨峰血压\"（正常生理现象）和真正的高血压异常，避免频繁误报降低用户信任度。\n\n---\n\n### 答题项2：优化方案（3.1.4-2.docx）\n\n#### 优化方向一：修复体脂率监测功能并提升数据准确性\n\n**问题描述：** 体脂率监测数据异常——8次测量结果完全相同（均为0.17），标准差为0，明显不符合正常生理波动规律。该功能基本处于不可用状态。\n\n**解决方案：**\n1. **传感器校准与诊断**：对生物电阻抗分析（BIA）传感器进行全面检测和校准，排查硬件是否存在接触不良、电极氧化等物理问题。建立自检程序，每次测量前自动验证传感器工作状态。\n2. **算法修复与优化**：审查体脂率计算算法，检查是否存在变量固定赋值、除零错误或参数缺失等代码缺陷。引入用户的身高、体重、年龄、性别等个人参数，使用改进的BIA方程提升计算准确性。\n3. **多次测量取均值**：每次体脂测量执行3次连续扫描，取中位数作为最终结果，减少单次测量的随机误差。\n4. **交叉验证机制**：将体脂率测量结果与BMI指数和历史数据进行交叉比对，当数值偏差超过合理范围时提示\"测量可能不准确，请重新测量\"。\n\n#### 优化方向二：建立智能健康预警与风险评估系统\n\n**问题描述：** 数据显示7时出现\"晨峰血压\"现象（131.4 mmHg），部分血糖值接近糖尿病阈值（7.75 mmol/L），系统缺乏针对性的健康风险预警机制。\n\n**解决方案：**\n1. **分级预警体系**：\n   - 黄色预警：收缩压120-139 mmHg或血糖6.1-7.0 mmol/L，提示用户注意。\n   - 红色预警：收缩压>=140 mmHg或血糖>7.0 mmol/L，立即通知用户并建议就医。\n   - 紧急预警：收缩压>180 mmHg或血糖>11.1 mmol/L，自动通知紧急联系人。\n2. **晨峰血压专项监测**：在6-8时高风险时段自动增加血压测量频率（从每小时1次增至每30分钟1次），并与用户的历史晨峰数据对比分析趋势。\n3. **趋势分析报告**：每周生成血压和血糖趋势图表，标注异常波动时段，帮助用户和医生识别慢性病发展风险。\n4. **用药提醒联动**：对于需要定时服药的用户，根据血压/血糖监测时间智能推送用药提醒，并在服药后追踪指标变化评估药效。\n\n#### 优化方向三：提升监测频率与用户交互体验\n\n**问题描述：** 体脂率一周仅测8次（日均1次），与血压/血糖的高频监测（日均11次）形成巨大落差。整体数据量偏少（168条/周），监测的时段覆盖不够均匀。\n\n**解决方案：**\n1. **无感化监测**：优化血压和血糖的无创监测技术，采用PPG光电传感器持续估算血压，使用近红外光谱技术无创估算血糖，实现全天候自动监测，无需用户主动操作。\n2. **智能排程引擎**：根据用户的健康风险等级和生活作息自动安排监测计划。高风险用户（如血压>130 mmHg）每2小时测一次血压；低风险用户每4小时测一次。在发现异常值后自动加密监测频率。\n3. **简化测量流程**：将体脂率测量从需要专门操作简化为穿戴即可测量，通过手环表面的电极自动完成BIA测量，降低使用门槛，提升测量频率。\n4. **可视化健康仪表盘**：在手机APP中设计直观的健康仪表盘，用红黄绿三色显示各项指标的实时状态，让用户一目了然地了解自己的健康状况。同时提供指标解读说明，帮助用户理解血压114.8/74.5 mmHg、血糖5.65 mmol/L等数值的健康含义。\n"
+    },
+    "3.1.5": {
+      "sourceReferenceSha256": "781ed82b1bbb93d0a55e4ae1b7256a851a691c0a486732250e3f268693918b85",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先根据表格计算指标，再提出优化建议；参考文案中的数字必须自行核算。",
+      "checklist": [
+        "写明指标分子、分母、单位、时间范围和缺失处理",
+        "计算总体和分组统计，画图并标明样本量",
+        "用证据区分现象与原因，提出可验证的改进及告警阈值"
+      ],
+      "prerequisiteLessons": [
+        "bridge-monitor",
+        "bridge-errors"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-monitor",
+          "title": "系统监控：质量、延迟、漂移与回退"
+        },
+        {
+          "id": "bridge-errors",
+          "title": "错误案例分析：从一个错例到可验证修正"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 3.1.5 智能家居环境控制系统的数据分析与优化\n\n## 题目要求\n\n根据智能家居环境控制系统数据集（1000条记录，包含时间戳、温度、湿度、光照水平、响应时间、能源消耗），从用户环境偏好、系统响应时间和能源消耗分析三方面进行分析，输出分析报告（3.1.5-1.docx）和3个优化方向及解决方案（3.1.5-2.docx）。\n\n## 答案\n\n### 答题项1：数据分析报告（3.1.5-1.docx）\n\n#### 一、用户环境偏好分析\n\n**数据集概况：** 共1000条记录，时间范围为2023年1月1日至12月31日（全年），记录了室内温度、湿度、光照水平等环境参数。\n\n**不同时段环境参数偏好设置：**\n\n| 时段 | 平均温度(C) | 平均湿度(%) | 平均光照水平(lux) |\n|------|-----------|-----------|-----------------|\n| 凌晨0-6时 | 24.76 | 49.88 | 554.4 |\n| 上午6-12时 | 24.80 | 49.56 | 544.9 |\n| 下午12-18时 | 24.91 | 50.07 | 545.7 |\n| 晚上18-24时 | 25.16 | 49.69 | 538.8 |\n\n**详细统计特征：**\n\n| 指标 | 均值 | 标准差 | 最小值 | 最大值 |\n|------|------|--------|--------|--------|\n| 温度(C) | 24.91 | 2.86 | 20.01 | 29.99 |\n| 湿度(%) | 49.79 | 11.85 | 30.01 | 69.99 |\n| 光照水平(lux) | 545.82 | 256.49 | 100.23 | 999.98 |\n\n**偏好分析：**\n- **温度偏好**：用户全天温度设置较为稳定，均值约24.9°C，变化幅度仅0.4°C（24.76-25.16°C）。晚间温度略高（25.16°C），凌晨略低（24.76°C）。温度整体控制在20-30°C的舒适区间。\n- **湿度偏好**：全天湿度偏好非常稳定，均值约49.8%，各时段差异不足1%。湿度范围30%-70%，中心集中在50%附近，符合人体舒适湿度标准（40%-60%）。\n- **光照偏好**：光照水平在各时段差异不大（539-554 lux），但晚间略低（538.8 lux），凌晨略高（554.4 lux）。光照范围100-1000 lux，跨度较大，说明用户在不同活动场景有差异化的光照需求。\n\n**按季节分析：**\n\n| 季节 | 平均温度(C) | 平均能源消耗 |\n|------|-----------|------------|\n| 春季 | 24.90 | 0.95 |\n| 夏季 | 24.96 | 1.06 |\n| 秋季 | 24.83 | 1.05 |\n| 冬季 | 24.95 | 1.02 |\n\n- 各季节室内温度控制非常稳定（24.83-24.96°C），说明环控系统能够有效维持恒温环境。\n- 夏季和秋季能源消耗略高（1.05-1.06），可能因为室外温差大需要更多制冷/制热能源。\n\n#### 二、系统响应时间分析\n\n**总体响应时间统计：**\n- 平均响应时间：**3.02秒**\n- 最短响应时间：1.01秒\n- 最长响应时间：5.00秒\n- 中位数：3.00秒\n- 标准差：1.17秒\n- 25%分位数：1.99秒\n- 75%分位数：4.08秒\n\n**按季节响应时间：**\n\n| 季节 | 平均响应时间(秒) |\n|------|----------------|\n| 冬季 | 2.94 |\n| 夏季 | 2.99 |\n| 春季 | 3.07 |\n| 秋季 | 3.10 |\n\n**瓶颈分析：**\n- **响应时间偏高**：平均3.02秒，远高于智能照明系统（1.06秒）和智能音箱（1.99秒）。对于温度调节等场景，虽然用户对即时性的要求不如语音交互那么严格，但3秒的延迟仍然影响用户感知。\n- **波动较大**：标准差1.17秒，75%分位数达4.08秒，说明约25%的操作响应时间超过4秒，用户体验不稳定。\n- **最大延迟达5秒**：个别请求延迟严重，可能原因包括：(1) 温控系统需要启动压缩机或加热模组，硬件预热时间较长；(2) 多传感器数据融合计算耗时；(3) 云端通信延迟。\n- 各季节响应差异不大（2.94-3.10秒），说明延迟主要与系统架构有关，而非外部环境因素。\n- **温度与响应时间相关性**：温度与响应时间的相关性较弱，说明响应延迟是系统性问题而非特定温度区间的问题。\n\n#### 三、能源消耗分析\n\n**总体能源消耗统计：**\n- 平均能源消耗：1.02 kWh\n- 最低消耗：0.10 kWh\n- 最高消耗：2.00 kWh\n- 中位数：0.99 kWh\n- 标准差：0.54 kWh\n\n**按月份能源消耗分析：**\n\n| 月份 | 平均能源消耗(kWh) |\n|------|-----------------|\n| 1月 | 0.93 |\n| 2月 | **1.17**（最高） |\n| 3月 | 0.99 |\n| 4月 | **0.83**（最低） |\n| 5月 | 1.03 |\n| 6月 | 1.10 |\n| 7月 | 1.09 |\n| 8月 | 0.97 |\n| 9月 | 1.06 |\n| 10月 | 1.01 |\n| 11月 | 1.09 |\n| 12月 | 0.98 |\n\n**节能潜力分析：**\n- **月度差异**：2月能耗最高（1.17 kWh），4月最低（0.83 kWh），极差为0.34 kWh。2月处于寒冬，制热需求大；4月春季气候宜人，制冷制热需求最小。\n- **温度与能耗相关性**：相关系数仅-0.014，几乎无线性相关。说明能耗受多重因素影响，不仅仅取决于温度设定值。\n- **光照与能耗相关性**：相关系数0.063，弱正相关。高光照设置会略微增加能耗。\n- **节能空间**：能源消耗范围0.10-2.00 kWh，跨度达20倍。最低消耗仅0.10 kWh说明系统在理想条件下可以极低能耗运行。如果将平均能耗从1.02 kWh优化至0.80 kWh（降低22%），全年可节省可观的电力成本。\n\n---\n\n### 答题项2：优化方案（3.1.5-2.docx）\n\n#### 优化方向一：大幅降低系统响应时间\n\n**问题描述：** 系统平均响应时间3.02秒，约25%的操作响应超过4秒，最大延迟5秒，显著影响用户的操控体验和对系统的信任感。\n\n**解决方案：**\n1. **边缘计算架构**：将环境数据分析和控制决策从云端下沉至本地边缘网关。网关本地完成传感器数据采集、环境参数计算和控制指令下发，仅将汇总数据上传云端存储，消除网络往返延迟。\n2. **预判式控制**：基于用户历史偏好数据（温度24.9°C、湿度50%），系统提前预判用户可能的操作意图。例如，检测到室温低于24°C时自动启动预热，而非等待用户手动操作后才响应。\n3. **硬件快速启动**：优化HVAC（暖通空调）设备的启动流程，采用变频技术实现秒级启动，而非传统的压缩机缓慢启动模式。\n4. **分级响应策略**：对于温度等缓变量，先立即反馈\"已收到指令\"（<0.5秒），再在后台执行实际调节（2-3秒完成）。用户感知到的响应时间从3秒降至0.5秒。\n5. **目标指标**：将平均响应时间从3.02秒降至1.5秒以内，95%分位数控制在3秒以内。\n\n#### 优化方向二：智能节能优化\n\n**问题描述：** 系统年均能耗1.02 kWh/次操作，能耗波动范围大（0.10-2.00 kWh），2月和夏季能耗偏高，存在显著的节能空间。\n\n**解决方案：**\n1. **智能温控策略**：根据用户在家/离家状态自动调整温控模式。数据显示用户偏好温度24.9°C，可在用户离家时自动将温度调至27°C（夏季）或20°C（冬季），回家前30分钟提前恢复舒适温度，预计节能20-30%。\n2. **自然通风联动**：集成室外温湿度传感器，当室外条件适宜（如4月春季，室外温度20-26°C），自动提示用户开窗通风替代空调运行，从数据看4月能耗最低（0.83 kWh），说明自然条件辅助节能效果显著。\n3. **分区精细控制**：将全屋统一温控升级为分房间独立控制。无人房间自动进入节能模式（降低制冷/制热功率），有人房间保持舒适设置。\n4. **能耗可视化与目标管理**：在APP中展示实时和历史能耗数据，设置每月能耗预算目标，当接近预算上限时提供节能建议（如\"将温度提高1°C可节省约10%能耗\"）。\n\n#### 优化方向三：多维环境自适应与舒适度优化\n\n**问题描述：** 数据显示温度、湿度、光照三个参数在各时段变化不大，系统未充分利用环境数据为用户提供差异化的舒适体验。湿度和光照的标准差较大（湿度11.85%、光照256 lux），说明不同用户或不同场景的需求差异明显，但系统未做个性化适配。\n\n**解决方案：**\n1. **PMV舒适度模型**：引入PMV（预测平均投票）热舒适模型，综合考虑温度、湿度、风速、辐射温度、衣着量和活动量等6个因素，计算最佳环境参数组合。例如夏季可适当提高温度至26°C但同时降低湿度至45%，维持同等舒适度的同时降低能耗。\n2. **场景化环境预设**：根据时段和用户活动场景自动匹配环境参数：\n   - 起床模式（6-7时）：温度24°C、光照渐亮至600 lux、湿度50%\n   - 工作模式（9-17时）：温度24.5°C、光照700 lux、湿度45%\n   - 休息模式（18-22时）：温度25°C、光照400 lux暖光、湿度50%\n   - 睡眠模式（22-6时）：温度23°C、光照0、湿度55%\n3. **空气质量监测扩展**：在温湿度和光照基础上，增加CO2浓度、PM2.5、甲醛等空气质量传感器，当CO2浓度超过1000ppm时自动启动新风系统，提供全方位的室内环境管理。\n4. **机器学习个性化适配**：利用每位用户的历史操作数据训练个性化偏好模型，不同家庭成员回家时自动切换对应的环境预设方案，真正实现\"千人千面\"的智能家居体验。\n"
+    },
+    "3.2.1": {
+      "sourceReferenceSha256": "73db766665f0935f214de6e0395db8dccb491a265a4013119bdc6999cd9b2ce4",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先运行一次模型推理，再设计用户如何输入、纠错、理解和导出结果。",
+      "checklist": [
+        "核对模型、标签、输入尺寸、通道和数据类型",
+        "保存实际输出并解释置信度与准确率的区别",
+        "设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+      ],
+      "prerequisiteLessons": [
+        "bridge-interaction",
+        "bridge-metrics"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-interaction",
+          "title": "人机交互：澄清、接管、超时与验收用例"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：图像识别评估系统交互流程设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n核对当前目录与素材文件名，再核对输入维度。这里仅执行单张样本推理；置信度不是在带真值测试集上测得的准确率，表情类别也不能证明人的真实心理状态。\n\n```python\nimport onnxruntime as ort\nimport numpy as np\nimport scipy.special\nfrom PIL import Image\n\n\n# 预处理图像\ndef preprocess_image(image, resize_size=256, crop_size=224, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):\n    image = image.resize((resize_size, resize_size), Image.BILINEAR)\n    w, h = image.size\n    left = (w - crop_size) / 2\n    top = (h - crop_size) / 2\n    image = image.crop((left, top, left + crop_size, top + crop_size))\n    image = np.array(image).astype(np.float32)\n    image = image / 255.0\n    image = (image - mean) / std\n    image = np.transpose(image, (2, 0, 1))\n    image = image.reshape((1,) + image.shape)\n    return image\n\n\n# 模型加载\nsession = ort.InferenceSession('resnet.onnx')\n\n# 加载类别标签\nlabels_path = 'labels.txt'\nwith open(labels_path) as f:\n    labels = [line.strip() for line in f.readlines()]\n\n# 获取模型输入和输出的名称\ninput_name = session.get_inputs()[0].name\noutput_name = session.get_outputs()[0].name\n\n# 加载图片\nimage = Image.open('img_test.jpg').convert('RGB')\n\n# 预处理图片\nprocessed_image = preprocess_image(image)\n\n# 确保输入数据是 float32 类型\nprocessed_image = processed_image.astype(np.float32)\n\n# 进行图片识别\noutput = session.run([output_name], {input_name: processed_image})[0]\n\n# 应用 softmax 函数获取概率\nprobabilities = scipy.special.softmax(output, axis=-1)\n\n# 获取最高的5个概率和对应的类别索引\ntop5_idx = np.argsort(probabilities[0])[-5:][::-1]\ntop5_prob = probabilities[0][top5_idx]\n\n# 打印结果\nprint(\"Top 5 predicted classes:\")\nfor i in range(5):\n    print(f\"{i+1}: {labels[top5_idx[i]]} - Probability: {top5_prob[i]}\")\n```\n\n## 交付与复核\n\n- 核对模型、标签、输入尺寸、通道和数据类型\n- 保存实际输出并解释置信度与准确率的区别\n- 设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+    },
+    "3.2.2": {
+      "sourceReferenceSha256": "7e7342a49b2eedb2a26d0a2f350f40009db3a19fe8c34f0af14794a6616e2240",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先运行一次模型推理，再设计用户如何输入、纠错、理解和导出结果。",
+      "checklist": [
+        "核对模型、标签、输入尺寸、通道和数据类型",
+        "保存实际输出并解释置信度与准确率的区别",
+        "设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+      ],
+      "prerequisiteLessons": [
+        "bridge-interaction",
+        "bridge-metrics"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-interaction",
+          "title": "人机交互：澄清、接管、超时与验收用例"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：手写数字识别系统交互流程设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n核对当前目录与素材文件名，再核对输入维度。这里仅执行单张样本推理；置信度不是在带真值测试集上测得的准确率，表情类别也不能证明人的真实心理状态。\n\n```python\nimport onnxruntime\nimport numpy as np\nfrom PIL import Image\n\n# 加载ONNX模型\nort_session = onnxruntime.InferenceSession('mnist.onnx')\n\n# 加载图像\nimage = Image.open('img_test.png').convert('L')  # 转为灰度图\n\n# 图像预处理\nimage = image.resize((28, 28))  # 调整大小为MNIST模型的输入尺寸\nimage_array = np.array(image, dtype=np.float32)  # 转为numpy数组\nimage_array = np.expand_dims(image_array, axis=0)  # 添加batch维度\nimage_array = np.expand_dims(image_array, axis=0)  # 添加通道维度\n\n# 返回模型输入列表\nort_inputs = {ort_session.get_inputs()[0].name: image_array}\n# 执行预测\nort_outs = ort_session.run(None, ort_inputs)\n\n# 获取预测结果\npredicted_class = np.argmax(ort_outs[0])\n\n# 输出预测结果\nprint(f\"Predicted class: {predicted_class}\")\n```\n\n## 交付与复核\n\n- 核对模型、标签、输入尺寸、通道和数据类型\n- 保存实际输出并解释置信度与准确率的区别\n- 设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+    },
+    "3.2.3": {
+      "sourceReferenceSha256": "27da7bba6f5a0955c93617d328a4ec7fa0c608be0bf7a3b6359924175c9a1148",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先运行一次模型推理，再设计用户如何输入、纠错、理解和导出结果。",
+      "checklist": [
+        "核对模型、标签、输入尺寸、通道和数据类型",
+        "保存实际输出并解释置信度与准确率的区别",
+        "设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+      ],
+      "prerequisiteLessons": [
+        "bridge-interaction",
+        "bridge-metrics"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-interaction",
+          "title": "人机交互：澄清、接管、超时与验收用例"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：面部表情识别系统交互流程设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n核对当前目录与素材文件名，再核对输入维度。这里仅执行单张样本推理；置信度不是在带真值测试集上测得的准确率，表情类别也不能证明人的真实心理状态。\n\n```python\n# 导入必要的库\nimport numpy as np\nfrom PIL import Image\nimport onnxruntime as ort\n\n\n# 定义预处理函数，用于将图片转换为模型所需的输入格式\ndef preprocess(image_path):\n    input_shape = (1, 1, 64, 64)    # 模型输入期望的形状 (N, C, H, W)\n    img = Image.open(image_path).convert('L')    # 打开图像并转换为灰度图\n    img = img.resize((64, 64), Image.Resampling.LANCZOS)    # 调整图像大小到64x64\n    img_data = np.array(img, dtype=np.float32)    # 转为numpy数组\n    img_data = np.expand_dims(img_data, axis=0)  # 添加 batch 维度\n    img_data = np.expand_dims(img_data, axis=1)  # 添加 channel 维度\n    assert img_data.shape == input_shape, f\"Expected shape {input_shape}, but got {img_data.shape}\"\n    return img_data\n\n\n# 定义情感类别与数字标签的映射表\nemotion_table = {'neutral':0, 'happiness':1, 'surprise':2, 'sadness':3, 'anger':4, 'disgust':5, 'fear':6, 'contempt':7}\n\n# 加载模型\nort_session = ort.InferenceSession('emotion-ferplus.onnx')\n\n# 加载本地图片并进行预处理\ninput_data = preprocess('img_test.png')\n\n# 准备输入数据\nort_inputs = {ort_session.get_inputs()[0].name: input_data}\n\n# 运行模型，进行预测\nort_outs = ort_session.run(None, ort_inputs)\n\n# 解码模型输出，找到预测概率最高的情感类别\npredicted_label = np.argmax(ort_outs[0])\n\n# 根据预测的标签找到对应的情感名称\npredicted_emotion = list(emotion_table.keys())[predicted_label]\n\n# 输出预测的情感\nprint(f\"Predicted emotion: {predicted_emotion}\")\n```\n\n## 交付与复核\n\n- 核对模型、标签、输入尺寸、通道和数据类型\n- 保存实际输出并解释置信度与准确率的区别\n- 设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+    },
+    "3.2.4": {
+      "sourceReferenceSha256": "35762141e2e9a421dcbd7013ec76a81940f8049d6965e2362c4e4240ca552e1e",
+      "examEligible": false,
+      "notice": "所附 flower-detection.onnx 与 3.2.1 的 resnet.onnx 内容完全相同，标签为 ImageNet 1000 类，不能证明为花卉专用模型。仅演示通用分类推理，暂不纳入技能模拟。",
+      "firstStep": "先运行一次模型推理，再设计用户如何输入、纠错、理解和导出结果。",
+      "checklist": [
+        "核对模型、标签、输入尺寸、通道和数据类型",
+        "保存实际输出并解释置信度与准确率的区别",
+        "设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+      ],
+      "prerequisiteLessons": [
+        "bridge-interaction",
+        "bridge-metrics"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-interaction",
+          "title": "人机交互：澄清、接管、超时与验收用例"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：花朵智能识别系统交互流程设计\n\n所附 flower-detection.onnx 与 3.2.1 的 resnet.onnx 内容完全相同，标签为 ImageNet 1000 类，不能证明为花卉专用模型。仅演示通用分类推理，暂不纳入技能模拟。\n\n## 操作步骤\n\n核对当前目录与素材文件名，再核对输入维度。这里仅执行单张样本推理；置信度不是在带真值测试集上测得的准确率，表情类别也不能证明人的真实心理状态。\n\n```python\nimport onnxruntime as ort\nimport numpy as np\nimport scipy.special\nfrom PIL import Image\n\n\n# 预处理图像\ndef preprocess_image(image, resize_size=256, crop_size=224, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):\n    image = image.resize((resize_size, resize_size), Image.BILINEAR)\n    w, h = image.size\n    left = (w - crop_size) / 2\n    top = (h - crop_size) / 2\n    image = image.crop((left, top, left + crop_size, top + crop_size))\n    image = np.array(image).astype(np.float32)\n    image = image / 255.0\n    image = (image - mean) / std\n    image = np.transpose(image, (2, 0, 1))\n    image = image.reshape((1,) + image.shape)\n    return image\n\n\n# 加载模型\nsession = ort.InferenceSession('flower-detection.onnx')\n\n# 加载类别标签\nwith open('labels.txt') as f:\n    labels = [line.strip() for line in f.readlines()]\n\n# 获取模型输入和输出的名称\ninput_name = session.get_inputs()[0].name\noutput_name = session.get_outputs()[0].name\n\n# 加载图片\nimage = Image.open('flower_test.png').convert('RGB')\n\n# 预处理图片\nprocessed_image = preprocess_image(image)\n\n# 确保输入数据是 float32 类型\nprocessed_image = processed_image.astype(np.float32)\n\n# 进行图片识别\noutput = session.run([output_name], {input_name: processed_image})[0]\n\n# 应用 softmax 函数获取识别分类后的模型置信度\naccuracy = scipy.special.softmax(output, axis=-1)\n\n# 获取预测的类别索引\npredicted_idx = np.argmax(accuracy[0])\n\n# 获取预测的准确值（转换为百分比）\nprob_percentage = accuracy[0][predicted_idx] * 100\n\n# 获取预测的类别标签\npredicted_label = labels[predicted_idx]\n\n# 输出预测结果，包含百分比形式的概率\nprint(f\"Predicted class: {predicted_label}, Accuracy: {prob_percentage:.2f}%\")\n```\n\n## 交付与复核\n\n- 核对模型、标签、输入尺寸、通道和数据类型\n- 保存实际输出并解释置信度与准确率的区别\n- 设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+    },
+    "3.2.5": {
+      "sourceReferenceSha256": "aa850fd18feead7d97be04ff04938a217460ae8fedfe90b0bea4e0f682395796",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "先运行一次模型推理，再设计用户如何输入、纠错、理解和导出结果。",
+      "checklist": [
+        "核对模型、标签、输入尺寸、通道和数据类型",
+        "保存实际输出并解释置信度与准确率的区别",
+        "设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+      ],
+      "prerequisiteLessons": [
+        "bridge-interaction",
+        "bridge-metrics"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-interaction",
+          "title": "人机交互：澄清、接管、超时与验收用例"
+        },
+        {
+          "id": "bridge-metrics",
+          "title": "评估指标：手算混淆矩阵，再理解代码"
+        }
+      ],
+      "runSteps": [
+        "把本题所有素材下载到同一文件夹，带子目录的文件保持目录结构。",
+        "使用一键安装环境的 Python/Jupyter，先完成 Python 基础与对应衔接课。",
+        "将参考代码保存为 reference.py 并放在素材旁；在此目录运行 python reference.py（依赖清单 requirements-labs.txt 位于项目根目录）。",
+        "保存真实输出、图表和报错处理记录，再关闭参考答案独立重做。"
+      ],
+      "troubleshooting": [
+        "找不到文件：核对文件名、扩展名及当前工作目录。",
+        "缺少库：使用项目学习环境，先在项目根目录执行 python -m pip install -r requirements-labs.txt。",
+        "列名不匹配：查看 df.columns；不要为使程序通过而随意更改目标字段。"
+      ],
+      "validationScope": "bundled-code",
+      "reference": "# 修订教学参考：人脸AI智能检测系统交互流程设计\n\n本例用于学习，不是四川指定批次的官方标准答案。\n\n## 操作步骤\n\n核对当前目录与素材文件名，再核对输入维度。这里仅执行单张样本推理；置信度不是在带真值测试集上测得的准确率，表情类别也不能证明人的真实心理状态。\n\n```python\nimport os\nimport time\nimport cv2\nimport numpy as np\nimport vision.utils.box_utils_numpy as box_utils\nimport onnxruntime as ort\n\n\n# 定义预测函数，对模型输出的边界框和置信度进行后处理\ndef predict(width, height, confidences, boxes, prob_threshold, iou_threshold=0.3, top_k=-1):\n    boxes = boxes[0]\n    confidences = confidences[0]\n    picked_box_probs = []\n    picked_labels = []\n    for class_index in range(1, confidences.shape[1]):\n        probs = confidences[:, class_index]\n        mask = probs > prob_threshold\n        probs = probs[mask]\n        if probs.shape[0] == 0:\n            continue\n        subset_boxes = boxes[mask, :]\n        box_probs = np.concatenate([subset_boxes, probs.reshape(-1, 1)], axis=1)\n        box_probs = box_utils.hard_nms(box_probs,\n                                       iou_threshold=iou_threshold,\n                                       top_k=top_k,\n                                       )\n        picked_box_probs.append(box_probs)\n        picked_labels.extend([class_index] * box_probs.shape[0])\n    if not picked_box_probs:\n        return np.array([]), np.array([]), np.array([])\n    picked_box_probs = np.concatenate(picked_box_probs)\n    picked_box_probs[:, 0] *= width\n    picked_box_probs[:, 1] *= height\n    picked_box_probs[:, 2] *= width\n    picked_box_probs[:, 3] *= height\n    return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]\n\n\n# 从标签文件中读取类别名称列表\nclass_names = [name.strip() for name in open('voc-model-labels.txt').readlines()]\n\n# 创建 ONNX Runtime 的推理会话\nort_session = ort.InferenceSession('version-RFB-320.onnx')\n\n# 获取模型输入的名称\ninput_name = ort_session.get_inputs()[0].name\n\n# 定义保存检测结果图像的目录路径\nresult_path = \"./detect_imgs_results_onnx\"\n\n# 定义置信度阈值\nthreshold = 0.7\n# 定义存储待检测图像的目录路径\npath = \"imgs\"\n# 用于统计所有图像中检测到的目标框总数\nsum = 0\n\n# 如果保存结果的目录不存在，则创建该目录\nif not os.path.exists(result_path):\n    os.makedirs(result_path)\n\n# 获取指定目录下的所有文件名称列表\nlistdir = os.listdir(path)\n\n# 遍历目录下的每个文件\nfor file_path in listdir:\n    # 拼接图像文件的完整路径\n    img_path = os.path.join(path, file_path)\n    # 使用 OpenCV 读取图像文件\n    orig_image = cv2.imread(img_path)\n    # 将图像从 BGR 颜色空间转换为 RGB 颜色空间\n    image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)\n    # 将图像调整为 320x240 的尺寸\n    image = cv2.resize(image, (320, 240))\n    # 定义图像归一化的均值数组\n    image_mean = np.array([127, 127, 127])\n    # 对图像进行归一化处理\n    image = (image - image_mean) / 128\n    # 将图像的维度从 (H, W, C) 转换为 (C, H, W)\n    image = np.transpose(image, [2, 0, 1])\n    # 在第一个维度上扩展一个维度\n    image = np.expand_dims(image, axis=0)\n    # 将图像数据类型转换为 float32 类型\n    image = image.astype(np.float32)\n    # 记录开始时间\n    time_time = time.time()\n    # 使用 ONNX Runtime 运行模型\n    confidences, boxes = ort_session.run(None, {input_name: image})\n    # 打印推理耗时\n    print(\"cost time:{}\".format(time.time() - time_time))\n    # 后处理\n    boxes, labels, probs = predict(orig_image.shape[1], orig_image.shape[0], confidences, boxes, threshold)\n    # 遍历每个检测到的目标框\n    for i in range(boxes.shape[0]):\n        box = boxes[i, :]\n        label = f\"{class_names[labels[i]]}: {probs[i]:.2f}\"\n        # 在原始图像上绘制目标框\n        cv2.rectangle(orig_image, (box[0], box[1]), (box[2], box[3]), (255, 255, 0), 4)\n        # 保存结果图像\n        cv2.imwrite(os.path.join(result_path, file_path), orig_image)\n    # 累加检测到的目标框数量\n    sum += boxes.shape[0]\n# 打印目标框总数\nprint(\"sum:{}\".format(sum))\n```\n\n## 交付与复核\n\n- 核对模型、标签、输入尺寸、通道和数据类型\n- 保存实际输出并解释置信度与准确率的区别\n- 设计正常、空输入、错误文件、低置信度、失败重试和隐私处理"
+    },
+    "4.1.1": {
+      "sourceReferenceSha256": "3372c156ec51163ad3125d3fe6b96fae24a453487ea654819a128d537e515eab",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "把“讲什么”改成“学员最终独立做出什么”，每个知识点接演示和练习。",
+      "checklist": [
+        "写对象、前置知识、可观察学习目标与时间安排",
+        "设计讲解→示范→跟做→独立练习，给出具体练习材料",
+        "准备评分标准、常见错误、补救步骤和课后复测"
+      ],
+      "prerequisiteLessons": [
+        "bridge-teach",
+        "bridge-guide"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-teach",
+          "title": "培训讲义：把一个技能教给初学者"
+        },
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.1.1 Label Studio培训大纲编写\n\n## 题目要求\n\nA企业是一家康复训练机构，需要利用人工智能技术为康复患者提供个性化的康复训练计划。现计划对新进技术人员进行数据标注培训，使其掌握Label Studio标注工具的使用，能对文本、图像、视频、音频进行标注，达到人工智能训练师五级/初级工的技能水平。要求根据素材中的培训大纲，在下划线处补全各章节的学习目标。\n\n## 答案\n\n根据学习大纲补充学习目标（在下划线处填写的内容）：\n\n### 引言\n- 学习目标：了解数据标注的重要性和应用场景。（已给出）\n\n### 数据标注基础理论\n- 学习目标：**掌握数据标注的基本概念、类型及其在人工智能中的作用。**\n\n### Label Studio简介与安装\n- 学习目标：**掌握Label Studio的安装、配置方法及基本操作界面的使用。**\n\n### 文本数据标注\n- 学习目标：**掌握使用Label Studio进行文本数据标注的方法和操作流程。**\n\n### 图像数据标注\n- 学习目标：**掌握使用Label Studio进行图像数据标注的方法和操作流程。**\n\n### 视频数据标注\n- 学习目标：**掌握使用Label Studio进行视频数据标注的方法和操作流程。**\n\n### 音频数据标注\n- 学习目标：掌握音频数据标注的方法和技巧。（已给出）\n\n### 综合项目实践\n- 学习目标：综合运用所学知识进行数据标注项目。（已给出）\n\n### 总结与答疑\n- 学习目标：巩固所学内容，解决学员疑问。（已给出）\n\n### 评估测试\n- 学习目标：评估学员掌握的数据标注技能。（已给出）\n"
+    },
+    "4.1.2": {
+      "sourceReferenceSha256": "a28c4ead950b4aeaa4beb699c69031e8c1b978979f451589fdc44efd0a00f9f6",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "把“讲什么”改成“学员最终独立做出什么”，每个知识点接演示和练习。",
+      "checklist": [
+        "写对象、前置知识、可观察学习目标与时间安排",
+        "设计讲解→示范→跟做→独立练习，给出具体练习材料",
+        "准备评分标准、常见错误、补救步骤和课后复测"
+      ],
+      "prerequisiteLessons": [
+        "bridge-teach",
+        "bridge-guide"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-teach",
+          "title": "培训讲义：把一个技能教给初学者"
+        },
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.1.2 爬虫培训大纲编写\n\n## 题目要求\n\nA企业是一家互联网金融机构，需要利用人工智能技术获取大量上市公司的财务报告。现计划对新进技术人员进行网页爬虫工具的使用培训，使其掌握常用网页爬虫工具的使用，能对网络公开的上市公司财务报告进行获取，达到人工智能训练师四级/中级工的技能水平。要求根据素材中的培训大纲，在下划线处补全各章节的学习目标。\n\n## 答案\n\n根据学习大纲补充学习目标（在下划线处填写的内容）：\n\n### 引言\n- 学习目标：了解网页爬虫的重要性和应用场景。（已给出）\n\n### 网页爬虫基础理论\n- 学习目标：**掌握网页爬虫的基本概念、工作原理及机器人协议的相关知识。**\n\n### 常用网页爬虫工具简介\n- 学习目标：**了解常用网页爬虫工具的特点、适用场景及各自的优势。**\n\n### 环境搭建与工具安装\n- 学习目标：掌握网页爬虫工具的安装和环境配置。（已给出）\n\n### 网页数据解析\n- 学习目标：**掌握使用BeautifulSoup解析网页数据及提取所需信息的方法。**\n\n### 动态网页处理\n- 学习目标：掌握处理动态网页的方法。（已给出）\n\n### Scrapy框架实战\n- 学习目标：**掌握Scrapy框架的使用方法，能够创建爬虫项目并进行数据存储与导出。**\n\n### 数据清洗与处理\n- 学习目标：**掌握对爬取数据进行清洗、去重、格式转换与规范化处理的方法。**\n\n### 综合项目实践\n- 学习目标：综合运用所学知识进行网页爬虫项目。（已给出）\n\n### 总结与答疑\n- 学习目标：巩固所学内容，解决学员疑问。（已给出）\n\n### 评估测试\n- 学习目标：评估学员掌握的网页爬虫技能。（已给出）\n"
+    },
+    "4.1.3": {
+      "sourceReferenceSha256": "5ce5652a8f4d40dbcbe0b0556d8588d5e6de3e5b5fb49adf24886e0e45acb214",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "把“讲什么”改成“学员最终独立做出什么”，每个知识点接演示和练习。",
+      "checklist": [
+        "写对象、前置知识、可观察学习目标与时间安排",
+        "设计讲解→示范→跟做→独立练习，给出具体练习材料",
+        "准备评分标准、常见错误、补救步骤和课后复测"
+      ],
+      "prerequisiteLessons": [
+        "bridge-teach",
+        "bridge-guide"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-teach",
+          "title": "培训讲义：把一个技能教给初学者"
+        },
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.1.3 数据清洗培训大纲编写\n\n## 题目要求\n\nA企业是一家康复训练机构，采集了大量的康复数据，现计划对新进技术人员进行数据清洗工具的使用培训。通过培训使新进技术人员掌握4种基于Python的数据清洗工具的使用，能对大量的康复数据进行清洗，达到人工智能训练师四级/中级工的技能水平。要求根据素材中的培训大纲，在下划线处补全各章节的学习目标。\n\n## 答案\n\n根据学习大纲补充学习目标（在下划线处填写的内容）：\n\n### 引言\n- 学习目标：**了解数据清洗的重要性及其在康复数据处理中的应用场景。**\n\n### 数据清洗基础理论\n- 学习目标：**掌握数据清洗的基本概念、常见任务及其在数据分析中的重要性。**\n\n### 常用数据清洗工具简介\n- 学习目标：**了解Pandas、NumPy、OpenRefine、Dask四种数据清洗工具的特点和适用场景。**\n\n### 环境搭建与工具安装\n- 学习目标：**掌握Python环境搭建及Pandas、NumPy、OpenRefine、Dask的安装与配置方法。**\n\n### Pandas实战\n- 学习目标：**掌握使用Pandas进行数据导入导出、筛选过滤、数据转换等清洗操作的方法。**\n\n### NumPy实战（综合项目实践）\n- 学习目标：综合运用所学知识进行数据清洗项目。（已给出）\n"
+    },
+    "4.1.4": {
+      "sourceReferenceSha256": "f950c3252dee18b24e1d5a0ef60fb21911c8a673df412c632674b88de5072cde",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "把“讲什么”改成“学员最终独立做出什么”，每个知识点接演示和练习。",
+      "checklist": [
+        "写对象、前置知识、可观察学习目标与时间安排",
+        "设计讲解→示范→跟做→独立练习，给出具体练习材料",
+        "准备评分标准、常见错误、补救步骤和课后复测"
+      ],
+      "prerequisiteLessons": [
+        "bridge-teach",
+        "bridge-guide"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-teach",
+          "title": "培训讲义：把一个技能教给初学者"
+        },
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.1.4 Pandas数据清洗培训大纲编写\n\n## 题目要求\n\nA企业是一家康复训练机构，采集了大量的康复数据，现计划对新进技术人员进行数据清洗工具的使用培训。因为Pandas是Python中最为广泛使用的数据分析和操作库之一，因此这次培训将使新进技术人员掌握Pandas的主要数据清洗功能使用，能对大量的康复数据进行清洗，达到人工智能训练师四级/中级工的技能水平。要求根据素材中的培训大纲，在下划线处补全各章节的学习目标。\n\n## 答案\n\n根据学习大纲补充学习目标（在下划线处填写的内容）：\n\n### 数据清洗基础理论\n- 学习目标：掌握数据清洗的基本概念和流程。（已给出）\n\n### Pandas简介与安装\n- 学习目标：**掌握Pandas库的安装配置及数据导入导出的基本操作方法。**\n\n### 数据筛选与过滤\n- 学习目标：**掌握使用Pandas进行条件筛选、数据去重和缺失值处理的方法。**\n\n### 数据转换\n- 学习目标：**掌握使用Pandas进行数据类型转换、时间序列处理及数据分列合并的方法。**\n\n### 数据合并与重塑\n- 学习目标：**掌握使用Pandas进行数据合并（concat、merge）和数据重塑（pivot、melt）的方法。**\n\n### 数据分组与聚合\n- 学习目标：**掌握使用Pandas进行数据分组（groupby）和聚合函数应用的方法。**\n\n### 数据可视化（综合项目实践）\n- 学习目标：综合运用所学知识进行数据清洗项目。（已给出）\n"
+    },
+    "4.1.5": {
+      "sourceReferenceSha256": "1a1ab6478c9c5da28b2553687706c864d5466bf5fdfc3ad519e59f1d8d1006e8",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "把“讲什么”改成“学员最终独立做出什么”，每个知识点接演示和练习。",
+      "checklist": [
+        "写对象、前置知识、可观察学习目标与时间安排",
+        "设计讲解→示范→跟做→独立练习，给出具体练习材料",
+        "准备评分标准、常见错误、补救步骤和课后复测"
+      ],
+      "prerequisiteLessons": [
+        "bridge-teach",
+        "bridge-guide"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-teach",
+          "title": "培训讲义：把一个技能教给初学者"
+        },
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.1.5 Python数据可视化培训大纲编写\n\n## 题目要求\n\nA企业是一家康复训练机构，采集了大量的康复数据，现计划对新进技术人员进行数据可视化工具的使用培训。通过培训使新进技术人员掌握Python的数据可视化工具的使用，能对重要数据进行可视化操作，达到人工智能训练师四级/中级工的技能水平。要求根据素材中的培训大纲，在下划线处补全各章节的学习目标。\n\n## 答案\n\n根据学习大纲补充学习目标（在下划线处填写的内容）：\n\n### 数据可视化基础理论\n- 学习目标：**掌握数据可视化的基本概念、目的、优势及常见的可视化图表类型。**\n\n### Matplotlib简介与安装\n- 学习目标：**掌握Matplotlib库的安装配置及其基本构架与常用组件的使用。**\n\n### Matplotlib基本绘图\n- 学习目标：**掌握使用Matplotlib创建常见图表并进行图表定制的方法。**\n\n### Plotly简介与安装\n- 学习目标：**掌握Plotly库的安装配置及其与Jupyter Notebook结合使用的方法。**\n\n### Plotly交互式绘图\n- 学习目标：**掌握使用Plotly创建交互式图表及图表交互功能的使用方法。**\n\n### 数据可视化项目实战\n- 学习目标：综合运用所学知识进行数据可视化项目。（已给出）\n\n### 总结与答疑\n- 学习目标：巩固所学内容，解决学员疑问。（已给出）\n\n### 评估测试\n- 学习目标：评估学员掌握的数据可视化技能。（已给出）\n"
+    },
+    "4.2.1": {
+      "sourceReferenceSha256": "ae2c489009d652b603938551f78e9dca26ca92d940ec7a33c710e68240b273b1",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "指导方案应让另一位学员照着完成工作，并能发现和处理异常。",
+      "checklist": [
+        "写工具准备、授权范围、操作步骤和每步检查点",
+        "给出合格/不合格样例、质量阈值、抽检及争议升级路径",
+        "安排示范、学员复述操作、独立验收与反馈记录"
+      ],
+      "prerequisiteLessons": [
+        "bridge-guide",
+        "bridge-delivery"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        },
+        {
+          "id": "bridge-delivery",
+          "title": "四领域综合任务：从空目录做出可复核成果"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.2.1 智能零售分析系统数据采集和处理指导\n\n## 题目要求\n根据智能零售分析系统的系统目标和业务需求，补全数据采集和处理指导方案（在下划线处填写答案）。\n\n## 答案\n\n### 答题项1：顾客信息 -- 会员卡使用数据，包括______\n**填写内容：** 顾客的个人基本信息、购物偏好、购买频率、消费金额、积分兑换记录及会员等级变动情况\n\n### 答题项2：数据预处理 -- 清洗______\n**填写内容：** 去除重复记录、修正错误数据、填补缺失值、删除无效或异常的交易记录，确保数据的准确性和完整性\n\n### 答题项3：数据预处理 -- 标准化______\n**填写内容：** 统一数据格式（如日期格式、货币单位、商品编码），对数值型数据进行归一化或标准化处理，确保不同来源的数据具有一致的度量标准\n\n### 答题项4：数据分析与应用 -- 建模______\n**填写内容：** 运用机器学习算法（如时间序列分析、回归分析、聚类分析等）构建销售预测模型、顾客细分模型和动态定价模型，挖掘数据中的潜在规律和趋势\n\n### 答题项5：最终达到______的目标\n**填写内容：** 提高销售转化率和客户忠诚度、减少库存成本、降低运营成本、加强市场竞争力并快速响应市场变化\n"
+    },
+    "4.2.2": {
+      "sourceReferenceSha256": "4605518ac7c5a4573b9d347ef4b9595c5b212b00d0b7dd3e2dd70e9cc8ec2487",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "指导方案应让另一位学员照着完成工作，并能发现和处理异常。",
+      "checklist": [
+        "写工具准备、授权范围、操作步骤和每步检查点",
+        "给出合格/不合格样例、质量阈值、抽检及争议升级路径",
+        "安排示范、学员复述操作、独立验收与反馈记录"
+      ],
+      "prerequisiteLessons": [
+        "bridge-guide",
+        "bridge-delivery"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        },
+        {
+          "id": "bridge-delivery",
+          "title": "四领域综合任务：从空目录做出可复核成果"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.2.2 AI辅助的医疗影像诊断系统数据采集和处理指导\n\n## 题目要求\n根据AI辅助的医疗影像诊断系统的系统目标，补全数据采集和处理指导方案（在下划线处填写答案）。\n\n## 答案\n\n### 答题项1：数据采集方案 -- ______：邀请经验丰富的医生对影像进行标注\n**填写内容：** 专家标注与数据集构建\n\n### 答题项2：数据处理方案 -- 数据清洗与预处理______\n**填写内容：** 对采集到的医学影像进行格式统一、尺寸归一化、噪声去除、对比度增强等预处理操作，剔除质量不达标的影像数据，并对影像进行标准化处理（如DICOM格式转换），确保数据质量满足模型训练要求\n\n### 答题项3：数据处理方案 -- 模型训练与验证______\n**填写内容：** 将预处理后的数据按比例划分为训练集、验证集和测试集（如7:1.5:1.5），选用合适的深度学习架构（如ResNet、VGG、U-Net等）进行模型训练，通过交叉验证等方法评估模型在验证集上的准确率、灵敏度和特异度等指标，防止过拟合\n\n### 答题项4：数据处理方案 -- 模型测试与优化______\n**填写内容：** 使用独立的测试集对训练好的模型进行全面评估，计算AUC、F1值、召回率等关键性能指标，根据测试结果调整模型超参数、优化网络结构或采用数据增强等策略提升模型性能，确保模型在临床应用中达到高准确率和低误诊率\n\n### 答题项5：系统优化与升级 -- 提高______\n**填写内容：** 模型对新病种和罕见病例的识别能力与诊断准确率\n"
+    },
+    "4.2.3": {
+      "sourceReferenceSha256": "de0c4d00431cc673bf1472288b550b672c33a71493ad0a53541142251de13736",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "指导方案应让另一位学员照着完成工作，并能发现和处理异常。",
+      "checklist": [
+        "写工具准备、授权范围、操作步骤和每步检查点",
+        "给出合格/不合格样例、质量阈值、抽检及争议升级路径",
+        "安排示范、学员复述操作、独立验收与反馈记录"
+      ],
+      "prerequisiteLessons": [
+        "bridge-guide",
+        "bridge-delivery"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        },
+        {
+          "id": "bridge-delivery",
+          "title": "四领域综合任务：从空目录做出可复核成果"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.2.3 AI智能安防监控系统采集和处理指导\n\n## 题目要求\n根据AI智能安防监控系统的目标，补全数据采集和处理指导方案（在下划线处填写答案）。\n\n## 答案\n\n### 答题项1：多角度覆盖 -- 确保______无死角\n**填写内容：** 监控区域全方位、多层次\n\n### 答题项2：数据传输与存储 -- 建立安全的______\n**填写内容：** 云端与本地混合存储架构\n\n### 答题项3：数据处理方案 -- 视频流预处理______\n**填写内容：** 对原始视频流进行解码、帧提取、图像增强（包括去噪、亮度调整、对比度优化）、分辨率归一化等操作，将视频数据转换为适合AI模型分析的标准化格式，同时对视频进行关键帧抽取以降低计算开销\n\n### 答题项4：数据处理方案 -- 行为分析与异常检测______\n**填写内容：** 利用深度学习模型（如YOLO、SSD等目标检测算法和LSTM、Transformer等时序分析模型）对视频中的人物行为进行实时识别与分类，通过建立正常行为基线模型，自动检测偏离正常模式的异常行为（如闯入禁区、聚集、徘徊、暴力冲突、物品遗留等），并即时触发告警通知安保人员\n\n### 答题项5：系统优化 -- 提升______\n**填写内容：** 异常行为识别的准确率和实时响应速度，降低误报率和漏报率\n"
+    },
+    "4.2.4": {
+      "sourceReferenceSha256": "49bd680a9a1846a7c5b8b5a3f02753a2b3a83c227b5864d6708a2b58e303a9ea",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "指导方案应让另一位学员照着完成工作，并能发现和处理异常。",
+      "checklist": [
+        "写工具准备、授权范围、操作步骤和每步检查点",
+        "给出合格/不合格样例、质量阈值、抽检及争议升级路径",
+        "安排示范、学员复述操作、独立验收与反馈记录"
+      ],
+      "prerequisiteLessons": [
+        "bridge-guide",
+        "bridge-delivery"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        },
+        {
+          "id": "bridge-delivery",
+          "title": "四领域综合任务：从空目录做出可复核成果"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.2.4 自动驾驶汽车感知系统数据采集与标注指导\n\n## 题目要求\n根据自动驾驶汽车感知系统的业务需求，补全数据采集和数据标注指导方案（在下划线处填写答案）。\n\n## 答案\n\n### 答题项1：数据采集方案 -- 多传感器融合______\n**填写内容：** 综合运用摄像头、毫米波雷达、激光雷达（LiDAR）、超声波传感器、GPS/IMU等多种传感器，实现视觉、点云、位置等多模态数据的同步采集与时间戳对齐，通过传感器融合技术获取环境的全面感知信息\n\n### 答题项2：数据采集方案 -- 场景覆盖______\n**填写内容：** 规划覆盖城市道路、高速公路、乡村道路、停车场等多种道路类型的数据采集路线，涵盖晴天、雨天、雾天、雪天、夜间等不同天气和光照条件，以及早晚高峰、节假日等不同交通流量场景，确保数据的多样性和代表性\n\n### 答题项3：数据采集方案 -- 数据质量控制______\n**填写内容：** 建立数据质量检查机制，对采集到的传感器数据进行实时校验，包括检查图像清晰度、点云密度、GPS信号精度等指标，自动标记和剔除质量不达标的数据，并定期对传感器进行标定校准，确保数据的准确性和可靠性\n\n### 答题项4：数据标注方案 -- ______：对标注员进行专业培训\n**填写内容：** 标注员培训\n\n### 答题项5：数据整合与存储 -- 形成______数据集\n**填写内容：** 结构化的、版本可控的高质量标注\n"
+    },
+    "4.2.5": {
+      "sourceReferenceSha256": "c6f4cbc5a0b052f6b2322cf84bc9ae1f741593f2b6d04e74fc67086d07c20839",
+      "examEligible": true,
+      "notice": "教学练习；示例与实际考试的工具、题型和评分细则可能不同。",
+      "firstStep": "指导方案应让另一位学员照着完成工作，并能发现和处理异常。",
+      "checklist": [
+        "写工具准备、授权范围、操作步骤和每步检查点",
+        "给出合格/不合格样例、质量阈值、抽检及争议升级路径",
+        "安排示范、学员复述操作、独立验收与反馈记录"
+      ],
+      "prerequisiteLessons": [
+        "bridge-guide",
+        "bridge-delivery"
+      ],
+      "prerequisites": [
+        {
+          "id": "bridge-guide",
+          "title": "技术指导：诊断卡点、分层提示与复测"
+        },
+        {
+          "id": "bridge-delivery",
+          "title": "四领域综合任务：从空目录做出可复核成果"
+        }
+      ],
+      "runSteps": [
+        "下载并阅读题面，列出尚不明确的假设。",
+        "按下方验收清单撰写自己的方案；参考文案只是示例。",
+        "用真实素材核算数字，提交流程、证据与可执行验收标准。"
+      ],
+      "troubleshooting": [
+        "只有口号没有步骤：补充输入、动作、产物、检查方法。",
+        "数字没有来源：写出计算公式与数据范围，不抄参考数值。"
+      ],
+      "validationScope": "materials-only",
+      "reference": "# 4.2.5 智能化数据标注在文化遗产数字化保护中的应用指导\n\n## 题目要求\n根据智能化数据标注在文化遗产数字化保护中的业务需求，补全应用指导方案（在下划线处填写答案）。\n\n## 答案\n\n### 答题项1：图像标注 -- 使用______等标注工具\n**填写内容：** LabelMe、LabelImg、CVAT（Computer Vision Annotation Tool）、VGG Image Annotator\n\n### 答题项2：智能化辅助标注 -- 训练______的模型\n**填写内容：** 基于文化遗产图像特征的深度学习目标检测与语义分割\n\n### 答题项3：跨学科团队协作 -- 组建______团队\n**填写内容：** 跨学科协作\n\n### 答题项4：数据安全与隐私保护 -- 使用______存储和传输数据\n**填写内容：** 加密技术（如AES-256加密算法和SSL/TLS安全传输协议）\n\n### 答题项5：用户体验与公众教育 -- 利用______技术\n**填写内容：** VR（虚拟现实）/AR（增强现实）\n"
+    }
+  }
+}

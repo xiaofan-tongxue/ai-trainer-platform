@@ -51,7 +51,9 @@ public class QuestionService {
         DB.update(
                 "INSERT INTO practice_records(user_id,question_id,user_answer,is_correct,created_at) VALUES(?,?,?,?,NOW())",
                 userId, questionId, com.aitrainer.security.ProtectedFields.seal("practice_records","user_answer",userAnswer), com.aitrainer.security.ProtectedFields.seal("practice_records","is_correct",ok ? 1 : 0));
-        if (ok) {
+        if (Boolean.FALSE.equals(q.get("examEligible"))) {
+            // Preserve the attempt, but uncertain legacy keys must not create/remaster mistakes.
+        } else if (ok) {
             mdao.markMastered(userId, questionId);
         } else {
             mdao.record(userId, questionId);
@@ -62,6 +64,8 @@ public class QuestionService {
         r.put("correctAnswer", correct);
         r.put("analysis", q.get("analysis"));
         r.put("type", type);
+        r.put("examEligible",q.get("examEligible"));
+        r.put("reviewStatus",q.get("reviewStatus"));
         return r;
     }
 

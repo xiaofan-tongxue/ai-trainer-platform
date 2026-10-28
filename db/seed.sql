@@ -3091,7 +3091,7 @@ print("低风险患者占比:", low_risk_ratio)
 bmi_bins = [0, 18.5, 24, 28, np.inf]
 bmi_labels = [''偏瘦'', ''正常'', ''超重'', ''肥胖'']
 # 根据BMI值划分指定区间 4分
-data[''BMIRange''] = pd.cut(data[''BMI''], bmi_bins, bmi_labels, right=False)  # 使用左闭右开区间
+data[''BMIRange''] = pd.cut(data[''BMI''], bmi_bins, labels=bmi_labels, right=False)  # 使用左闭右开区间
 # 计算每个BMI区间中高风险患者的比例 2分
 bmi_risk_rate = data.groupby(''BMIRange'')[''RiskLevel''].apply(lambda x: (x == ''高风险患者'').mean())
 # 统计每个BMI区间的患者数量 1分
@@ -3110,7 +3110,7 @@ print(bmi_patient_count)
 age_bins = [0, 26, 36, 46, 56, 66, np.inf]
 age_labels = [''≤25岁'', ''26-35岁'', ''36-45岁'', ''46-55岁'', ''56-65岁'', ''＞65岁'']
 # 根据年龄值划分指定区间 4分
-data[''AgeRange''] = pd.cut(data[''Age''], age_bins, age_labels, right=False)  # 使用左闭右开区间
+data[''AgeRange''] = pd.cut(data[''Age''], age_bins, labels=age_labels, right=False)  # 使用左闭右开区间
 # 计算每个年龄区间中高风险患者的比例 2分
 age_risk_rate = data.groupby(''AgeRange'')[''RiskLevel''].apply(lambda x: (x == ''高风险患者'').mean())
 # 统计每个年龄区间的患者数量 1分
@@ -3133,12 +3133,12 @@ print(age_patient_count)
 - `risk_counts[''高风险患者''] / len(data)`：计算高风险患者占总人数的比例
 
 ### Cell 3 - BMI区间统计（对应截图 1.1.1-2）
-- `pd.cut(data[''BMI''], bmi_bins, bmi_labels, right=False)`：将BMI值按区间分组（左闭右开），分为偏瘦/正常/超重/肥胖四类
+- `pd.cut(data[''BMI''], bmi_bins, labels=bmi_labels, right=False)`：将BMI值按区间分组（左闭右开），分为偏瘦/正常/超重/肥胖四类
 - `data.groupby(''BMIRange'')[''RiskLevel''].apply(lambda x: (x == ''高风险患者'').mean())`：按BMI区间分组，计算每组中高风险患者的比例
 - `data[''BMIRange''].value_counts()`：统计每个BMI区间的患者数量
 
 ### Cell 4 - 年龄区间统计（对应截图 1.1.1-3）
-- `pd.cut(data[''Age''], age_bins, age_labels, right=False)`：将年龄按区间分组，分为6个年龄段
+- `pd.cut(data[''Age''], age_bins, labels=age_labels, right=False)`：将年龄按区间分组，分为6个年龄段
 - `data.groupby(''AgeRange'')[''RiskLevel''].apply(lambda x: (x == ''高风险患者'').mean())`：按年龄区间分组，计算每组中高风险患者的比例
 - `data[''AgeRange''].value_counts()`：统计每个年龄区间的患者数量
 
@@ -3152,10 +3152,10 @@ print(age_patient_count)
 | Cell2: 第3个空 `np.where(_____, ` | `data[''DaysInHospital''] > 7` |
 | Cell2: `data_____.____` | `[''RiskLevel''].value_counts()` |
 | Cell2: `/ _____` (两处) | `len(data)` |
-| Cell3: `pd.cut(_____, _____, _____, right=False)` | `data[''BMI''], bmi_bins, bmi_labels` |
+| Cell3: `pd.cut(_____, _____, labels=_____, right=False)` | `data[''BMI''], bmi_bins, labels=bmi_labels` |
 | Cell3: `_____(_____)[''RiskLevel'']` | `data.groupby(''BMIRange'')` |
 | Cell3: `data_____` | `[''BMIRange''].value_counts()` |
-| Cell4: `pd.cut(_____, _____, _____, right=False)` | `data[''Age''], age_bins, age_labels` |
+| Cell4: `pd.cut(_____, _____, labels=_____, right=False)` | `data[''Age''], age_bins, labels=age_labels` |
 | Cell4: `_____(_____)[''RiskLevel'']` | `data.groupby(''AgeRange'')` |
 | Cell4: `data_____` | `[''AgeRange''].value_counts()` |
 ','[{"name":"1.1.1.ipynb","size":3932},{"name":"patient_data.csv","size":21995}]',1),

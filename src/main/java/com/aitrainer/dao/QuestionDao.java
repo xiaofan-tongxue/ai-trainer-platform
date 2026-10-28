@@ -18,6 +18,7 @@ public class QuestionDao {
         } else if (o == null) {
             q.put("options", new ArrayList<Object>());
         }
+        com.aitrainer.service.ContentQuality.question(q);
         return q;
     }
 
@@ -29,7 +30,7 @@ public class QuestionDao {
 
     public static Map<String,Object> publicView(Map<String,Object> q) {
         Map<String,Object> r=new java.util.LinkedHashMap<String,Object>(q);
-        r.remove("answer");r.remove("analysis");return r;
+        com.aitrainer.service.ContentQuality.hideSolutions(r);return r;
     }
 
     public Map<String, Object> findById(long id) {
@@ -50,9 +51,10 @@ public class QuestionDao {
     /** 随机抽取指定数量指定类型的题目 */
     public List<Map<String, Object>> randomByType(String type, int n) {
         List<Map<String, Object>> list = DB.query(
-                "SELECT * FROM questions WHERE type=? ORDER BY RAND() LIMIT ?", type, n);
-        for (Map<String, Object> m : list) decorate(m);
-        return list;
+                "SELECT * FROM questions WHERE type=? ORDER BY RAND()", type);
+        List<Map<String,Object>> eligible=new ArrayList<Map<String,Object>>();
+        for (Map<String, Object> m : list){decorate(m);if(Boolean.TRUE.equals(m.get("examEligible"))&&eligible.size()<n)eligible.add(m);}
+        return eligible;
     }
 
     public List<Map<String, Object>> byIds(List<Long> ids) {

@@ -9,8 +9,20 @@ public final class Curriculum {
     private static Map<String,Object> data;
     public static synchronized Map<String,Object> data() {
         if(data==null) {
-            try { data=Json.obj(Json.parse(new String(Files.readAllBytes(Paths.get(System.getProperty("curriculum.file","data/curriculum.json"))),StandardCharsets.UTF_8))); }
-            catch(Exception e) { throw new IllegalStateException("课程文件读取失败，请检查 data/curriculum.json",e); }
+            try {
+                Map<String,Object> loaded=Json.obj(Json.parse(new String(Files.readAllBytes(Paths.get(System.getProperty("curriculum.file","data/curriculum.json"))),StandardCharsets.UTF_8)));
+                Map<String,Object> bridge=Json.obj(Json.parse(new String(Files.readAllBytes(Paths.get(System.getProperty("bridge.file","data/bridge-course.json"))),StandardCharsets.UTF_8)));
+                List<Object> original=Json.arr(loaded.get("lessons")), extra=Json.arr(bridge.get("lessons")), merged=new ArrayList<Object>();
+                Set<String> ids=new HashSet<String>();
+                for(Object o:original)if(!ids.add(Json.str(Json.obj(o).get("id"))))throw new IllegalArgumentException("重复课程编号");
+                Set<String> baseIds=new HashSet<String>(ids);
+                for(Object o:extra){Map<String,Object> l=Json.obj(o);if(!baseIds.contains(Json.str(l.get("after")))||!ids.add(Json.str(l.get("id"))))throw new IllegalArgumentException("衔接课程映射错误");}
+                for(Object o:original){merged.add(o);for(Object e:extra)if(Json.obj(o).get("id").equals(Json.obj(e).get("after")))merged.add(e);}
+                loaded.put("lessons",merged);loaded.put("overviewCount",original.size());loaded.put("bridgeCount",extra.size());
+                loaded.put("totalHours",Json.integer(loaded.get("hours"),136)+Json.integer(bridge.get("additionalHours"),0));
+                loaded.put("reviewedAt",bridge.get("version"));data=loaded;
+            }
+            catch(Exception e) { throw new IllegalStateException("课程文件读取失败，请检查 data/curriculum.json 和 data/bridge-course.json",e); }
         }
         return data;
     }

@@ -1,0 +1,1303 @@
+{
+  "version": "2026-10-26",
+  "additionalHours": 24,
+  "notice": "20节原创衔接课；标准能力映射不代表科教兴川真题。成果自查为学员自述，不参与概率或考试评分。",
+  "lessons": [
+    {
+      "id": "bridge-files",
+      "after": "start-2",
+      "stage": "start",
+      "domain": "foundation",
+      "title": "文件与运行环境：从保存代码到交付结果",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 start-2；尚未接触 Python 时先读文件操作，代码在 py-37—40 后回练。",
+      "content": "### 为什么先学这一课\n考场不仅看屏幕上的结果，还需要能找到、保存、重新运行自己的文件。浏览器练习环境中的文件通常在内存里，关闭页面后不能当成已交付文件。\n\n### 一步一步跟做\n1. 在电脑上新建 exam_practice 文件夹，再建 input、work、output 三个子文件夹。原始素材只放 input，处理后的结果放 output。\n2. 在资源管理器开启“文件扩展名”。确认代码名是 main.py，而不是 main.py.txt。CSV 是文本表格，改成 .xlsx 不会变成 Excel 工作簿。\n3. 在安装包的“环境终端”执行 python --version，记下实际版本；运行 Python 文件时，先进入该文件夹，再执行 python main.py。\n4. 运行下例，理解“当前工作目录”与“代码所在位置”可能不同。看到 input 不存在时先核对目录，不要反复重装 Python。\n\n```python\nfrom pathlib import Path\nroot = Path.cwd()\nprint(root.name != \"\")\nprint((root / \"input\").name)\n```\n输出 True 和 input。第一行导入路径工具；cwd 询问当前运行目录；斜杠连接目录，不是算术除法。\n\n### Notebook 与浏览器的区别\nNotebook 每个单元可以单独运行，但旧变量可能掩盖缺失步骤。交付前“重启内核并运行全部”，再导出要求的格式。浏览器 Python 下载的 .py 需要自己保存到电脑，网页上的成功提示不能代替文件。\n\n### 常见错误与独立尝试\nFileNotFoundError 先检查目录、文件名大小写和扩展名；ModuleNotFoundError 先核对使用了哪个解释器。独立完成一份目录截图和三行环境记录：运行命令、Python 版本、结果文件位置。把工作文件复制到另一目录，再从头运行一次。",
+      "deliverable": "提交目录说明、环境记录和重新运行记录；不提交含密码或 API Key 的环境变量。",
+      "evidenceChecks": [
+        "能区分原始素材、代码和输出目录",
+        "核对过真实扩展名与运行目录",
+        "重新打开文件并完成从头运行"
+      ],
+      "quiz": [
+        {
+          "question": "把 data.csv 改名 data.xlsx 会怎样？",
+          "options": [
+            {
+              "label": "A",
+              "text": "自动转换成 Excel"
+            },
+            {
+              "label": "B",
+              "text": "仅改变文件名，不改变内部格式"
+            },
+            {
+              "label": "C",
+              "text": "自动去重"
+            }
+          ],
+          "answer": "B",
+          "explanation": "格式由内容决定，应使用正确的导出方法。"
+        },
+        {
+          "question": "Notebook 交付前最有效的检查是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "只运行最后一格"
+            },
+            {
+              "label": "B",
+              "text": "截图后关机"
+            },
+            {
+              "label": "C",
+              "text": "重启内核并从头运行全部"
+            }
+          ],
+          "answer": "C",
+          "explanation": "这能暴露依赖旧变量、缺失导入和错误执行顺序。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=foundation"
+        }
+      ],
+      "example": {
+        "code": "from pathlib import Path\nroot = Path.cwd()\nprint(root.name != \"\")\nprint((root / \"input\").name)",
+        "expected": "True\ninput"
+      }
+    },
+    {
+      "id": "bridge-tables",
+      "after": "start-2",
+      "stage": "start",
+      "domain": "foundation",
+      "title": "表格入门：字段、筛选、排序与分组汇总",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-files；代码示例在 py-27 和 py-43 后跟做。",
+      "content": "### 先读懂一张表\n一行是一条记录，一列是一个字段。工单编号是标识符，不应该求平均；处理秒数是数值，可以求均值；渠道是类别，可以分组计数。先写清“每行代表什么”，再进行统计。\n\n### 完整示范\n有四条工单：网页 10 秒、网页 30 秒、电话 60 秒、电话 100 秒。在电子表格中建立 ticket_id、channel、seconds 三列，筛选 seconds 大于 30 得到两条；按 seconds 降序，第一条为 100 秒。筛选只是暂时隐藏行，不等于删除原始数据。\n\n```python\nrows = [(\"web\", 10), (\"web\", 30), (\"phone\", 60), (\"phone\", 100)]\nfor channel in [\"web\", \"phone\"]:\n    values = [seconds for name, seconds in rows if name == channel]\n    print(channel, len(values), sum(values) / len(values))\n```\n输出 web 2 20.0 和 phone 2 80.0。列表推导式逐条保留指定渠道的秒数；len 是数量；总和除以数量是均值。电子表格可用数据透视表完成同样任务：行字段选渠道，值字段选计数与平均秒数。\n\n### 注意分母\n两组均值不能总是直接平均。例如网页有 100 条、电话只有 2 条，整体均值必须按记录数加权。隐藏行、空字符串和真正的零也不相同。\n\n### 独立练习\n再增加网页 50 秒。先手算网页数量 3、均值 30 秒，再用表格或代码验证。另存结果前核对：汇总数量总和等于原表记录数，编号列仍为文本；CSV 导出会丢失图表、公式和多个工作表，保留原工作簿以便复核。",
+      "deliverable": "提交原始小表、筛选结果、分组计数与均值，并写出使用的分母。",
+      "evidenceChecks": [
+        "能解释每列的含义与类型",
+        "分组数量之和与有效原始行数一致",
+        "能解释为什么有时不能直接平均各组均值"
+      ],
+      "quiz": [
+        {
+          "question": "两组分别 100 条和 2 条，整体均值怎样算？",
+          "options": [
+            {
+              "label": "A",
+              "text": "直接平均两组均值"
+            },
+            {
+              "label": "B",
+              "text": "按各组记录数加权"
+            },
+            {
+              "label": "C",
+              "text": "只用记录多的组"
+            }
+          ],
+          "answer": "B",
+          "explanation": "每条记录应有相同权重，两组记录数不等时应加权。"
+        },
+        {
+          "question": "工单编号 0012 最适合按哪种方式保存？",
+          "options": [
+            {
+              "label": "A",
+              "text": "文本标识符"
+            },
+            {
+              "label": "B",
+              "text": "浮点小数"
+            },
+            {
+              "label": "C",
+              "text": "日期"
+            }
+          ],
+          "answer": "A",
+          "explanation": "编号没有求和意义，按文本保存可以保留前导零。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=foundation"
+        }
+      ],
+      "example": {
+        "code": "rows = [(\"web\", 10), (\"web\", 30), (\"phone\", 60), (\"phone\", 100)]\nfor channel in [\"web\", \"phone\"]:\n    values = [seconds for name, seconds in rows if name == channel]\n    print(channel, len(values), sum(values) / len(values))",
+        "expected": "web 2 20.0\nphone 2 80.0"
+      }
+    },
+    {
+      "id": "bridge-stats",
+      "after": "start-4",
+      "stage": "start",
+      "domain": "foundation",
+      "title": "统计直觉：均值、中位数、比例与抽样",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先掌握 py-08、py-19—24 的算术、列表和循环。",
+      "content": "### 从业务问题开始\n“平均响应快”不代表每个人都得到及时服务。秒数为 1、2、2、3、92，均值是 20，中位数是 2；一个极慢请求把均值拉高。均值反映总体消耗，中位数反映典型位置，应一起解释。\n\n```python\nfrom statistics import mean, median\nseconds = [1, 2, 2, 3, 92]\nslow = sum(x > 3 for x in seconds)\nprint(mean(seconds), median(seconds))\nprint(slow, len(seconds), slow / len(seconds))\n```\n输出 20 2 和 1 5 0.2。布尔值参与求和时，True 记为 1。这里的慢请求条件是大于 3，不包含恰好 3。\n\n### 跟做与解释\n把 92 改成 7，均值变成 3，中位数仍为 2。指标的变化来自分布，不要只报告一个百分数。若 100 条请求只有 80 条有耗时，算“慢请求率”前必须说明分母是全部请求还是有耗时的请求；缺失部分应单列。\n\n### 抽样不是随手挑\n只抽上午的数据，不能代表整天；只挑容易的样本，不能代表真实效果。可以按渠道、时段、类别分层抽样，保留样本编号和抽样规则。相关性也不等于因果：新版本表现更好，可能只是流量类别变化了。\n\n### 独立练习\n给定两天成功数分别为 9/10、10/20，算每日成功率与两天合并成功率。参考核对：90%、50%、19/30 约 63.3%，合并率不是 70%。再写出一个样本选择偏差，以及你会如何补采数据。",
+      "deliverable": "提交三个统计结果、明确分母，并说明一个异常值与一个抽样偏差。",
+      "evidenceChecks": [
+        "正确计算并解释合并比例",
+        "能区分均值与中位数的用途",
+        "抽样方案覆盖不同时间或类别"
+      ],
+      "quiz": [
+        {
+          "question": "9/10 与 10/20 合并成功率是多少？",
+          "options": [
+            {
+              "label": "A",
+              "text": "70%"
+            },
+            {
+              "label": "B",
+              "text": "约63.3%"
+            },
+            {
+              "label": "C",
+              "text": "50%"
+            }
+          ],
+          "answer": "B",
+          "explanation": "合并成功数19、总数30，不能等权平均分母不同的比例。"
+        },
+        {
+          "question": "只抽最容易的样本来评估模型，会怎样？",
+          "options": [
+            {
+              "label": "A",
+              "text": "通常高估效果"
+            },
+            {
+              "label": "B",
+              "text": "能代表全部用户"
+            },
+            {
+              "label": "C",
+              "text": "自动消除噪声"
+            }
+          ],
+          "answer": "A",
+          "explanation": "样本分布偏离真实使用场景，评估会产生选择偏差。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=foundation"
+        }
+      ],
+      "example": {
+        "code": "from statistics import mean, median\nseconds = [1, 2, 2, 3, 92]\nslow = sum(x > 3 for x in seconds)\nprint(mean(seconds), median(seconds))\nprint(slow, len(seconds), slow / len(seconds))",
+        "expected": "20 2\n1 5 0.2"
+      }
+    },
+    {
+      "id": "bridge-sql",
+      "after": "start-4",
+      "stage": "start",
+      "domain": "foundation",
+      "title": "数据库基础：查询、聚合与数据字典",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 py-37—40；本课用 Python 自带 SQLite，不要求安装新数据库。",
+      "content": "### 数据库能帮你做什么\nCSV 适合交换小表，数据库适合按条件查询和关联记录。表是数据集合，列是字段，主键唯一标识记录。数据字典则说明字段名称、类型、是否允许缺失、单位和合法范围；字段名本身不够。\n\n### 从零运行一次查询\n```python\nimport sqlite3\nwith sqlite3.connect(\":memory:\") as db:\n    db.execute(\"CREATE TABLE tickets (id INTEGER PRIMARY KEY, channel TEXT, seconds INTEGER)\")\n    db.executemany(\"INSERT INTO tickets VALUES (?, ?, ?)\",\n                   [(1, \"web\", 10), (2, \"web\", 30), (3, \"phone\", 60)])\n    result = db.execute(\"SELECT channel, COUNT(*), AVG(seconds) FROM tickets GROUP BY channel ORDER BY channel\").fetchall()\n    print(result)\n```\n输出 [('phone', 1, 60.0), ('web', 2, 20.0)]。memory 表示临时数据库；CREATE 建表；问号由参数绑定填值；GROUP BY 按渠道合并；COUNT 与 AVG 分别计数和求平均。关闭连接后此临时数据库消失。\n\n### 先讲错误，再尝试\nWHERE 在分组前筛记录；HAVING 在分组后筛汇总。NULL 是缺失，不等于 0；COUNT(*) 数所有行，而 COUNT(seconds) 不计该列缺失。连接两张表时，关联键重复会使结果膨胀，应比较连接前后行数。\n\n### 独立练习\n增加一条 web、50 秒的记录，查询 web 平均值应为 30。给 seconds 写数据字典：“整数，单位秒，允许0，不允许负数，缺失需记录原因”。再尝试重复插入主键，说明数据库为何拒绝。只在本练习的临时库操作，不连接真实业务库。",
+      "deliverable": "提交查询、结果和三字段数据字典；能解释主键、缺失值和参数绑定。",
+      "evidenceChecks": [
+        "成功运行临时库查询",
+        "能解释 COUNT(*) 与 COUNT(字段) 的差别",
+        "数据字典包含类型、单位、缺失和范围"
+      ],
+      "quiz": [
+        {
+          "question": "COUNT(seconds) 会统计 NULL 吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "会"
+            },
+            {
+              "label": "B",
+              "text": "不会"
+            },
+            {
+              "label": "C",
+              "text": "只在排序后会"
+            }
+          ],
+          "answer": "B",
+          "explanation": "COUNT(字段)忽略NULL，COUNT(*)计算行数。"
+        },
+        {
+          "question": "重复主键被拒绝的原因是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "主键必须唯一"
+            },
+            {
+              "label": "B",
+              "text": "文本不能存入数据库"
+            },
+            {
+              "label": "C",
+              "text": "查询太慢"
+            }
+          ],
+          "answer": "A",
+          "explanation": "主键提供唯一身份，重复会破坏记录识别。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=foundation"
+        }
+      ],
+      "example": {
+        "code": "import sqlite3\nwith sqlite3.connect(\":memory:\") as db:\n    db.execute(\"CREATE TABLE tickets (id INTEGER PRIMARY KEY, channel TEXT, seconds INTEGER)\")\n    db.executemany(\"INSERT INTO tickets VALUES (?, ?, ?)\", [(1, \"web\", 10), (2, \"web\", 30), (3, \"phone\", 60)])\n    result = db.execute(\"SELECT channel, COUNT(*), AVG(seconds) FROM tickets GROUP BY channel ORDER BY channel\").fetchall()\n    print(result)",
+        "expected": "[('phone', 1, 60.0), ('web', 2, 20.0)]"
+      }
+    },
+    {
+      "id": "bridge-process",
+      "after": "data-2",
+      "stage": "data",
+      "domain": "business",
+      "title": "业务流程设计：采集、处理、审核与返工",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先读 data-1、data-2 和 bridge-tables。",
+      "content": "### 把“提高效率”变成可以验收的任务\n案例：客服团队希望减少退款工单的重复分派。先限定范围：只处理授权的模拟工单，不处理支付信息，不由模型决定退款。目标可以是“在相同类别构成下减少重复分派率，同时不增加错误路由率”。阈值属于项目目标，需要业务方确认。\n\n### 完整示范：六步流程\n1. 采集：从授权导出中获取 ticket_id、渠道、文本、时间、处理队列；记录负责人、数据范围、导出时间和版本。\n2. 校验：编号唯一、字段完整、时间可解析。失败数据进入隔离区，记录失败原因，不静默丢弃。\n3. 处理：去重、统一编码、移除无关个人信息，保留不可改写的原始副本。\n4. 标注：按版本化规则识别退款、物流、其他；不确定样本转人工裁决。\n5. 审核：质检员分层抽样；不合格批次退回，重新处理并复查。\n6. 发布：记录审批人、版本和存放位置；出现质量问题可回退到前一个版本。\n\n### 如何画出真正有用的流程\n用矩形表示动作，菱形表示判断，箭头标明流向。为“字段校验通过吗”画通过与失败两条分支，失败分支回到修正或隔离，不能画一个没有出口的异常框。再写出每个节点的输入、输出、负责人和验收方式。\n\n### 独立练习\n改成“社区活动咨询分类”。画一张覆盖授权、采集、处理、审核、返工、发布的流程图；写明缺失编号和争议标签分别走哪条路径。请另一位学习者只看图说明如何处理失败记录；如果他必须猜测，就继续补全图示。",
+      "deliverable": "提交六步流程图和节点表；每个节点有输入、输出、责任人与失败处理。",
+      "evidenceChecks": [
+        "流程包含采集、处理、审核三个环节",
+        "至少两种失败情况有明确返工或隔离路径",
+        "发布前有质量验收和版本记录"
+      ],
+      "quiz": [
+        {
+          "question": "审核不合格的数据批次应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "直接发布"
+            },
+            {
+              "label": "B",
+              "text": "退回修正并复查"
+            },
+            {
+              "label": "C",
+              "text": "只修改统计数字"
+            }
+          ],
+          "answer": "B",
+          "explanation": "流程必须闭环，不能让失败记录未经复核进入后续训练。"
+        },
+        {
+          "question": "流程图只有正常路径，缺少什么？",
+          "options": [
+            {
+              "label": "A",
+              "text": "异常和返工路径"
+            },
+            {
+              "label": "B",
+              "text": "更多颜色"
+            },
+            {
+              "label": "C",
+              "text": "模型品牌"
+            }
+          ],
+          "answer": "A",
+          "explanation": "缺少异常路径，实施者无法一致处理失败数据。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=business"
+        }
+      ]
+    },
+    {
+      "id": "bridge-improve",
+      "after": "data-2",
+      "stage": "data",
+      "domain": "business",
+      "title": "业务模块优化：定位瓶颈与设计对照",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-process、bridge-stats。",
+      "content": "### 不要一看到失败就换模型\n业务流程可能经过采集、清洗、分类、路由四个模块。假设100条工单中20条重复分派，逐条复查发现：12条来自路由规则遗漏，5条来自标签错误，3条来自超时重试。优先修路由更有依据，不能把所有错误归因于算法。\n\n### 示范一份优化记录\n问题：退款与物流混合诉求被自动路由两次。\n证据：固定验证集100条，旧规则重复分派20条，其中12条与混合诉求相关。\n假设：先检测多诉求并交人工确认，能减少重复分派。\n改动：只修改路由模块，固定模型与数据版本。\n验收：比较重复分派率、错误路由率、人工接管量和处理时间；人工接管变多也是成本，不能只报一个好看的指标。\n\n### 如何做对照\n离线时让旧、新方案处理同一份未用于调参的验证集，记录每条记录的两种结果。线上试点应在授权范围内分配可比较的流量，并设置停止与回退条件。不能把昨天全渠道的结果和今天只选简单样本的结果当成公平对照。\n\n### 独立练习与核对\n旧方案100条中重复20条，新方案同100条重复12条：绝对下降8个百分点，相对减少40%。若新方案错误路由从2条增至8条，不应直接宣称优化成功。补写原因分析、可验证假设、单模块改动、指标、回退五个部分。\n\n### 常见失误\n同时改数据、规则和模型会难以归因；小样本变化不能证明稳定收益；只写“提升准确率”而没有基线、分母和验收口径无法复核。",
+      "deliverable": "提交带基线、原因、改动、对照结果及回退条件的模块优化方案。",
+      "evidenceChecks": [
+        "问题有数据和错误类别支持",
+        "对照使用一致样本与指标口径",
+        "同时评价收益、错误代价和人工成本"
+      ],
+      "quiz": [
+        {
+          "question": "20%降到12%，绝对下降为？",
+          "options": [
+            {
+              "label": "A",
+              "text": "40个百分点"
+            },
+            {
+              "label": "B",
+              "text": "8个百分点"
+            },
+            {
+              "label": "C",
+              "text": "12个百分点"
+            }
+          ],
+          "answer": "B",
+          "explanation": "相差8个百分点；相对原20%的降幅才是40%。"
+        },
+        {
+          "question": "新方案减少重复分派却增加错误路由，应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "直接上线"
+            },
+            {
+              "label": "B",
+              "text": "隐藏错误率"
+            },
+            {
+              "label": "C",
+              "text": "综合业务代价重新验收"
+            }
+          ],
+          "answer": "C",
+          "explanation": "模块优化需要满足约定的多项指标，不能只选择改善的一项。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=business"
+        }
+      ]
+    },
+    {
+      "id": "bridge-clean",
+      "after": "data-3",
+      "stage": "data",
+      "domain": "training",
+      "title": "清洗规范：缺失、重复、异常与分箱边界",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 py-41—46，再读 data-3。",
+      "content": "### 清洗前先定规则\n对模拟成绩表规定：id 唯一；score 为0至100的数值；缺失成绩隔离待核，不按0分填充；重复编号保留哪个版本必须有时间或业务依据。先保留原表，再产生干净表和问题清单。清洗日志记录规则版本、输入行数、各原因剔除数与输出行数。\n\n### 示例：分组边界要精确\n```python\nimport pandas as pd\nscores = pd.Series([0, 59, 60, 79, 80, 100])\ngroups = pd.cut(scores, bins=[0, 60, 80, 101],\n                labels=[\"review\", \"pass\", \"strong\"], right=False)\nprint(groups.tolist())\n```\n结果为两项 review、两项 pass、两项 strong。right=False 表示左闭右开：60属于[60,80)，80属于[80,101)。labels 必须显式写成关键字，不能误放到第三个位置参数，那是 right 参数。\n\n### 跟做一张处理记录\n输入10行：1行缺失、1行完全重复、1行分数超出范围，且三行互不重叠。隔离/移除后应剩7行。若某行同时缺失且重复，不能在两个互斥剔除计数中重复计算；使用固定检查顺序或按唯一编号汇总。\n\n### 独立任务\n建立6行数据：分数0、60、100、空值、101，以及一条完全重复行。写清保留、隔离与去重策略，执行后核对每一行去向。不能因模型结果不好就删除测试集中的困难记录。\n\n### 常见错误\n用全数据均值填补再切分会泄漏测试信息；把“无法解析”自动当0会改变意义；只报告删了多少、不保留原因，会让结果无法复核。",
+      "deliverable": "交付清洗规则、处理后的表、问题清单和行数核对记录。",
+      "evidenceChecks": [
+        "边界0、60、80、100都测试过",
+        "缺失和异常的处理理由明确",
+        "输入与输出行数能按唯一记录对账"
+      ],
+      "quiz": [
+        {
+          "question": "pd.cut 的 labels 应怎样传入？",
+          "options": [
+            {
+              "label": "A",
+              "text": "用 labels= 指定"
+            },
+            {
+              "label": "B",
+              "text": "放到 right 的位置"
+            },
+            {
+              "label": "C",
+              "text": "改列名即可"
+            }
+          ],
+          "answer": "A",
+          "explanation": "第三个位置参数是right，明确写labels=可避免参数错位。"
+        },
+        {
+          "question": "测试集中的困难记录应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "为了高分删除"
+            },
+            {
+              "label": "B",
+              "text": "按预先定义规则保留并分析"
+            },
+            {
+              "label": "C",
+              "text": "改成预测标签"
+            }
+          ],
+          "answer": "B",
+          "explanation": "事后针对模型表现改测试集会使评估偏高。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ],
+      "example": {
+        "code": "import pandas as pd\nscores = pd.Series([0, 59, 60, 79, 80, 100])\ngroups = pd.cut(scores, bins=[0, 60, 80, 101], labels=[\"review\", \"pass\", \"strong\"], right=False)\nprint(groups.tolist())",
+        "expected": "['review', 'review', 'pass', 'pass', 'strong', 'strong']"
+      }
+    },
+    {
+      "id": "bridge-text",
+      "after": "data-4",
+      "stage": "data",
+      "domain": "training",
+      "title": "文本标注：写清标签定义与争议裁决",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 data-4；本课可不用编程。",
+      "content": "### 标签不是凭感觉选\n给模拟客服文本设置三类：退款、物流、其他。规范至少写：任务目标、标注单位、标签定义、包含与排除条件、边界例子、争议处理、版本。不要只给标签名字。\n\n### 一份可以照着执行的规范\n标注单位为一条完整工单。退款：明确请求退回支付金额，如“请把钱退给我”；物流：只询问配送状态，如“包裹到哪了”；其他：无法归入前两类。混合诉求不强迫单选，先标记 needs_review，交审核员按本任务约定裁决。模型信心不足不能充当人工标签。\n\n### 逐条示范\n“我不想退款，只查快递”判物流，因为否定词排除了退款意图。\n“退款到账了吗”判退款，关注的是资金退回进度。\n“太慢了”上下文不足，进入争议队列，不凭猜测判物流。\n“退款和配送都要查”按混合诉求规则处理，记录最终裁决理由。\n\n### 质量与留痕\n两人先独立标注同一批样本，再对比。分歧不一定是某人不认真，也可能是规则有空白。规则修订后，找出受影响旧样本并复核，不能只改文档。保存样本编号、规则版本、标注者代号、复核结论；练习只用虚构句子。\n\n### 独立任务\n自己写6条文本，至少包含否定、混合诉求、含糊表达各1条。先给标签与理由，再让同伴按同一规范标一次。无法找到同伴时，隔一天遮住原标签复标并明确说明这不等同于独立双人质检。",
+      "deliverable": "提交标签规范、6条虚构样本、分歧表和一次规则修订记录。",
+      "evidenceChecks": [
+        "规范含正例、反例和含糊情况",
+        "争议样本有裁决路径与理由",
+        "修订规则后复核受影响样本"
+      ],
+      "quiz": [
+        {
+          "question": "“不退款，只查快递”应优先依据什么？",
+          "options": [
+            {
+              "label": "A",
+              "text": "看到退款两个字"
+            },
+            {
+              "label": "B",
+              "text": "整句意图和否定关系"
+            },
+            {
+              "label": "C",
+              "text": "文字长度"
+            }
+          ],
+          "answer": "B",
+          "explanation": "不能只用关键词忽略否定语义。"
+        },
+        {
+          "question": "两名标注员分歧多，第一步应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "直接处罚一人"
+            },
+            {
+              "label": "B",
+              "text": "检查规则与典型分歧"
+            },
+            {
+              "label": "C",
+              "text": "删除全部分歧样本"
+            }
+          ],
+          "answer": "B",
+          "explanation": "先定位是规范歧义、培训问题还是执行偏差。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ]
+    },
+    {
+      "id": "bridge-media",
+      "after": "data-4",
+      "stage": "data",
+      "domain": "training",
+      "title": "图像与语音标注：坐标、时间轴与验收",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先理解 bridge-text 的规范和复核方法。",
+      "content": "### 从看懂对象到写出规范\n图像分类给整张图一个标签；目标检测需要为对象画框；分割描述更精细的区域。语音转写记录说了什么，时间切分标出什么时候说。选择任务类型来自业务需求，不能互相替代。\n\n### 画框示范\n在200×100像素的虚构图像中，一个矩形物体占x=20至80、y=10至50。采用左上原点，x向右、y向下，框写为(xmin,ymin,xmax,ymax)=(20,10,80,50)。归一化后分别除以宽、高，得到(0.1,0.1,0.4,0.5)。注意有些工具使用中心点加宽高，导出前一定核对格式。\n\n### 语音时间轴示范\n一段5秒的模拟录音：0.5—1.4秒“你好”，2.0—3.5秒“查询订单”。开始时间应小于结束时间且不超出录音长度；静音、听不清、重叠说话怎样标，要在规范中约定。不要为了凑完整句子编造没听清的内容。\n\n### 跟做与自检\n用画图工具创建只有矩形的图片，手工记录框坐标，检查框是否在图像范围内、是否遗漏对象。录制自己朗读的两句话，只用于本地练习，写出时间段、文本与不确定标记。无麦克风时用上述模拟时间表练习，并注明未完成真实听辨。\n\n### 独立任务\n设计遮挡、出界、无目标三种图像情况及处理规则；设计停顿、噪声、重叠三种语音情况。交付标注表和检查清单。三级要能够制定流程并指导他人，单纯记住工具按钮不够。",
+      "deliverable": "提交图像坐标表、语音时间表、六种边界情况和导出格式说明。",
+      "evidenceChecks": [
+        "坐标原点、范围和格式说明完整",
+        "语音时间段合法且不编造含糊内容",
+        "知道哪些练习只是模拟、哪些已实际操作"
+      ],
+      "quiz": [
+        {
+          "question": "x 坐标归一化要除以什么？",
+          "options": [
+            {
+              "label": "A",
+              "text": "图像宽度"
+            },
+            {
+              "label": "B",
+              "text": "图像高度"
+            },
+            {
+              "label": "C",
+              "text": "录音长度"
+            }
+          ],
+          "answer": "A",
+          "explanation": "x按宽度、y按高度归一化，不能混用。"
+        },
+        {
+          "question": "语音无法听清时应怎样标？",
+          "options": [
+            {
+              "label": "A",
+              "text": "猜一个合理句子"
+            },
+            {
+              "label": "B",
+              "text": "按规范标为不确定并复核"
+            },
+            {
+              "label": "C",
+              "text": "删掉音频"
+            }
+          ],
+          "answer": "B",
+          "explanation": "保留不确定性比伪造确定文本更符合质量要求。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ]
+    },
+    {
+      "id": "bridge-quality",
+      "after": "data-4",
+      "stage": "data",
+      "domain": "training",
+      "title": "标注质检：抽样、一致率与返工闭环",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-text、bridge-media、bridge-stats。",
+      "content": "### 三个概念分开看\n完整率：应标的项目是否都标了。准确率：与可靠参考答案相比是否正确。一致率：不同标注员是否给出相同结果。两人可能一致地标错，所以一致不等于准确。\n\n### 可以手算的示范\n```python\na = [\"refund\", \"delivery\", \"other\", \"refund\", \"delivery\"]\nb = [\"refund\", \"delivery\", \"refund\", \"refund\", \"other\"]\nsame = sum(x == y for x, y in zip(a, b))\nprint(same, len(a), same / len(a))\n```\n输出3、5、0.6，表示这5条样本的一致率60%。zip配对同一条样本，两份数据必须先按编号对齐；顺序不同会算错。\n\n### 做一份质检方案\n对100条练习记录，先按标签与难度分层抽查20条，覆盖少数类和争议类。20条中发现3条错误，报告“抽查错误率3/20=15%”，不能说总体恰好15%。验收阈值是事先约定的项目规则，不是国家统一百分数。\n\n### 发现问题以后\n把错误分为漏标、标签混淆、边界不准、格式错误。记录样本编号、原因、责任环节、修正方法、复查人和复查时间。若某类系统性错误影响整批，应扩大抽检或全检，并回查同规则版本的数据。\n\n### 独立尝试\n修改上面两份标签使一致率达到80%，再构造“两人都错但一致率100%”的例子。编写一张返工表，至少给出规范修改和重新培训两种措施；修正后再抽一批新样本复核。",
+      "deliverable": "提交可复算的一致率、分层抽检计划、错误分类及返工复查记录。",
+      "evidenceChecks": [
+        "明确区分一致率和准确率",
+        "抽检覆盖少数类别与高风险情况",
+        "返工后用新样本复查"
+      ],
+      "quiz": [
+        {
+          "question": "两人一致率100%能证明全都正确吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能"
+            },
+            {
+              "label": "C",
+              "text": "有两人就能"
+            }
+          ],
+          "answer": "B",
+          "explanation": "两人可能依据同一错误规则一致地标错。"
+        },
+        {
+          "question": "抽查20条错3条，应如何报告？",
+          "options": [
+            {
+              "label": "A",
+              "text": "全体一定错15%"
+            },
+            {
+              "label": "B",
+              "text": "抽样错误率15%，附抽样范围"
+            },
+            {
+              "label": "C",
+              "text": "准确率3%"
+            }
+          ],
+          "answer": "B",
+          "explanation": "应保留抽样范围与不确定性，不能冒充总体精确结果。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ],
+      "example": {
+        "code": "a = [\"refund\", \"delivery\", \"other\", \"refund\", \"delivery\"]\nb = [\"refund\", \"delivery\", \"refund\", \"refund\", \"other\"]\nsame = sum(x == y for x, y in zip(a, b))\nprint(same, len(a), same / len(a))",
+        "expected": "3 5 0.6"
+      }
+    },
+    {
+      "id": "bridge-split",
+      "after": "model-1",
+      "stage": "model",
+      "domain": "training",
+      "title": "数据集维护：划分、泄漏与版本",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 py-48、model-1、bridge-clean。",
+      "content": "### 三份数据各做什么\n训练集用于学习参数；验证集用于选择模型和调参；测试集在方案确定后做最终检查。不能看一次测试效果就改一次参数，再称它为独立测试。\n\n### 从记录身份检查泄漏\n同一用户的多条记录分在训练和测试两边，模型可能记住用户，而没有学会泛化。时间预测任务还需要按时间先后划分，不能用未来信息预测过去。划分方法应符合实际部署场景。\n\n```python\ntrain_users = {\"u1\", \"u2\", \"u3\"}\ntest_users = {\"u4\", \"u5\"}\noverlap = train_users & test_users\nprint(len(overlap))\nassert not overlap\n```\n输出0，说明这份小例子没有用户交叉。集合交集只能检查指定身份；还应检查重复文本、同一原图的裁剪图、数据采集时间等。\n\n### 维护记录示范\n为每次实验记下：数据版本、样本数量、各类分布、划分依据、随机种子、训练/验证/测试编号、处理规则版本。随机种子只帮助复现，不会自动消除偏差。填补缺失和标准化参数只能从训练数据拟合，再用于验证与测试。\n\n### 独立任务\n构造6名用户，每人2条记录。按用户分成4人训练、1人验证、1人测试，检查两两交集为空，并统计每份数据的类别分布。再说明新样本和标签修订怎样形成新版本，旧版怎样保留；测试样本不得因预测错误而被事后删除。",
+      "deliverable": "交付数据划分表、无交叉检查、类别分布和版本记录。",
+      "evidenceChecks": [
+        "身份与重复样本交叉检查通过",
+        "预处理参数只从训练集拟合",
+        "测试集在方案冻结前没有参与调参"
+      ],
+      "quiz": [
+        {
+          "question": "固定随机种子能保证没有泄漏吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能"
+            },
+            {
+              "label": "C",
+              "text": "种子大于100就能"
+            }
+          ],
+          "answer": "B",
+          "explanation": "种子仅保证可复现，泄漏与样本关联和处理顺序有关。"
+        },
+        {
+          "question": "用全部数据计算填补均值再划分，有什么问题？",
+          "options": [
+            {
+              "label": "A",
+              "text": "会引入测试信息"
+            },
+            {
+              "label": "B",
+              "text": "不会有任何影响"
+            },
+            {
+              "label": "C",
+              "text": "必定提高真实性"
+            }
+          ],
+          "answer": "A",
+          "explanation": "测试集统计量进入训练过程，污染了独立评估。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ],
+      "example": {
+        "code": "train_users = {\"u1\", \"u2\", \"u3\"}\ntest_users = {\"u4\", \"u5\"}\noverlap = train_users & test_users\nprint(len(overlap))\nassert not overlap",
+        "expected": "0"
+      }
+    },
+    {
+      "id": "bridge-pipeline",
+      "after": "model-2",
+      "stage": "model",
+      "domain": "training",
+      "title": "完整训练闭环：建立基线并复现结果",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成48节 Python、bridge-split；需安装 NumPy、scikit-learn，或在支持这些库的练习环境运行。",
+      "content": "### 先看数据，再选模型\n本例使用 scikit-learn 内置 Iris 小数据，4个数值特征预测3类花。只用于学习流程，不能把这个数据上的高分当成真实业务能力。\n\n```python\nfrom sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.dummy import DummyClassifier\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y)\nmodel = make_pipeline(StandardScaler(), LogisticRegression(max_iter=300))\nmodel.fit(X_train, y_train)\nbaseline = DummyClassifier(strategy=\"most_frequent\").fit(X_train, y_train)\nprint(len(y_train), len(y_test))\nprint(model.score(X_test, y_test) > baseline.score(X_test, y_test))\n```\n输出120 30和True。train_test_split先划分；stratify保持类别比例；Pipeline把缩放与分类连起来，只在训练集拟合缩放参数。fit是学习，score在这里返回准确率。DummyClassifier给出“总猜最多类”的简单基线。\n\n### 逐步复核\n记录特征含义、类别数量、每份数据大小和版本；不要把目标y拼进X。这里固定模型，仅演示最终测试；若要选择参数，应从训练部分另分验证集或交叉验证，不能循环查看测试集来挑最好结果。\n\n### 独立任务\n从空白文件重写导入、加载、划分、基线、训练、预测、评估七步。解释每个变量代表什么，再保存预测和真实标签供错误分析。能运行只是起点，还应说明为何模型优于基线、测试样本很少带来什么限制。",
+      "deliverable": "提交可从头运行的脚本、环境版本、基线比较与局限说明。",
+      "evidenceChecks": [
+        "从空白环境顺序执行成功",
+        "能解释训练集、测试集与每个关键调用",
+        "比较基线且未用测试集反复调参"
+      ],
+      "quiz": [
+        {
+          "question": "Pipeline 中的缩放器在哪里学习均值？",
+          "options": [
+            {
+              "label": "A",
+              "text": "全体数据"
+            },
+            {
+              "label": "B",
+              "text": "训练集"
+            },
+            {
+              "label": "C",
+              "text": "测试集"
+            }
+          ],
+          "answer": "B",
+          "explanation": "只有训练集的统计量可用于拟合预处理。"
+        },
+        {
+          "question": "总猜最多类的模型有什么用途？",
+          "options": [
+            {
+              "label": "A",
+              "text": "作为简单比较基线"
+            },
+            {
+              "label": "B",
+              "text": "证明高级模型必定有效"
+            },
+            {
+              "label": "C",
+              "text": "替代所有测试"
+            }
+          ],
+          "answer": "A",
+          "explanation": "复杂方案至少应与简单基线比较，明确实际收益。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ],
+      "example": {
+        "code": "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.dummy import DummyClassifier\nX, y = load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)\nmodel = make_pipeline(StandardScaler(), LogisticRegression(max_iter=300))\nmodel.fit(X_train, y_train)\nbaseline = DummyClassifier(strategy=\"most_frequent\").fit(X_train, y_train)\nprint(len(y_train), len(y_test))\nprint(model.score(X_test, y_test) > baseline.score(X_test, y_test))",
+        "expected": "120 30\nTrue"
+      }
+    },
+    {
+      "id": "bridge-metrics",
+      "after": "model-3",
+      "stage": "model",
+      "domain": "training",
+      "title": "评估指标：手算混淆矩阵，再理解代码",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-stats、model-3。",
+      "content": "### 先规定“正类”\n假设正类是“应转人工”。TP=确实该转且预测转；FP=不需要却转了；FN=该转却漏了；TN=不需转且没转。不先定义正类，就容易把召回率解释反。\n\n```python\ntp, fp, fn, tn = 6, 2, 4, 8\nprecision = tp / (tp + fp)\nrecall = tp / (tp + fn)\naccuracy = (tp + tn) / (tp + fp + fn + tn)\nf1 = 2 * precision * recall / (precision + recall)\nprint(round(precision, 3), round(recall, 3))\nprint(round(accuracy, 3), round(f1, 3))\n```\n输出0.75 0.6及0.7 0.667。精确率回答“转出的有多少真需要”；召回率回答“真需要的抓住了多少”。两者分母不同。分母为零时须写清处理约定，不能直接除零或静默解释成优秀。\n\n### 阈值与代价\n降低转人工阈值通常提高召回，也会增加人工量。应用中根据漏判代价和人工容量选择阈值，使用验证集决定，最后在独立测试集报告。类别严重不平衡时，只看准确率会掩盖少数类失败。\n\n### 回归也要会\n真实耗时[2,4]，预测[3,2]，绝对误差[1,2]，MAE=1.5；平方误差[1,4]，MSE=2.5，RMSE为其平方根。单位不同：MAE和RMSE与原变量同单位，MSE是平方单位；R²可以为负，不应宣称总在0到1之间。\n\n### 独立任务\n把FN从4改为8，重算指标并解释业务后果。为退款路由和耗时预测分别选择两个指标，说明分母、单位与错误代价；不要直接把不同任务的指标数值比较高低。",
+      "deliverable": "交付混淆矩阵、手算过程、阈值取舍和回归误差说明。",
+      "evidenceChecks": [
+        "能正确区分FP与FN及其业务代价",
+        "指标分母和正类定义明确",
+        "知道不平衡数据与R²的常见误区"
+      ],
+      "quiz": [
+        {
+          "question": "召回率的分母是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "TP+FP"
+            },
+            {
+              "label": "B",
+              "text": "TP+FN"
+            },
+            {
+              "label": "C",
+              "text": "所有预测负类"
+            }
+          ],
+          "answer": "B",
+          "explanation": "召回率衡量真实正类中被检出的比例。"
+        },
+        {
+          "question": "R²可能小于0吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "可能"
+            },
+            {
+              "label": "B",
+              "text": "不可能"
+            },
+            {
+              "label": "C",
+              "text": "只有分类才可能"
+            }
+          ],
+          "answer": "A",
+          "explanation": "模型比相应均值基线更差时，R²可以为负。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ],
+      "example": {
+        "code": "tp, fp, fn, tn = 6, 2, 4, 8\nprecision = tp / (tp + fp)\nrecall = tp / (tp + fn)\naccuracy = (tp + tn) / (tp + fp + fn + tn)\nf1 = 2 * precision * recall / (precision + recall)\nprint(round(precision, 3), round(recall, 3))\nprint(round(accuracy, 3), round(f1, 3))",
+        "expected": "0.75 0.6\n0.7 0.667"
+      }
+    },
+    {
+      "id": "bridge-errors",
+      "after": "model-4",
+      "stage": "model",
+      "domain": "training",
+      "title": "错误案例分析：从一个错例到可验证修正",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-pipeline、bridge-metrics。",
+      "content": "### 总分之后还要看什么\n总体准确率90%，可能是简单类别99%、少数类别30%。将错例按类别、文本长度、渠道、时间、噪声情况拆开比较，才能发现单一模块问题。每组都应报告样本数，2条样本的50%不能与200条的50%同等解读。\n\n### 完整错例表\n模拟工单E01：“不用退款，快递在哪”。真实标签物流，模型预测退款。可能原因是训练数据缺少否定表达，也可能是规则只匹配退款关键词。先核对原始数据和标签，再检查预处理是否删掉了“不”字，最后比较模型行为。\n\n### 修正闭环\n1. 复现：固定数据、规则和模型版本，确认错误可以重复。\n2. 归因：区分数据错误、标注歧义、处理错误、模型不足与业务规则错误。\n3. 改进：例如修正否定词清洗规则，在训练集中补足授权的否定样本。\n4. 回归测试：加入不同否定句和正常退款句，确认旧功能没有被破坏。\n5. 冻结方案：在验证集选择修正，最终只对独立测试集验收，不追着测试集调参。\n\n### 独立任务\n自写4个错例，覆盖否定、混合诉求、超短文本、缺失字段。对每个写“证据—假设—改动—验证方法—预期风险”。没有真实运行时，明确标记为待验证假设，不能把猜想写成已提升效果。\n\n### 报告怎么写\n一页报告按背景、数据版本、方法、基线与新结果、分组表现、典型错例、局限和下一步组织。附复现命令与输出位置，避免只有结论没有证据。",
+      "deliverable": "提交4行错例分析表和一页测试报告，至少一项修正有前后对照。",
+      "evidenceChecks": [
+        "先核对数据标签再推断模型原因",
+        "改动配有回归测试和失败条件",
+        "报告区分观察事实与待验证假设"
+      ],
+      "quiz": [
+        {
+          "question": "错误案例分析第一步应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "直接增加层数"
+            },
+            {
+              "label": "B",
+              "text": "核对原始数据、标签并复现"
+            },
+            {
+              "label": "C",
+              "text": "删除所有错例"
+            }
+          ],
+          "answer": "B",
+          "explanation": "先确认问题真实存在，再定位处理或模型原因。"
+        },
+        {
+          "question": "一组仅2条且错误率50%，应该？",
+          "options": [
+            {
+              "label": "A",
+              "text": "断言全体该组都很差"
+            },
+            {
+              "label": "B",
+              "text": "注明样本不足并补测"
+            },
+            {
+              "label": "C",
+              "text": "改分母使其变低"
+            }
+          ],
+          "answer": "B",
+          "explanation": "小样本证据有限，应呈现样本数并补充代表性数据。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ]
+    },
+    {
+      "id": "bridge-monitor",
+      "after": "system-1",
+      "stage": "system",
+      "domain": "design",
+      "title": "系统监控：质量、延迟、漂移与回退",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-stats、bridge-errors。",
+      "content": "### 模型分数不等于系统健康\n系统还要监控请求成功率、超时率、响应时间、人工接管量、业务错误率和数据分布。没有真实标签时，不能把模型信心当成准确率；可以监控输入变化并抽样人工复核。\n\n### 示例：五项监控表\n为模拟客服系统建立指标、分母、统计窗口、负责人、告警条件、处理动作六列。成功率用成功响应数/全部请求数；超时率用超时请求数/全部请求数；转人工率说明是否包含失败请求；质量用经过复核样本的正确数/复核数；延迟同时看中位数与高分位。\n\n### 漂移怎么理解\n训练时网页占80%、电话占20%，最近变为网页30%、电话70%，输入分布变化可能影响效果。先确认埋点和口径没有变，再按渠道看质量，不能看到变化就自动重训上线。\n\n### 告警与回退示范\n本练习假设连续两个5分钟窗口超时率超过约定阈值，就通知负责人，并临时转人工；阈值要用基线与业务容量确认，不是官方统一值。若修复失败，恢复上一已验收版本，并记录影响范围、开始/结束时间和验证结果。\n\n### 独立任务\n设旧系统每1000次请求超时10次，新系统超时40次，计算1%和4%。写一个三步排查：依赖服务、输入长度、模型版本；列出可观测证据。再设计恢复检查，确认成功率与用户结果均恢复，不能仅以“服务进程存在”结案。",
+      "deliverable": "提交监控表、一次异常排查记录与可执行的回退步骤。",
+      "evidenceChecks": [
+        "指标有分母、窗口与负责人",
+        "能区分输入漂移和已确认质量下降",
+        "回退后有用户结果验证"
+      ],
+      "quiz": [
+        {
+          "question": "没有真实标签时，模型信心能直接当准确率吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能"
+            },
+            {
+              "label": "C",
+              "text": "超过0.9就能"
+            }
+          ],
+          "answer": "B",
+          "explanation": "信心是模型输出，准确率需要可靠标签作为对照。"
+        },
+        {
+          "question": "检测到输入分布变化后，应先？",
+          "options": [
+            {
+              "label": "A",
+              "text": "自动覆盖生产模型"
+            },
+            {
+              "label": "B",
+              "text": "核查口径并分组评估"
+            },
+            {
+              "label": "C",
+              "text": "关闭日志"
+            }
+          ],
+          "answer": "B",
+          "explanation": "分布变化可能来自埋点或流量，需先验证原因和影响。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=design"
+        }
+      ]
+    },
+    {
+      "id": "bridge-interaction",
+      "after": "system-2",
+      "stage": "system",
+      "domain": "design",
+      "title": "人机交互：澄清、接管、超时与验收用例",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-process、bridge-monitor。",
+      "content": "### 从用户目标设计流程\n用户要知道订单怎么了，不是观看模型如何思考。系统先确认必要信息，再提供结果；不确定时澄清，风险或能力边界之外交人工。只收集完成任务所需的信息，不在提示里索取密码、验证码或 API Key。\n\n### 五条可画出的路径\n正常：输入订单查询→核验权限→查到状态→说明结果。\n含糊：用户说“帮我处理一下”→询问是退款还是物流→再处理。\n低信心：分类不确定→提供简短选项→仍不明则转人工。\n超时：说明暂未完成→允许有限重试→失败转人工，避免重复提交。\n越权：不是本人可访问的订单→拒绝返回数据并指引合法验证。\n\n### 交接不能丢上下文\n转人工应携带已授权的任务摘要、已尝试步骤和错误码，尽量避免让用户重复说明。对真实个人信息做最小必要处理。人工处理后记录结论，可用于修订规则，但不能直接把未经核验反馈当训练真值。\n\n### 验收用例示范\n每条用例写前置条件、输入、预期输出、后续状态。输入“网络一直没反应”时，预期不是无限加载，而是有时限提示与可用退路。退款之类具有业务后果的动作，应有权限验证和确认环节。\n\n### 独立任务\n设计校园图书咨询的交互图，覆盖五种路径；写5条测试用例并逐条走一遍。记录完成率、转人工原因和用户是否能恢复操作。无真实系统时可用纸面角色扮演，但报告必须注明是模拟验收。",
+      "deliverable": "交付交互流程图、5条测试用例和逐条执行结果。",
+      "evidenceChecks": [
+        "包含正常、含糊、低信心、超时和权限失败路径",
+        "人工接管携带必要且已授权的上下文",
+        "用例包含输入、预期结果和实际结果"
+      ],
+      "quiz": [
+        {
+          "question": "低信心输出最合理的下一步是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "编造确定答案"
+            },
+            {
+              "label": "B",
+              "text": "澄清或交人工"
+            },
+            {
+              "label": "C",
+              "text": "无提示退出"
+            }
+          ],
+          "answer": "B",
+          "explanation": "流程应让不确定性可处理，并让用户有继续完成任务的路径。"
+        },
+        {
+          "question": "交互验收用例需要哪组要素？",
+          "options": [
+            {
+              "label": "A",
+              "text": "输入、预期输出、后续状态"
+            },
+            {
+              "label": "B",
+              "text": "只有页面截图"
+            },
+            {
+              "label": "C",
+              "text": "模型参数总量"
+            }
+          ],
+          "answer": "A",
+          "explanation": "可重复执行的用例才能检验实际流程是否满足需求。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=design"
+        }
+      ]
+    },
+    {
+      "id": "bridge-teach",
+      "after": "system-3",
+      "stage": "system",
+      "domain": "coaching",
+      "title": "培训讲义：把一个技能教给初学者",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-clean、bridge-quality。",
+      "content": "### 培训不是展示自己会多少\n三级要求能够编写初级培训讲义，并开展知识和技术培训。把目标写成可观察动作：“学员能对10条记录检查编号重复，记录处理规则”，比“了解数据清洗”更能验收。\n\n### 一份20分钟微课示范\n前2分钟：展示重复编号造成统计失真，让学员说出疑问。\n第3—7分钟：老师用5行小表演示识别重复，解释每一步原因。\n第8—13分钟：学员跟做另一份表；老师只在卡住处提示。\n第14—18分钟：换一份数据，学员独立处理并口头解释。\n最后2分钟：用检查表验收，布置隔日复做。\n这20分钟是本练习设计，不是官方统一课时。\n\n### 讲义应该包含什么\n对象与先修要求、目标、样本与工具、完整步骤、每步解释、常见错误、独立任务、验收标准、资料来源。示范数据只用虚构记录；先展示小规模可理解的例子，再逐步扩大。\n\n### 怎样评分\n示范评分：正确识别重复40分、保留规则与理由30分、结果复核20分、表达清楚10分。分值属于本课练习规则。只运行出结果但说不出为什么，不算完成教学目标；可以给补学建议并安排复测。\n\n### 独立任务\n围绕“文本否定句标注”制作一页讲义，用正例、反例和含糊例各一个。请同伴按讲义完成新例子，记录哪里需要额外解释。没有同伴时进行录音试讲，说明尚未完成真实学员验证。",
+      "deliverable": "交付一页讲义、20分钟教案、独立练习和评分表。",
+      "evidenceChecks": [
+        "目标使用可观察动作且先修要求清晰",
+        "有完整示范、逐步解释和不同数据的独立练习",
+        "记录学习者反馈并修改讲义"
+      ],
+      "quiz": [
+        {
+          "question": "哪个目标更容易验收？",
+          "options": [
+            {
+              "label": "A",
+              "text": "了解清洗"
+            },
+            {
+              "label": "B",
+              "text": "掌握很多知识"
+            },
+            {
+              "label": "C",
+              "text": "独立检查重复并解释保留规则"
+            }
+          ],
+          "answer": "C",
+          "explanation": "具体动作和成果允许第三方判断是否完成。"
+        },
+        {
+          "question": "只让学员复制示范，缺少什么？",
+          "options": [
+            {
+              "label": "A",
+              "text": "独立迁移与理解验收"
+            },
+            {
+              "label": "B",
+              "text": "更多字体"
+            },
+            {
+              "label": "C",
+              "text": "更多术语"
+            }
+          ],
+          "answer": "A",
+          "explanation": "换数据独立操作才能识别是否只是照抄。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=coaching"
+        }
+      ]
+    },
+    {
+      "id": "bridge-guide",
+      "after": "system-3",
+      "stage": "system",
+      "domain": "coaching",
+      "title": "技术指导：诊断卡点、分层提示与复测",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成 bridge-teach。",
+      "content": "### 先定位不会的那一步\n初学者说“代码不行”，可能是不会运行、看不懂变量、文件路径错、逻辑错误或数据格式不符。先请他描述预期、实际结果和第一处报错，避免一上来就发完整答案。\n\n### 一次指导示范\n现象：读取 scores.csv 报 FileNotFoundError。\n询问：文件在哪里？当前工作目录是什么？扩展名是否真实可见？\n提示1：让学员用文件管理器定位素材。\n提示2：展示如何打印当前目录和查看文件名。\n示范：仅演示读取一个虚构小文件，再让学员处理自己的练习文件。\n复测：换文件名或目录，学员不看示范重新运行。\n全过程不要求粘贴真实账号密码或完整环境变量。\n\n### 分层提示\n概念提示先说明原理；方向提示指出要检查的部位；局部示范只展示一个关键步骤；最后才给完整参考并注明已看答案。给过完整答案后，必须换一题再验收，不能把复制运行认作独立掌握。\n\n### 标注指导示范\n遇到“退款到账了吗”标为物流，先询问标注依据；指出关注对象是资金状态；让学员对比“快递到哪了”；再用新的资金进度句复测。若多人反复混淆，应修订规范和培训材料，而不是反复归责学员。\n\n### 独立任务\n写两份指导记录：一份文件读取错误，一份标签混淆。每份包含问题、诊断证据、提示级别、学员操作、结果和隔日复测。没有发生过真实指导时注明模拟，不能编造学员反馈。",
+      "deliverable": "提交两份指导记录，含提示层级、学习者操作和不同题目的复测。",
+      "evidenceChecks": [
+        "先询问预期与实际结果，定位第一处错误",
+        "提示由浅入深且说明是否看过完整答案",
+        "换题复测而不是重复复制"
+      ],
+      "quiz": [
+        {
+          "question": "给了完整答案后，如何验收独立掌握？",
+          "options": [
+            {
+              "label": "A",
+              "text": "再复制一次"
+            },
+            {
+              "label": "B",
+              "text": "换一道同类题独立完成"
+            },
+            {
+              "label": "C",
+              "text": "直接勾选掌握"
+            }
+          ],
+          "answer": "B",
+          "explanation": "换题可检验是否理解了可迁移的方法。"
+        },
+        {
+          "question": "多人反复出现同一标注分歧，应该优先？",
+          "options": [
+            {
+              "label": "A",
+              "text": "检查规范和培训是否清晰"
+            },
+            {
+              "label": "B",
+              "text": "认为所有人不认真"
+            },
+            {
+              "label": "C",
+              "text": "取消质检"
+            }
+          ],
+          "answer": "A",
+          "explanation": "持续同类分歧可能由规范空白或教学设计导致。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=coaching"
+        }
+      ]
+    },
+    {
+      "id": "bridge-delivery",
+      "after": "practice-4",
+      "stage": "practice",
+      "domain": "training",
+      "title": "四领域综合任务：从空目录做出可复核成果",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "先完成以上衔接课；这是项目自编练习，不是科教兴川真题。",
+      "content": "### 使用一组可理解的虚构数据\n用以下6条工单开始，不引入任何真实身份信息。\nT1：不退款，只查快递；物流。\nT2：退款到账了吗；退款。\nT3：包裹到哪里了；物流。\nT4：请把钱退回；退款。\nT5：太慢了；待复核。\nT6：退款和物流都要查；混合诉求。\n这只是流程演练小样本，不能用它证明模型泛化或考试通过率。\n\n### 四份成果依次完成\n业务分析：画授权采集、清洗、标注、质检、发布流程，写出每条失败分支。\n智能训练：制定标签规范，用两份独立结果计算一致率；若具备编程基础，再用 Iris 完成独立划分、基线与训练，保留版本、预测和指标。\n系统设计：为客服查询画正常、含糊、低信心、超时与权限失败路径；定义监控及回退。\n培训指导：选一个常见错误写一页讲义，设计跟做、独立练习、评分与复测。\n\n### 跟做后的第二轮\n第一轮可以参考课程；第二轮换成“图书咨询”，从空目录完成相同四类成果。独立轮避免看参考答案或让AI代写。记录使用了哪些提示，这用于判断下一步学习需要，不用于惩罚。\n\n### 交付清单\n文件夹中保存流程图、数据字典、规范、代码、运行结果、测试报告、讲义和自查表。README写运行命令、环境版本、各文件用途和已知限制。把文件复制到新目录，从头运行并打开每份结果，确认没有绝对路径依赖。\n\n### 自评边界\n成果自查只表示本人核对，不等于教师评分或官方验收。检查不足就返回对应课程；四类成果都有可复核证据后，再进入限时技能模拟。",
+      "deliverable": "交付含四领域成果的文件夹和复现说明，并记录第一轮提示与第二轮独立完成情况。",
+      "evidenceChecks": [
+        "四领域成果都存在且能解释",
+        "在新目录从头复现并打开结果文件",
+        "明确区分跟做、独立轮和待复核项"
+      ],
+      "quiz": [
+        {
+          "question": "6条模拟工单能证明真实模型泛化吗？",
+          "options": [
+            {
+              "label": "A",
+              "text": "能"
+            },
+            {
+              "label": "B",
+              "text": "不能"
+            },
+            {
+              "label": "C",
+              "text": "准确率100%就能"
+            }
+          ],
+          "answer": "B",
+          "explanation": "如此小的教学样本只验证流程，不能支持泛化结论。"
+        },
+        {
+          "question": "第二轮独立任务的意义是？",
+          "options": [
+            {
+              "label": "A",
+              "text": "检查迁移能力与薄弱点"
+            },
+            {
+              "label": "B",
+              "text": "证明已经官方合格"
+            },
+            {
+              "label": "C",
+              "text": "省去测试"
+            }
+          ],
+          "answer": "A",
+          "explanation": "换场景从头完成能暴露只会照抄的环节。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ]
+    },
+    {
+      "id": "bridge-exam",
+      "after": "sprint-2",
+      "stage": "sprint",
+      "domain": "training",
+      "title": "考场演练：限时、保存、重跑与成果提交",
+      "minutes": 60,
+      "kind": "bridge",
+      "prerequisite": "完成 bridge-delivery 的独立轮后再做；先向科教兴川确认本批次软件与提交格式。",
+      "content": "### 练习环境要尽量贴近考场\n确认操作系统、Python与库版本、Notebook或编辑器、是否联网、可用帮助文档、文件命名和上传格式。国家标准确定能力与考试时间框架，不等于科教兴川各批次固定四题或某种软件。\n\n### 一次120分钟练习怎样安排\n本平台自编四领域技能卷可参考：前5分钟读题和检查素材；业务分析25分钟；智能训练35分钟；系统设计35分钟；培训指导10分钟；最后10分钟从头运行、打开结果、核对提交。合计120分钟，这是训练时间分配，可按实际试卷调整。\n\n### 保存与复现\n每完成一部分及时保存。代码需从空环境运行；Notebook重启后运行全部；输出目录中要有文件，不能只在终端看到文字。提交前逐个核对文件名、格式、能否打开，以及题目要求的证据是否齐全。网页中保存的文字作答不等于你已上传代码文件。\n\n### 自我监督\n独立模拟时不看参考答案，不让AI代写；审阅可在交卷锁定后进行。AI文本审阅不会真正执行你的代码，也不能确认附件可运行，因此仍要在本地复现。提前结束可以保留成绩，但本平台仅把完成完整训练时段的记录用于较保守的通过可能性估计；这不是官方禁止提前交卷规则。\n\n### 复盘与考务\n复盘按“不会知识、操作失误、时间不足、交付缺失”分类，每项给出下一次练习。至少分别练90分钟理论和120分钟技能；再查看近30天3次理论、2次技能的证据是否齐全。报名条件、考试日期、允许工具、成绩查询及补考要求仍以评价机构通知为准。",
+      "deliverable": "交付一次限时演练记录、保存与复现检查表、错因分类及下一轮计划。",
+      "evidenceChecks": [
+        "本批次软件、联网和成果格式已经核对或明确标记待确认",
+        "完成独立限时练习并保留真实作答记录",
+        "逐个打开交付文件并从头重跑"
+      ],
+      "quiz": [
+        {
+          "question": "AI审阅文本后，是否已证明代码实际运行？",
+          "options": [
+            {
+              "label": "A",
+              "text": "是"
+            },
+            {
+              "label": "B",
+              "text": "否"
+            },
+            {
+              "label": "C",
+              "text": "分数超过60就证明了"
+            }
+          ],
+          "answer": "B",
+          "explanation": "文本审阅和实际执行是不同证据，仍需本地验证运行结果。"
+        },
+        {
+          "question": "平台四任务技能卷是否代表机构固定题型？",
+          "options": [
+            {
+              "label": "A",
+              "text": "是"
+            },
+            {
+              "label": "B",
+              "text": "不是，只是训练设计"
+            },
+            {
+              "label": "C",
+              "text": "所有地区都相同"
+            }
+          ],
+          "answer": "B",
+          "explanation": "批次题型、数量、软件与提交格式须向评价机构确认。"
+        }
+      ],
+      "links": [
+        {
+          "label": "配套专项题",
+          "href": "/practice.html?domain=training"
+        }
+      ]
+    }
+  ]
+}

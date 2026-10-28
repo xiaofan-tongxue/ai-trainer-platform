@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22",
+  "version": "2026-10-26",
   "basis": "国家职业技能标准（2021年版）对应项目内六领域训练映射；不是评价机构逐题蓝图",
   "weights": {
     "theory": 100,
@@ -134,6 +134,87 @@
       "questionCount": 20,
       "practicalTaskCount": 10,
       "status": "coverage-mapped"
+    }
+  ],
+  "capabilities": [
+    {
+      "section": "1.1",
+      "name": "业务流程设计",
+      "lessons": [
+        "bridge-process"
+      ],
+      "evidence": "采集、处理、审核流程及失败返工",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "1.2",
+      "name": "业务模块效果优化",
+      "lessons": [
+        "bridge-improve"
+      ],
+      "evidence": "基线、单模块改动、对照指标与回退",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "2.1",
+      "name": "数据处理规范制定",
+      "lessons": [
+        "bridge-clean",
+        "bridge-text",
+        "bridge-media",
+        "bridge-quality"
+      ],
+      "evidence": "清洗标注规范、抽检与复查记录",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "2.2",
+      "name": "算法测试",
+      "lessons": [
+        "bridge-split",
+        "bridge-pipeline",
+        "bridge-metrics",
+        "bridge-errors"
+      ],
+      "evidence": "数据版本、训练与测试、错例分析报告",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "3.1",
+      "name": "智能系统监控和优化",
+      "lessons": [
+        "bridge-monitor",
+        "bridge-errors"
+      ],
+      "evidence": "指标口径、分析报告、优化需求与回退",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "3.2",
+      "name": "人机交互流程设计",
+      "lessons": [
+        "bridge-interaction"
+      ],
+      "evidence": "正常与异常交互流程及验收用例",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "4.1",
+      "name": "培训",
+      "lessons": [
+        "bridge-teach"
+      ],
+      "evidence": "初级讲义、跟做和独立练习评分表",
+      "status": "learning-and-self-check; external assessment pending"
+    },
+    {
+      "section": "4.2",
+      "name": "指导",
+      "lessons": [
+        "bridge-guide"
+      ],
+      "evidence": "采集处理与标注问题指导记录、换题复测",
+      "status": "learning-and-self-check; external assessment pending"
     }
   ]
 }

@@ -23,9 +23,12 @@ public class ExamService {
         if(mode.equals("practical")){
             for(int i=2;i<Knowledge.IDS.length;i++){
                 String prefix=String.valueOf(i-1)+".%";
-                Map<String,Object> q=DB.queryOne("SELECT * FROM practical_tasks WHERE code LIKE ? ORDER BY RAND() LIMIT 1",prefix);
+                Map<String,Object> q=null;
+                for(Map<String,Object> candidate:DB.query("SELECT * FROM practical_tasks WHERE code LIKE ? ORDER BY RAND()",prefix)){
+                    PracticalDao.decorate(candidate);if(Boolean.TRUE.equals(candidate.get("examEligible"))){q=candidate;break;}
+                }
                 if(q==null)throw new IllegalStateException("实操领域缺少题目："+Knowledge.NAMES[i]);
-                PracticalDao.decorate(q);q.put("domain",Knowledge.IDS[i]);q.put("points",Knowledge.PRACTICAL[i]);questions.add(q);
+                q.put("domain",Knowledge.IDS[i]);q.put("points",Knowledge.PRACTICAL[i]);questions.add(q);
             }
         }else if(mode.equals("shanghai")){
             String[] types={"JUDGE","SINGLE","MULTIPLE"};int[] counts={40,140,10};
@@ -38,7 +41,7 @@ public class ExamService {
             List<Map<String,Object>> all=new QuestionDao().allTagged();Collections.shuffle(all);
             for(int i=0;i<Knowledge.IDS.length;i++){
                 int count=mode.equals("diagnostic")?3:Knowledge.THEORY[i];int n=0;
-                for(Map<String,Object> q:all)if(Knowledge.IDS[i].equals(q.get("domain"))&&n<count){q.put("points",mode.equals("diagnostic")?100.0/18:1.0);questions.add(q);n++;}
+                for(Map<String,Object> q:all)if(Boolean.TRUE.equals(q.get("examEligible"))&&Knowledge.IDS[i].equals(q.get("domain"))&&n<count){q.put("points",mode.equals("diagnostic")?100.0/18:1.0);questions.add(q);n++;}
                 if(n<count)throw new IllegalStateException("题库领域数量不足："+Knowledge.NAMES[i]);
             }
             Collections.shuffle(questions);
@@ -57,7 +60,7 @@ public class ExamService {
     }
     private Map<String,Object> view(Map<String,Object> row){
         Map<String,Object> paper=Json.obj(Json.parse(Json.str(row.get("paper"))));
-        for(Object o:Json.arr(paper.get("questions"))){Map<String,Object> q=Json.obj(o);q.remove("answer");q.remove("analysis");q.remove("reference_answer");}
+        for(Object o:Json.arr(paper.get("questions")))ContentQuality.hideSolutions(Json.obj(o));
         paper.put("sessionId",row.get("id"));paper.put("startedAt",row.get("started_at"));paper.put("deadlineAt",row.get("deadline_at"));paper.put("serverNow",now());paper.put("status",row.get("status"));
         paper.put("answers",Json.parse(Json.str(row.get("answers"),"{}")));
         if(row.get("result")!=null)paper.put("result",Json.parse(Json.str(row.get("result"))));
@@ -116,21 +119,23 @@ public class ExamService {
                 p.setLong(1,uid);p.setString(2,Json.str(finalRow.get("title")));
                 p.setString(3,recordSecret("total",result.get("total")));p.setString(4,recordSecret("correct",result.get("correct")));p.setString(5,recordSecret("score",result.get("score")));p.setString(6,recordSecret("passed",Boolean.TRUE.equals(result.get("passed"))?1:0));p.setString(7,recordSecret("duration_sec",duration));p.setString(8,recordSecret("detail",Json.stringify(result.get("detail"))));p.executeUpdate();try(ResultSet keys=p.getGeneratedKeys()){if(keys.next())result.put("recordId",keys.getLong(1));}
             }
-            for(Object o:Json.arr(result.get("detail"))){Map<String,Object> d=Json.obj(o);if(!Boolean.TRUE.equals(d.get("correct")))try(PreparedStatement p=c.prepareStatement("INSERT INTO mistakes(user_id,question_id,wrong_count,mastered,last_wrong_at,created_at) VALUES(?,?,1,0,NOW(),NOW()) ON DUPLICATE KEY UPDATE wrong_count=wrong_count+1,mastered=0,last_wrong_at=NOW()")){p.setLong(1,uid);p.setLong(2,Json.lng(d.get("questionId"),0));p.executeUpdate();}}
+            for(Object o:Json.arr(result.get("detail"))){Map<String,Object> d=Json.obj(o);if(!Boolean.TRUE.equals(d.get("correct"))&&!Boolean.FALSE.equals(d.get("examEligible")))try(PreparedStatement p=c.prepareStatement("INSERT INTO mistakes(user_id,question_id,wrong_count,mastered,last_wrong_at,created_at) VALUES(?,?,1,0,NOW(),NOW()) ON DUPLICATE KEY UPDATE wrong_count=wrong_count+1,mastered=0,last_wrong_at=NOW()")){p.setLong(1,uid);p.setLong(2,Json.lng(d.get("questionId"),0));p.executeUpdate();}}
             try(PreparedStatement p=c.prepareStatement("UPDATE exam_sessions SET result=?,status='SUBMITTED' WHERE id=? AND user_id=?")){p.setString(1,secret("result",Json.stringify(result)));p.setString(2,id);p.setLong(3,uid);p.executeUpdate();}return null;
         });
         return result;
     }}
     public static Map<String,Object> gradeTheory(Map<String,Object> paper,Map<String,Object> answers){
         List<Object> detail=new ArrayList<Object>();Map<String,Object> domains=new LinkedHashMap<String,Object>();double score=0;int correct=0;
-        for(Object o:Json.arr(paper.get("questions"))){Map<String,Object> q=Json.obj(o);String id=Json.str(q.get("id"));String answer=Json.str(answers.get(id),"");boolean ok=QuestionService.judge(Json.str(q.get("type")),Json.str(q.get("answer")),answer);double points=((Number)q.get("points")).doubleValue();if(ok){score+=points;correct++;}
+        for(Object o:Json.arr(paper.get("questions"))){Map<String,Object> q=Json.obj(o);ContentQuality.question(q);String id=Json.str(q.get("id"));String answer=Json.str(answers.get(id),"");boolean ok=QuestionService.judge(Json.str(q.get("type")),Json.str(q.get("answer")),answer);double points=((Number)q.get("points")).doubleValue();if(ok){score+=points;correct++;}
             String domain=Json.str(q.get("domain"));Map<String,Object> d=Json.obj(domains.get(domain));double max=d.containsKey("max")?((Number)d.get("max")).doubleValue():0;double got=d.containsKey("score")?((Number)d.get("score")).doubleValue():0;domains.put(domain,map("max",max+points,"score",got+(ok?points:0)));
-            detail.add(map("questionId",q.get("id"),"question",q.get("question"),"type",q.get("type"),"options",q.get("options"),"domain",domain,"yourAnswer",answer,"correctAnswer",q.get("answer"),"correct",ok,"analysis",q.get("analysis"),"score",points));
+            detail.add(map("questionId",q.get("id"),"question",q.get("question"),"type",q.get("type"),"options",q.get("options"),"domain",domain,"yourAnswer",answer,"correctAnswer",q.get("answer"),"correct",ok,"analysis",q.get("analysis"),"score",points,"questionFingerprint",ContentQuality.fingerprint(q),"examEligible",ContentQuality.questionEligible(ContentQuality.fingerprint(q))));
         }
         score=Math.round(score*10)/10.0;
-        return map("total",detail.size(),"correct",correct,"score",score,"passed",score>=60,"detail",detail,"domains",domains,"gradingMode","objective");
+        return map("total",detail.size(),"correct",correct,"score",score,"passed",score>=60,"detail",detail,"domains",domains,"gradingMode","objective","contentWarning",detail.stream().anyMatch(o->Boolean.FALSE.equals(Json.obj(o).get("examEligible")))?"本旧卷包含待复核题，分数仅保留供参考，不纳入能力评估。":null);
     }
     private Map<String,Object> practicalGrade(Map<String,Object> row,Map<String,Object> paper,Map<String,Object> answers){
+        for(Object item:Json.arr(paper.get("questions")))if(!ContentQuality.practicalEligible(Json.str(Json.obj(item).get("code"))))
+            return map("detail",Collections.emptyList(),"complete",false,"score",null,"passed",false,"gradingMode","content_review_required","message","本旧卷含已发现素材问题的题目，暂停AI审阅。作答仍保留，请返回测评入口重新生成试卷。");
         Map<String,Object> previous=Json.obj(Json.parse(Json.str(row.get("result"),"{}")));List<Object> detail=new ArrayList<Object>(Json.arr(previous.get("detail")));Set<String> done=new HashSet<String>();for(Object o:detail)done.add(Json.str(Json.obj(o).get("questionId")));
         String failure=null;
         for(Object o:Json.arr(paper.get("questions"))){Map<String,Object> q=Json.obj(o);String id=Json.str(q.get("id"));if(done.contains(id))continue;

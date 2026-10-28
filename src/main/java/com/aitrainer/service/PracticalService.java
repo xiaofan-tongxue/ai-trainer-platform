@@ -31,6 +31,7 @@ public class PracticalService {
             e.put("error", "题目不存在");
             return e;
         }
+        if(!Boolean.TRUE.equals(t.get("examEligible")))throw new IllegalArgumentException("本题存在待核查内容，仅供学习辨错，暂不评分。"+Json.str(t.get("qualityNotice"),""));
         AiAgentService.GradeResult g = ai.grade(
                 String.valueOf(t.get("task_desc")),
                 String.valueOf(t.get("reference_answer")),

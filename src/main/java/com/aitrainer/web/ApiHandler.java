@@ -89,6 +89,7 @@ public class ApiHandler {
                 com.aitrainer.service.PythonProgressService progress=new com.aitrainer.service.PythonProgressService();
                 res.ok(req.method.equals("GET")?progress.load(user.id):progress.save(user.id,asMap(req.json())));
             }
+            else if(b.equals("evidence")&&req.method.equals("POST"))res.ok(new com.aitrainer.service.LearningEvidenceService().save(user.id,asMap(req.json())));
             else if(b.equals("curriculum")&&req.method.equals("GET"))res.ok(learning.journey(user.id));
             else if(b.equals("profile")&&req.method.equals("GET"))res.ok(learning.profile(user.id));
             else if(b.equals("profile")&&req.method.equals("POST"))res.ok(learning.saveProfile(user.id,asMap(req.json())));
@@ -395,7 +396,7 @@ public class ApiHandler {
         if(p.matches("/auth/(login|register|logout|password)"))return method.equals("POST");
         if(p.matches("/auth/me|/settings|/chapters(/[0-9]+)?|/questions|/profile|/learning/(curriculum|snapshot)|/exam/(sessions|records)|/exam/session/[A-Za-z0-9-]{36}|/exam/record/[0-9]+|/practical(/[0-9]+|/submissions|/[0-9]+/material)?|/mistakes(/stats)?|/admin/(stats|login-logs|operation-logs|mistakes|submissions)"))return method.equals("GET");
         if(p.matches("/learning/(profile|report|python-progress)|/admin/(users|ai)"))return method.equals("GET")||method.equals("POST");
-        if(p.matches("/learning/check|/practice/answer|/exam/(generate|save|submit)|/practical/[0-9]+/submit|/mistakes/remove|/python/feedback|/admin/ai/test"))return method.equals("POST");
+        if(p.matches("/learning/(check|evidence)|/practice/answer|/exam/(generate|save|submit)|/practical/[0-9]+/submit|/mistakes/remove|/python/feedback|/admin/ai/test"))return method.equals("POST");
         return p.matches("/admin/user/[0-9]+")&&(method.equals("PUT")||method.equals("POST")||method.equals("DELETE"));
     }
     private User currentUser(Request req) {

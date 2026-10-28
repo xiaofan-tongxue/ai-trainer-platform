@@ -11,6 +11,14 @@ import static com.aitrainer.security.ProtectedFields.seal;
 public class PracticalDao {
     public static Map<String, Object> decorate(Map<String, Object> t) {
         if (t == null) return null;
+        // Correct the known source typo for existing installations without replacing their database.
+        if("1.1.1".equals(t.get("code"))&&t.get("reference_answer") instanceof String){
+            String reference=(String)t.get("reference_answer");
+            reference=reference.replace(", bmi_bins, bmi_labels",", bmi_bins, labels=bmi_labels")
+                    .replace(", age_bins, age_labels",", age_bins, labels=age_labels")
+                    .replace("pd.cut(_____, _____, _____, right=False)","pd.cut(_____, _____, labels=_____, right=False)");
+            t.put("reference_answer",reference);
+        }
         for (String k : new String[]{"uploads", "materials"}) {
             Object o = t.get(k);
             if (o instanceof String && !((String) o).isEmpty()) {
@@ -20,12 +28,14 @@ public class PracticalDao {
                 t.put(k, new ArrayList<Object>());
             }
         }
+        com.aitrainer.service.ContentQuality.practical(t);
         return t;
     }
 
     public List<Map<String, Object>> list() {
         List<Map<String, Object>> list = DB.query(
-                "SELECT id,code,title,category,duration,level,sort_order FROM practical_tasks ORDER BY sort_order,id");
+                "SELECT id,code,title,category,duration,level,sort_order,reference_answer FROM practical_tasks ORDER BY sort_order,id");
+        for(Map<String,Object> t:list){decorate(t);t.remove("reference_answer");t.remove("learningGuide");}
         return list;
     }
 
