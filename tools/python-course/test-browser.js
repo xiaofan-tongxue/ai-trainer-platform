@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert');
 const root=path.resolve(__dirname,'../..'),web=path.join(root,'webapp');
 const course=JSON.parse(fs.readFileSync(path.join(root,'data/python-course/course.json'),'utf8'));
-const csp="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
+const csp="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://fastly.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net https://fastly.jsdelivr.net https://unpkg.com; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
 const mime={'.html':'text/html','.js':'application/javascript','.css':'text/css'};
 let aiCalls=0;
 const accountProgress={progress:{},lastLesson:null}; let progressOffline=false;

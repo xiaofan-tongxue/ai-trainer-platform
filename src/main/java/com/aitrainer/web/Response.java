@@ -21,7 +21,7 @@ public class Response {
         header("X-Frame-Options","DENY");
         header("Referrer-Policy","no-referrer");
         header("Permissions-Policy","camera=(), microphone=(), geolocation=()");
-        header("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+        header("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://fastly.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net https://fastly.jsdelivr.net https://unpkg.com; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
         if(com.aitrainer.security.SecurityGate.production())header("Strict-Transport-Security","max-age=31536000");
     }
 

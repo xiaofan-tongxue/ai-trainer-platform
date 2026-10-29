@@ -2,7 +2,7 @@
 
 适用Windows10/11 64位。将整个ZIP解压到可写目录，建议路径简短、磁盘至少空余8GB。双击 **一键安装.bat**，等待校验、环境安装、建库、加密初始化及启动完成。通常不需要管理员权限；系统缺少VC++运行库时会显示Windows管理员确认。
 
-包内包含Java21 JDK、MySQL8.4 LTS独立实例、Connector/J8.4、Python3.13及pip、课程/题库/素材和预编译应用。运行环境下载来源及SHA-256在manifest.json登记。首次安装不需要下载Java、数据库或Python。网页内Python练习的Pyodide首次加载和DeepSeek仍需要互联网。
+包内包含Java21 JDK、MySQL8.4 LTS独立实例、Connector/J8.4、Python3.13及pip、课程/题库/素材和预编译应用。运行环境下载来源及SHA-256在manifest.json登记。首次安装不需要下载Java、数据库或Python。网页内Python练习的Pyodide首次加载和DeepSeek仍需要互联网；Pyodide 会自动尝试主 CDN 与备用 CDN，若单位网络拦截外部 CDN，请使用手机热点或环境终端执行已下载代码。
 
 安装目录自动选择公共用户目录中的 `AITrainer-当前用户SID`（通常在C:\Users\Public下），目录权限限制为安装用户和SYSTEM；这样避免MySQL中文路径问题。解压位置可以使用中文。配置只对本程序进程及“环境终端”生效，不修改全局PATH，不覆盖系统已有MySQL/Python。网站优先19001端口，数据库优先13306，冲突时自动选择后续可用端口，实际地址会显示并自动打开。
 

@@ -132,6 +132,9 @@
     document.getElementById('runtimeStatus').textContent=message;
   }
   function errorHelp(message) {
+    if (/importScripts|pyodide|运行环境下载失败|Failed to load|网络加载/i.test(message)) {
+      return 'Python 运行环境下载失败。请先确认网络可访问，再点击“运行”重试；如果当前网络拦截 CDN，可换用手机热点或使用本机环境终端运行课程代码。课程记录不会因此丢失。';
+    }
     const rules=[['SyntaxError','检查指示行及上一行的引号、括号、冒号；请使用英文标点。'],['IndentationError','检查代码块里的缩进，统一使用四个空格。'],['NameError','先赋值或导入，再使用；检查大小写与拼写。'],['TypeError','检查数据类型：文字和数字需要转换，函数参数也要对应。'],['ValueError','检查原始值是否符合转换规则，例如数字字段里是否含字母。'],['IndexError','检查列表长度；最后一个索引通常是长度减1。'],['KeyError','检查字典键或表头拼写；可选字段可以考虑 get。'],['EOFError','输入行不够：每次 input() 需要一行输入。'],['FileNotFoundError','检查文件名。每次运行都会重置练习目录；课程数据已自动放入。'],['AssertionError','断言与实际结果不一致，先核对边界规则，别直接删掉测试。'],['ModuleNotFoundError','本课会加载指定库；其他库需在本机对应环境安装。']];
     return rules.find(([type])=>message.includes(type))?.[1] || '先检查运行时是否加载成功。网络加载失败可以重试；代码问题先定位最后一行报错，再一次改一处。';
   }

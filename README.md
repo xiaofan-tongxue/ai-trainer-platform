@@ -19,7 +19,7 @@
 
 适用于 **Windows 10/11 64 位**，建议预留至少 **8 GB** 空间。安装包包含 Java 21、MySQL 8.4、Python 3.13、pip、完整课程题库和素材，自动配置独立环境、数据库、端口及随机管理员初始密码。首次登录必须修改密码。
 
-DeepSeek API Key 需在管理后台填写。运行环境可离线安装；DeepSeek 和网页 Python 首次加载仍需联网。全新安装包不包含原学员数据或密钥。
+DeepSeek API Key 需在管理后台填写。运行环境可离线安装；DeepSeek 和网页 Python 首次加载仍需联网。网页 Python 会在主 CDN 失败时自动尝试备用 CDN；单位网络若统一拦截外部 CDN，请改用手机热点或在“环境终端”运行已下载的 Python 文件。全新安装包不包含原学员数据或密钥。
 
 详见 [一键部署指南](deploy/windows/README.md)。
 
