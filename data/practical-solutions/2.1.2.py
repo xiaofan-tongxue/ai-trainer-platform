@@ -1,48 +1,28 @@
 import json
 from pathlib import Path
-import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-# 数据先划分。填补值、标准化参数、类别编码只从训练集学习。
-def prepare(X):
-    numeric = X.select_dtypes(include="number").columns.tolist()
-    categorical = [c for c in X.columns if c not in numeric]
-    return ColumnTransformer([
-        ("number", Pipeline([("fill", SimpleImputer(strategy="median")),
-                             ("scale", StandardScaler())]), numeric),
-        ("category", Pipeline([("fill", SimpleImputer(strategy="most_frequent")),
-                               ("encode", OneHotEncoder(handle_unknown="ignore"))]), categorical)
-    ])
-
-def clean_columns(df):
-    df.columns = df.columns.str.strip()
-    return df.drop(columns=[c for c in df if c.startswith("Unnamed:") or c in
-                           ["Timestamp", "Your name", "序号", "所用时间", "car name"]], errors="ignore").drop_duplicates()
-
-df = clean_columns(pd.read_excel("大学生低碳生活行为的影响因素数据集.xlsx"))
+# 本题只检查标签质量。目标列如果没有区分度，就停止，不要编造标签，也不要接着训练。
+df = pd.read_excel("大学生低碳生活行为的影响因素数据集.xlsx")
 target = "低碳行为积极性"
-df[target] = pd.to_numeric(df[target], errors="coerce")
-df = df.dropna(subset=[target])
-print("目标字段不同取值数：", df[target].nunique())
-if df[target].nunique() < 2:
-    print("注意：配套目标列为常量，仅练习预处理；请核查标签来源后再做预测训练。")
-X, y = df.drop(columns=[target]), df[target]
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=None)
-processor = prepare(X_train)
-train_features = processor.fit_transform(X_train)
-test_features = processor.transform(X_test)
-assert len(X_train) and len(X_test) and set(X_train.index).isdisjoint(X_test.index)
-# 导出原始单位的数据与划分标记，便于复核；不能把目标和标准化特征混写。
-output = X.copy()
-output["target"] = y
-output["split"] = np.where(output.index.isin(X_train.index), "train", "test")
-output.to_csv("2.1.2_cleaned_data.csv", index=False, encoding="utf-8-sig")
-print("划分后特征形状：", train_features.shape, test_features.shape)
-print("已生成 2.1.2_cleaned_data.csv；target 保留原单位，split 记录划分。")
+values = pd.to_numeric(df[target], errors="coerce")
+counts = {str(k): int(v) for k, v in values.value_counts(dropna=False).items()}
+allowance = [c for c in df.columns if "月生活费" in str(c)]
+report = {
+    "rows": int(len(df)),
+    "columns": int(df.shape[1]),
+    "missing_cells": int(df.isna().sum().sum()),
+    "duplicate_rows": int(df.duplicated().sum()),
+    "target": target,
+    "target_nunique": int(values.nunique(dropna=True)),
+    "target_counts": counts,
+    "trainable": bool(values.nunique(dropna=True) >= 2),
+    "allowance_column_is_option_code": bool(allowance),
+}
+assert report["rows"] == 318, "行数与所附数据不一致，请先核对是不是原文件"
+assert report["trainable"] is False, "只有目标列出现多个取值时，才可以讨论预测模型"
+report["decision"] = "目标列只有常量 0，不能训练有区分度的预测模型。不要编造、插补或替换标签。"
+Path("2.1.2_quality.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+print("配套目标列为常量")
+print(json.dumps(report, ensure_ascii=False, indent=2))
+print("月生活费列名是金额区间，表内已是选项代号，不是连续金额。本题到质量结论为止。")

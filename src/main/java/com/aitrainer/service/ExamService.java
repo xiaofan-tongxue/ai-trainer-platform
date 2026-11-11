@@ -134,8 +134,8 @@ public class ExamService {
         return map("total",detail.size(),"correct",correct,"score",score,"passed",score>=60,"detail",detail,"domains",domains,"gradingMode","objective","contentWarning",detail.stream().anyMatch(o->Boolean.FALSE.equals(Json.obj(o).get("examEligible")))?"本旧卷包含待复核题，分数仅保留供参考，不纳入能力评估。":null);
     }
     private Map<String,Object> practicalGrade(Map<String,Object> row,Map<String,Object> paper,Map<String,Object> answers){
-        for(Object item:Json.arr(paper.get("questions")))if(!ContentQuality.practicalEligible(Json.str(Json.obj(item).get("code"))))
-            return map("detail",Collections.emptyList(),"complete",false,"score",null,"passed",false,"gradingMode","content_review_required","message","本旧卷含已发现素材问题的题目，暂停AI审阅。作答仍保留，请返回测评入口重新生成试卷。");
+        for(Object item:Json.arr(paper.get("questions")))if(!ContentQuality.practicalPaperCurrent(Json.obj(item)))
+            return map("detail",Collections.emptyList(),"complete",false,"score",null,"passed",false,"gradingMode","content_review_required","message","本卷含尚未核对或已修订的技能题目，暂停AI审阅。作答仍保留，请返回测评入口重新生成试卷。");
         Map<String,Object> previous=Json.obj(Json.parse(Json.str(row.get("result"),"{}")));List<Object> detail=new ArrayList<Object>(Json.arr(previous.get("detail")));Set<String> done=new HashSet<String>();for(Object o:detail)done.add(Json.str(Json.obj(o).get("questionId")));
         String failure=null;
         for(Object o:Json.arr(paper.get("questions"))){Map<String,Object> q=Json.obj(o);String id=Json.str(q.get("id"));if(done.contains(id))continue;
@@ -144,7 +144,7 @@ public class ExamService {
                 AiAgentService.GradeResult g;
                 if(answer.trim().isEmpty()){g=new AiAgentService.GradeResult();g.score=0;g.mode="empty";g.comment="未作答";g.analysis="本题未提交，按零分计。";}
                 else g=new AiAgentService().review(Json.str(q.get("task_desc"),"")+"\n技能要求："+Json.str(q.get("skills"),"")+"\n质量要求："+Json.str(q.get("quality"),""),Json.str(q.get("reference_answer"),""),answer);
-                detail.add(map("questionId",q.get("id"),"code",q.get("code"),"title",q.get("title"),"domain",q.get("domain"),"points",q.get("points"),"score",g.score,"mode",g.mode,"comment",g.comment,"analysis",g.analysis,"yourAnswer",answer));
+                detail.add(map("questionId",q.get("id"),"code",q.get("code"),"title",q.get("title"),"domain",q.get("domain"),"points",q.get("points"),"score",g.score,"mode",g.mode,"comment",g.comment,"analysis",g.analysis,"yourAnswer",answer,"assessmentRevision",Json.str(q.get("assessmentRevision"),"")));
                 DB.update("UPDATE exam_sessions SET result=? WHERE id=?",secret("result",Json.stringify(map("detail",detail,"complete",false))),row.get("id"));
             }catch(DeepSeekClient.AiFailure e){failure=e.getMessage();break;}
         }

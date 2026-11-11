@@ -65,8 +65,15 @@ def verify(task):
                                text=True, encoding='utf-8', capture_output=True, timeout=180)
             result['status'] = 'execution-passed' if p.returncode == 0 else 'execution-failed'
             result['exitCode'] = p.returncode
+            if p.returncode == 0 and code_id in {'2.1.2','2.1.5','2.2.3','3.2.4'}:
+                assert patches[code_id]['examEligible'] is (code_id in {'2.1.5','2.2.3'}), code_id+' eligibility drifted'
             if p.returncode == 0 and code_id.startswith('2.'):
-                if code_id.startswith('2.1.'):
+                if code_id=='2.1.2':
+                    report=json.loads((folder/'2.1.2_quality.json').read_text(encoding='utf-8'))
+                    assert report['rows']==318 and report['target_nunique']<2 and report['trainable'] is False
+                    assert report['target_counts'].get('0')==318
+                    result['quality']={'trainable':False,'target_nunique':report['target_nunique']}
+                elif code_id.startswith('2.1.'):
                     import pandas as pd
                     output = folder/(code_id+'_cleaned_data.csv')
                     frame = pd.read_csv(output)
@@ -76,11 +83,23 @@ def verify(task):
                         assert frame['target'].notna().all(), code_id+' missing labels'
                         if frame['target'].nunique()<2:
                             assert patches[code_id]['examEligible'] is False, 'constant label must be quarantined'
+                    if code_id=='2.1.5':
+                        assert not frame['target'].astype(str).str.fullmatch(r'\d+').any(), 'age interval was stored as an exact year'
+                        assert frame['age_interval'].nunique()>=2
                     result['outputRows']=len(frame)
                 else:
                     metrics=json.loads((folder/(code_id+'_metrics.json')).read_text(encoding='utf-8'))
                     assert all(metrics[k]>0 for k in ['train_rows','validation_rows','test_rows'])
+                    if code_id=='2.2.3':
+                        assert metrics.get('task')=='age-interval-classification'
+                        assert 'R2' not in metrics and 'MAE' not in metrics
+                        assert metrics['macro_f1']>=0
                     result['metrics']=metrics
+            if p.returncode == 0 and code_id=='3.2.4':
+                audit=json.loads((folder/'3.2.4_model_audit.json').read_text(encoding='utf-8'))
+                assert audit['matches_known_imagenet_resnet'] is True
+                assert audit['label_count']==1000 and audit['flower_specific_model'] is False
+                result['modelAudit']={k:audit.get(k) for k in ('sha256','label_count','predicted_label','confidence')}
             (out/(code_id+'.log')).write_text(p.stdout+'\n'+p.stderr, encoding='utf-8')
             result['error'] = '\n'.join(p.stderr.splitlines()[-4:]) if p.returncode else None
         except subprocess.TimeoutExpired:
