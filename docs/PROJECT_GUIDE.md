@@ -4,7 +4,7 @@
 
 ## 开始使用
 
-新电脑优先使用[Windows一键部署包](../dist/AITrainer-Windows-OneClick.zip)：解压后双击“一键安装.bat”，自动配置Java、独立MySQL、Python/pip、课程题库和加密账号。详细说明见[一键部署指南](../deploy/windows/README.md)。这是全新安装包，不包含当前电脑的学员记录或密钥。
+新电脑使用 Windows 一键部署包：解压后双击“一键安装.bat”，自动配置 Java、独立 MySQL、Python/pip、课程题库和加密账号。已发布的包仍是 v1.1.1。当前 main 的下一版按[Windows 构建手册](deployment/windows-build-runbook.md)生成。详细说明见[一键部署指南](../deploy/windows/README.md)。这是全新安装包，不包含当前电脑的学员记录或密钥。已有数据库不要重新导入 seed.sql，不要覆盖 data-key.dpapi。
 
 本机数据库和题库已经存在，安全迁移已完成，直接运行 `start.bat`，或依次运行 `build.ps1`、`run.ps1`。访问 [学习首页](http://localhost:19001/index.html)。已有账号首次登录后必须更新密码；服务默认仅本机访问，需使用初始化密钥库时的Windows账号启动。
 

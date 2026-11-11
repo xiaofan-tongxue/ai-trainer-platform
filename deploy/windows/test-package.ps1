@@ -13,6 +13,7 @@ $cp="$classes;$instance/app/build/classes;$instance/app/lib/connector.jar"
 & $javac --release 8 -encoding UTF-8 -cp $cp -d $classes "$project/src/test/java/com/aitrainer/service/PlatformTest.java" "$project/src/test/java/com/aitrainer/service/SecurityHttpTest.java"
 if($LASTEXITCODE -ne 0){throw 'Test compile failed'}
 $oldUrl=$env:DB_URL;$oldUser=$env:DB_USER;$oldPassword=$env:DB_PASSWORD;$oldKey=$env:DATA_ENCRYPTION_KEY
+$businessChecks=$null;$securityChecks=$null
 try{
  $env:DB_URL="jdbc:mysql://127.0.0.1:$($state.dbPort)/ai_trainer_platform?useUnicode=true&characterEncoding=utf8&sslMode=DISABLED&allowPublicKeyRetrieval=true&connectionTimeZone=Asia/Shanghai"
  $env:DB_USER=$null;$env:DB_PASSWORD=$null;$env:DATA_ENCRYPTION_KEY=$null
@@ -24,9 +25,14 @@ try{
    $lines=& $java @arguments
    [IO.File]::WriteAllLines("$out/$test.txt",[string[]]$lines,[Text.UTF8Encoding]::new($false))
    if($LASTEXITCODE -ne 0){throw "$test failed"}
-   Write-Output ($lines|Select-Object -Last 1)
+   $summary=[string]($lines|Select-Object -Last 1)
+   if($test -eq 'PlatformTest' -and $summary -match '^ALL (\d+) CHECKS PASSED$'){$script:businessChecks=[int]$Matches[1]}
+   elseif($test -eq 'SecurityHttpTest' -and $summary -match '^ALL (\d+) HTTP SECURITY CHECKS PASSED; fixtures removed$'){$script:securityChecks=[int]$Matches[1]}
+   else{throw "$test 未输出可核对的检查计数"}
+   Write-Output $summary
   }
   Copy-Item -LiteralPath 'docs/security/evidence/http-security-results.json' -Destination "$out/http-security-results.json" -Force
  }finally{Pop-Location}
 }finally{$env:DB_URL=$oldUrl;$env:DB_USER=$oldUser;$env:DB_PASSWORD=$oldPassword;$env:DATA_ENCRYPTION_KEY=$oldKey}
-@{testedAt=(Get-Date).ToString('o');instance=$instance;databasePort=$state.dbPort;httpPort=$state.httpPort;java='21';mysql='8.4.11';python='3.13.15';connector='8.4.0';businessChecks=74;securityHttpChecks=62;originalDatabaseUnaffected=$true}|ConvertTo-Json|Set-Content -Encoding UTF8 "$out/verification.json"
+if(-not $businessChecks -or -not $securityChecks){throw '验收计数缺失'}
+@{testedAt=(Get-Date).ToString('o');instance=$instance;databasePort=$state.dbPort;httpPort=$state.httpPort;java='21';mysql='8.4.11';python='3.13.15';connector='8.4.0';businessChecks=$businessChecks;securityHttpChecks=$securityChecks;originalDatabaseUnaffected=$true}|ConvertTo-Json|Set-Content -Encoding UTF8 "$out/verification.json"

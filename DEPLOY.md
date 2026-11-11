@@ -1,6 +1,6 @@
 # 部署与安全升级
 
-新电脑使用[Windows一键部署包](dist/AITrainer-Windows-OneClick.zip)，解压后运行“一键安装.bat”。包内包含运行环境，初始化独立数据库及随机管理员密码，自动完成安全迁移和环境配置。见[操作指南](deploy/windows/README.md)。新部署使用MySQL8.4及Connector/J8.4；下文现有电脑的MySQL5.7实例保持原状。
+新电脑使用 Windows 一键部署包，解压后运行“一键安装.bat”。已发布的包仍是 [v1.1.1](https://github.com/xiaofan-tongxue/ai-trainer-platform/releases/tag/v1.1.1)（commit `5aa8d60`，2026-09-22）。当前 main 的下一版包按[Windows 构建手册](docs/deployment/windows-build-runbook.md)在 Windows 上生成，发行说明草案见[v1.1.1 之后](docs/release-notes-draft-after-v1.1.1.md)。包内包含运行环境，初始化独立数据库及随机管理员密码。见[操作指南](deploy/windows/README.md)。新部署使用MySQL8.4及Connector/J8.4；下文现有电脑的MySQL5.7实例保持原状。已有安装不要重新导入 seed.sql，不要覆盖 data-key.dpapi；再次双击新包的一键安装也不会替换已经存在的 app 目录。
 
 当前电脑已完成敏感字段加密迁移和最小权限数据库配置。使用初始化密钥库时的Windows账号启动；运行 `build.ps1`、`run.ps1`，或使用 `start.bat`。默认访问 http://localhost:19001/login，旧账号首次登录须更新密码。
 
