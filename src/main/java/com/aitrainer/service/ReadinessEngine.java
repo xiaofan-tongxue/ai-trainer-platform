@@ -6,14 +6,19 @@ import static com.aitrainer.service.Curriculum.map;
 
 /** Transparent practice-based estimate. No historical outcome calibration is claimed. */
 public final class ReadinessEngine {
-    public static final String METHOD="heuristic-v4-content-quality";
+    public static final String METHOD="heuristic-v5-practical-conflicts";
     /** Full-session practice policy, not a rule forbidding early submission at official exams.
      * DATETIME storage truncates milliseconds, so allow one second at the boundary. */
     static String exclusion(String mode,Map<String,Object> r) {
         for(Object item:Json.arr(r.get("detail"))){
             Map<String,Object> d=Json.obj(item);
             if(Boolean.FALSE.equals(d.get("examEligible")))return "包含待复核题目，仅保留成绩供参考";
-            if("practical".equals(mode)&&!ContentQuality.practicalEligible(Json.str(d.get("code"),"")))return "包含素材不匹配的技能题目";
+            if("practical".equals(mode)){
+                String code=Json.str(d.get("code"),"");
+                if(!ContentQuality.practicalEligible(code))return "包含素材不匹配的技能题目";
+                String required=ContentQuality.assessmentRevision(code);
+                if(!required.isEmpty()&&!required.equals(Json.str(d.get("assessmentRevision"),"")))return "包含修订前的技能题目";
+            }
             String hash=Json.str(d.get("questionFingerprint"),"");
             if(hash.isEmpty()&&d.containsKey("question")&&d.containsKey("correctAnswer")){
                 Map<String,Object> old=new LinkedHashMap<String,Object>(d);old.put("answer",d.get("correctAnswer"));hash=ContentQuality.fingerprint(old);

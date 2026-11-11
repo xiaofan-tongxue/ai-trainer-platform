@@ -121,14 +121,22 @@ public class PlatformTest {
             int eligible=0,guided=0;
             for(Object item:Json.arr(seed.get("practical"))){Map<String,Object> raw=Json.obj(item),t=new LinkedHashMap<String,Object>(raw);t.put("reference_answer",t.remove("reference"));
                 com.aitrainer.dao.PracticalDao.decorate(t);if(Boolean.TRUE.equals(t.get("examEligible")))eligible++;if(t.containsKey("learningGuide"))guided++;
+                if("2.1.2".equals(t.get("code")))check(Boolean.FALSE.equals(t.get("examEligible"))&&Json.str(t.get("task_desc")).contains("不要编造"),"constant label stays a quality lesson and is not scored");
+                if("2.1.5".equals(t.get("code")))check(Boolean.TRUE.equals(t.get("examEligible"))&&Json.str(t.get("task_desc")).contains("区间")&&"2026-11-11-age-interval".equals(t.get("assessmentRevision")),"age intervals restored as categories");
+                if("2.2.3".equals(t.get("code")))check(Boolean.TRUE.equals(t.get("examEligible"))&&Json.str(t.get("title")).contains("年龄区间")&&!Json.str(t.get("reference_answer")).contains("RandomForestRegressor"),"age-interval classification restored without regression");
+                if("3.2.4".equals(t.get("code")))check(Boolean.FALSE.equals(t.get("examEligible"))&&Json.str(t.get("task_desc")).contains("文件名"),"filename is not treated as a flower model");
                 String first=Json.stringify(t);com.aitrainer.dao.PracticalDao.decorate(t);if(!first.equals(Json.stringify(t)))throw new AssertionError("non-idempotent practical decoration "+t.get("code"));
                 Map<String,Object> hidden=new LinkedHashMap<String,Object>(t);ContentQuality.hideSolutions(hidden);if(hidden.containsKey("reference_answer")||hidden.containsKey("learningGuide"))throw new AssertionError("practical solution leaked");
             }
-            check(eligible==36&&guided==40,"40 practical guides loaded; four defective materials excluded");
+            check(eligible==38&&guided==40,"40 practical guides loaded; constant-label and mismatched-model tasks stay excluded");
             Map<String,Object> customTask=com.aitrainer.dao.PracticalDao.decorate(map("code","2.2.1","reference_answer","My custom solution"));
             check("My custom solution".equals(customTask.get("reference_answer"))&&Boolean.FALSE.equals(customTask.get("examEligible")),"custom practical references preserved and require revalidation");
             Map<String,Object> oldSkill=Json.obj(exam("practical",90).get("result"));Json.obj(Json.arr(oldSkill.get("detail")).get(0)).put("code","3.2.4");
             check(ReadinessEngine.exclusion("practical",oldSkill)!=null,"old mismatched-model practical result excluded");
+            Map<String,Object> staleAge=Json.obj(exam("practical",90).get("result"));Json.obj(Json.arr(staleAge.get("detail")).get(0)).put("code","2.2.3");
+            check(ReadinessEngine.exclusion("practical",staleAge)!=null,"pre-revision category-regression result excluded");
+            Json.obj(Json.arr(staleAge.get("detail")).get(0)).put("assessmentRevision",ContentQuality.assessmentRevision("2.2.3"));
+            check(ReadinessEngine.exclusion("practical",staleAge)==null,"revised age-interval task can enter readiness");
         }catch(java.io.IOException e){throw new IllegalStateException(e);}
     }
     private static void adapter()throws Exception{

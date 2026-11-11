@@ -36,6 +36,14 @@ public final class ContentQuality {
         }
     }
     public static boolean practicalEligible(String code){return !Boolean.FALSE.equals(Json.obj(PRACTICAL.get(code)).get("examEligible"));}
+    public static String assessmentRevision(String code){return Json.str(Json.obj(PRACTICAL.get(code)).get("assessmentRevision"),"");}
+    /** Old papers keep the prompt they were generated with. A restored task needs its current revision marker. */
+    public static boolean practicalPaperCurrent(Map<String,Object> question){
+        String code=Json.str(question.get("code"));
+        if(!practicalEligible(code))return false;
+        String required=assessmentRevision(code);
+        return required.isEmpty()||required.equals(Json.str(question.get("assessmentRevision"),""));
+    }
     public static void practical(Map<String,Object> t){
         Map<String,Object> extra=Json.obj(PRACTICAL.get(Json.str(t.get("code"))));
         if(extra.isEmpty()){t.put("examEligible",false);t.put("qualityNotice","自定义题目尚未完成素材和参考答案核查，暂不纳入模拟。");return;}
@@ -45,7 +53,14 @@ public final class ContentQuality {
         t.put("qualityNotice",matches?extra.get("notice"):"本题参考答案与已核查版本不同，保留现有内容，暂不纳入模拟；请管理员复核。");
         if(matches){
             t.put("reference_answer",extra.get("reference"));
-            Map<String,Object> guide=new LinkedHashMap<String,Object>(extra);guide.remove("reference");guide.remove("sourceReferenceSha256");
+            if(extra.get("taskTitle")!=null)t.put("title",extra.get("taskTitle"));
+            if(extra.get("taskDesc")!=null)t.put("task_desc",extra.get("taskDesc"));
+            if(extra.get("taskSkills")!=null)t.put("skills",extra.get("taskSkills"));
+            if(extra.get("taskQuality")!=null)t.put("quality",extra.get("taskQuality"));
+            String revision=Json.str(extra.get("assessmentRevision"),"");
+            if(!revision.isEmpty())t.put("assessmentRevision",revision);
+            Map<String,Object> guide=new LinkedHashMap<String,Object>(extra);
+            for(String k:Arrays.asList("reference","sourceReferenceSha256","taskTitle","taskDesc","taskSkills","taskQuality","assessmentRevision"))guide.remove(k);
             t.put("learningGuide",guide);
         }
     }

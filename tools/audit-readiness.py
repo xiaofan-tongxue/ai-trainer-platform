@@ -58,6 +58,8 @@ for task in practical:
     guide=guidance.get(task['code'],{})
     if not guide.get('checklist') or not guide.get('runSteps'): errors.append('missing practical steps: '+task['code'])
     if helper.hashlib.sha256(task['reference'].replace('\r\n','\n').encode()).hexdigest()!=guide.get('sourceReferenceSha256'): errors.append('stale practical overlay: '+task['code'])
+    if guide.get('taskTitle') and guide['taskTitle']!=task.get('title'): errors.append('seed title drifts from overlay: '+task['code'])
+    if guide.get('taskDesc') and guide['taskDesc']!=task.get('taskDesc'): errors.append('seed task drifts from overlay: '+task['code'])
     for lesson in guide.get('prerequisiteLessons',[]):
         if lesson not in by_id: errors.append('unknown practical prerequisite: '+lesson)
 warnings.append(f"{sum(not g['examEligible'] for g in guidance.values())} practical tasks excluded for inconsistent materials; writing tasks still require human assessment")

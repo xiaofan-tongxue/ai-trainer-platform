@@ -8,7 +8,7 @@ const seed=JSON.parse(fs.readFileSync(path.join(root,'data/seed_data.json'),'utf
 const guidance=JSON.parse(fs.readFileSync(path.join(root,'data/practical-guidance.json'),'utf8')).tasks;
 const explanation=Object.values(JSON.parse(fs.readFileSync(path.join(root,'data/question-explanations.json'),'utf8')).questions).find(q=>!q.examEligible);
 const sample={...seed.questions[explanation.sourceIndex-1],id:explanation.sourceIndex,examEligible:false};
-const practical=seed.practical.map((t,i)=>({...t,id:i+1,task_desc:t.taskDesc,reference_answer:guidance[t.code].reference,learningGuide:guidance[t.code],qualityNotice:guidance[t.code].notice,examEligible:guidance[t.code].examEligible}));
+const practical=seed.practical.map((t,i)=>{const g=guidance[t.code];return {...t,id:i+1,title:g.taskTitle||t.title,task_desc:g.taskDesc||t.taskDesc,reference_answer:g.reference,learningGuide:g,qualityNotice:g.notice,examEligible:g.examEligible};});
 const course={...base,overviewCount:base.lessons.length,bridgeCount:bridge.lessons.length,totalHours:base.hours+bridge.additionalHours,
   lessons:base.lessons.flatMap(l=>[l,...bridge.lessons.filter(b=>b.after===l.id)]),progress:[],completed:0,nextLesson:'start-1',evidence:{}};
 let failWrite=false;
@@ -67,8 +67,22 @@ const server=http.createServer((req,res)=>{
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'practical mobile horizontal overflow');
   await page.goto(origin+'/practical.html?code=2.1.2');await page.locator('#learningGuide').waitFor();
   assert(await page.locator('#submitWork').isDisabled());assert((await page.locator('#qualityNotice').innerText()).includes('全部为0'));
+  assert((await page.locator('h2').innerText()).includes('常量目标'));
+  assert((await page.locator('body').innerText()).includes('不要编造'));
   await page.locator('button', {hasText:'查看参考答案'}).click();assert((await page.locator('#refAnswer').innerText()).includes('配套目标列为常量'));
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'expanded reference must not widen mobile page');
+  await page.goto(origin+'/practical.html?code=2.1.5');await page.locator('#learningGuide').waitFor();
+  assert(!(await page.locator('#submitWork').isDisabled()));
+  assert((await page.locator('body').innerText()).includes('不是精确岁数'));
+  await page.goto(origin+'/practical.html?code=2.2.3');await page.locator('#learningGuide').waitFor();
+  assert((await page.locator('h2').innerText()).includes('年龄区间'));
+  await page.locator('button', {hasText:'查看参考答案'}).click();
+  const ageReference=await page.locator('#refAnswer').innerText();
+  assert(ageReference.includes('RandomForestClassifier'));assert(!ageReference.includes('RandomForestRegressor'));
+  await page.goto(origin+'/practical.html?code=3.2.4');await page.locator('#learningGuide').waitFor();
+  assert(await page.locator('#submitWork').isDisabled());
+  assert((await page.locator('#qualityNotice').innerText()).includes('ImageNet'));
+  assert((await page.locator('body').innerText()).includes('文件名'));
   await page.screenshot({path:path.join(root,'build/audit/practical-mobile.png'),fullPage:true});
   await page.goto(origin+'/practice.html');await page.locator('#q-'+sample.id).waitFor();
   assert((await page.locator('#q-'+sample.id).innerText()).includes('待复核题'));
