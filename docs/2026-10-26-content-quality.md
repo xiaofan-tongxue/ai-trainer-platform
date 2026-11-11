@@ -80,6 +80,6 @@ node tools/test-learning-journey.js
 
 本轮更新保存在源码工作区并编译验证。启动新服务时须同时更新Java、页面和 `data/bridge-course.json`、`data/question-explanations.json`、`data/practical-guidance.json`。重启平台后加载新资料。不要重新导入数据库或替换加密主密钥。
 
-打包脚本会纳入完整data目录和依赖清单。本轮未推送GitHub或重建Release安装包，原有安装包不会自动升级。
+打包脚本会纳入完整 data 目录和依赖清单。v1.1.1 安装包不会自动升级。下一版 Windows 包的构建步骤见 [Windows 构建手册](deployment/windows-build-runbook.md)，发行说明草案见 [v1.1.1 之后](release-notes-draft-after-v1.1.1.md)。理论解析的人工复核范围见 [复核清单](2026-11-11-theory-explanation-review.md)。
 
 2026-11-11 已处理此前隔离的四道实操：2.1.5 与 2.2.3 的题面已改到与数据一致并恢复技能模拟；2.1.2 与 3.2.4 仍是辨错练习。接下来仍需：对题库完成专业逐题复核；取得科教兴川具体批次软件和提交要求；增加真实工具标注与附件验收；由教师复核独立完成的技能成果。平台现可更完整地支撑学习和训练，但不能仅以课程学完或AI评分判定必然拿证。

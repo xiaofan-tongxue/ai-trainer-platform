@@ -25,7 +25,7 @@ DeepSeek API Key 需在管理后台填写。运行环境可离线安装；DeepSe
 
 源码中的实操代码依赖可在专用Python环境、项目根目录执行 `python -m pip install -r requirements-labs.txt` 安装。旧离线包只包含Python与pip，机器学习依赖需另行联网安装。
 
-版本提示：`v1.1.1` Release 包含截至 `5aa8d60` 的源码、48 节 Python 小课、题库领域标签和一键安装包；`v1.0.0` 仅作为历史版本保留。2026-10-26的课程、解析与实操更新尚未进入该旧安装包。更新须同步完整data目录与服务端，不要重导用户数据库。源码课程说明见 [Python 基础学习指南](docs/PYTHON_FOUNDATIONS.md)。
+版本提示：已发布的 `v1.1.1` 包含截至 `5aa8d60`（2026-09-22）的源码、48 节 Python 小课、题库领域标签和一键安装包；`v1.0.0` 仅作为历史版本保留。2026-10-26 的课程、解析与隔离规则，以及 2026-11-11 的实操修订，都还没有进入该旧安装包。下一版安装包的 Windows 构建步骤见 [构建手册](docs/deployment/windows-build-runbook.md)，发行说明草案见 [v1.1.1 之后](docs/release-notes-draft-after-v1.1.1.md)。更新已有安装须同步程序、页面和完整 data 目录，不要重导用户数据库，不要覆盖 data-key.dpapi。源码课程说明见 [Python 基础学习指南](docs/PYTHON_FOUNDATIONS.md)。
 
 ## 源码与开发
 
@@ -51,7 +51,9 @@ git lfs pull
 - [零基础到三级的全局覆盖审查](docs/READINESS_AUDIT.md)
 - [2026-10-26课程补充、功能修正与待完善清单](docs/2026-10-26-readiness-review.md)
 - [题库解析、实操运行修正与争议题处理](docs/2026-10-26-content-quality.md)
-- [部署验收记录](docs/deployment/README.md)
+- [部署验收记录](docs/deployment/README.md)（2026-09-15，对应当时打出的 v1.1.1 包）
+- [下一版 Windows 包构建手册](docs/deployment/windows-build-runbook.md)
+- [理论解析人工复核清单](docs/2026-11-11-theory-explanation-review.md)
 - [安全整改与等保支撑材料](docs/security/README.md)
 
-已在本机独立环境完成全新安装、重复安装、停止与重启验证，并通过 74 项业务检查和 62 项 HTTP 安全检查；具体范围与限制以验收记录为准。
+v1.1.1 构建时，已在当时的 Windows 主机上完成全新安装、重复安装、停止与重启验证，并通过 74 项业务检查和 62 项 HTTP 安全检查。该结果属于 2026-09-15 的验收记录，不是当前 main 的新安装包证明。

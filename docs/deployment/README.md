@@ -1,5 +1,7 @@
 # 一键部署验收记录
 
+本页是 2026-09-15 的验收记录，对应后来发布的 v1.1.1（commit `5aa8d60`）。其中 74 项业务检查和 62 项 HTTP 安全检查是那次运行的结果。当前 main 尚未在本仓库重新打出 Windows zip，也没有用新代码重写这些数字。下一版的构建、摘要和验收步骤见 [Windows 构建手册](windows-build-runbook.md)。
+
 日期：2026-09-15。对象：Windows64位全新部署包。现有MySQL5.7数据库未迁移或覆盖；测试创建了两套独立MySQL8.4实例。
 
 交付位置：`dist/AITrainer-Windows-OneClick.zip`。使用说明见 [Windows部署指南](../../deploy/windows/README.md)。部署包包含运行环境和教学内容，排除原学员、真实API Key、DPAPI密钥库及数据库文件。
